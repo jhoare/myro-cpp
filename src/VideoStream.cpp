@@ -99,6 +99,7 @@ void * start_stream(void * data) {
 
 	videoData->live = 0;
 	pthread_exit(NULL);
+    return NULL;
 }
 
 void * display_stream(void * data) {
@@ -177,6 +178,7 @@ void * display_stream(void * data) {
 	}
 
 	pthread_exit(NULL);
+    return NULL;
 }
 
 void * capture_image(void * data) {
@@ -230,6 +232,7 @@ void * capture_image(void * data) {
 					  //so that the other threads are scheduled
 	}
 	pthread_exit(NULL);
+    return NULL;
 }
 
 void VideoStream::startStream() {

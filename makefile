@@ -1,8 +1,15 @@
 CC = g++
 INCLUDES = headers `fltk-config --cxxflags` `Magick++-config --cppflags`
-FLTKLIB = `fltk-config --ldflags --libs`
+FLTKLIB = `fltk-config --ldflags`
 MAGICKLIB = `Magick++-config --ldflags --libs`
-CFLAGS = -g -Wall -I$(INCLUDES)
+CFLAGS = -g -Wall -I$(INCLUDES) 
+OSTYPE := $(shell uname -o)
+
+# Special includes required to build in cygwin
+ifeq ($(OSTYPE),Cygwin)
+CFLAGS += -D__int8=char -D__int16=short -D__int32=int "-D__int64=long long"
+endif
+
 EXECUTABLES = test_motor test_camera video_stream test_blob \
 			  lightFollow
 
