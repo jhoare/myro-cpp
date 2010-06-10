@@ -312,7 +312,7 @@ int Scribbler::_set_speaker(int freq, int freq2, int duration) {
 int Scribbler::set_ir_power(int irpower) {
 	unsigned char buffer[2];
 	buffer[0] = SET_DONGLE_IR;
-	buffer[0] = irpower;
+	buffer[1] = irpower;
 	pthread_mutex_lock(this->robot_lock);
 	int status = con->_write(buffer, 2);
 	pthread_mutex_unlock(this->robot_lock);
