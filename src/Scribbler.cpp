@@ -287,7 +287,7 @@ int * Scribbler::_get(int message_header, int bytes, std::string mode) {
 			this->read_message(&temp, 1);
 			tResult += temp;
 		}
-		result = (int*)malloc(sizeof(int) * tResult.length() + 1);
+		result = (int*)malloc(sizeof(int) * (tResult.length()+1) );
 		for(int i = 0; i < (int)tResult.length(); i++) {
 			result[i] = tResult.at(i);
 		}
