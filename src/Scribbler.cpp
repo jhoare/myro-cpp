@@ -672,6 +672,7 @@ unsigned char * Scribbler::grab_jpeg_color(int reliable, int &size) {
 
 	decompressedResizedJpeg = jpegStretch(jpeg_buffer, 1, size);
 	free(jpeg_buffer);
+    free(jpeg_header);
 	pthread_mutex_unlock(this->robot_lock);
 	return decompressedResizedJpeg;
 }
@@ -1570,6 +1571,7 @@ Picture * Scribbler::takePicture(std::string type) {
 		imageBuffer = grab_jpeg_gray(0,size);
 		image = new GrayPicture(imageBuffer, 256, 192);
 	}
+    free(imageBuffer);
 	pthread_mutex_unlock(this->image_lock);
 	return image;
 }
@@ -1696,6 +1698,8 @@ std::vector<std::string> Scribbler::getInfo() {
 		temp_pair += info_pt[i];
 	result.push_back(temp_pair);
 
+    free(infoCString1);
+    free(retval);
 	return result;
 }
 
@@ -1737,6 +1741,8 @@ int Scribbler::send_message(unsigned char * buf, int bytes, int _echo,
 		if(_sensor)
 			read_message(sensors, 11);
 	}
+    free(padded_buf);
+    free(echo);
 	return status;
 }
 

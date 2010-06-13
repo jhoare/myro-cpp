@@ -28,25 +28,25 @@ int main(int argc, char ** argv) {
 	image_buffer = robot->takePicture("color")->getRawImage();
 	robotImage = Image(256,192,"RGB",CharPixel,image_buffer);
 	robotImage.display();
-	free(image_buffer);
+	delete[] (image_buffer);
 
 	cout << "Testing Grayscale(Note Image should look Pink)\n";
 	image_buffer = robot->takePicture("gray")->getRawImage();
 	robotImage = Image(256,192,"G", CharPixel, image_buffer);
 	robotImage.display();
-	free(image_buffer);
+	delete[] (image_buffer);
 
 	cout << "Testing Jpeg Color\n";
 	image_buffer = robot->takePicture("jpeg")->getRawImage();
 	robotImage = Image(256,192,"RGB", CharPixel, image_buffer);
 	robotImage.display();
-	free(image_buffer);
+	delete[] (image_buffer);
 
 	cout << "Testing Jpeg Gray\n";
 	image_buffer = robot->takePicture("grayjpeg")->getRawImage();
 	robotImage = Image(256,192,"G", CharPixel, image_buffer);
 	robotImage.display();
-	free(image_buffer);
+	delete[] (image_buffer);
 
 
 	cout << "All Camera Test Completed\n";
