@@ -68,7 +68,12 @@ class VideoStream {
 	std::vector<Filter*> * filters;
 	Scribbler * myScrib;
 	int color_mode;
+
 	pthread_t camThread;
+	pthread_t captureThread;
+	pthread_t displayThread;
+
+    void* data;
 
 	pthread_mutex_t * filterLock;
 

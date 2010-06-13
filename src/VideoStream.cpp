@@ -8,6 +8,7 @@
 #include <FL/Fl_Image.H>
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
+#include <iostream>
 
 #define image_height 192
 #define image_width 256
@@ -18,6 +19,9 @@ typedef struct Data {
 	Scribbler * robot;
 	int live;
 	ImageWindow * imageWindow;
+
+    pthread_mutex_t * setup_lock;
+    pthread_cond_t * signal_setup;
 
 	pthread_mutex_t * refresh_lock;
 	pthread_cond_t * signal_display;
@@ -56,6 +60,7 @@ VideoStream::VideoStream(Scribbler * scrib, int color_mode) {
 }
 
 VideoStream::~VideoStream() {
+    this->endStream();
 	free(image_buffer);
 	free(filterLock);
 	filters->clear();
@@ -68,18 +73,23 @@ void * start_stream(void * data) {
 	ImageWindow * imageWindow = new ImageWindow(0,0,256,192,NULL);
 
 	_data videoData = (_data)data;
+    pthread_mutex_lock(videoData->setup_lock);
 	videoData->imageWindow = imageWindow;
 	videoData->runGUI = 0;
 	videoData->imageReady = 0;
 	imageWindow->set_color_mode(videoData->color_mode);
+    pthread_cond_signal(videoData->signal_setup);
+    pthread_mutex_unlock(videoData->setup_lock);
 
+    /*
 	pthread_t capture_thread;
 	pthread_create(&capture_thread, NULL, capture_image, data);
 
-
 	pthread_t display_thread;
 	pthread_create(&display_thread, NULL, display_stream, data);
+    */
 
+    pthread_mutex_lock(videoData->run_gui_lock);
 	while(!videoData->runGUI)
 		pthread_cond_wait(videoData->signal_run_gui, videoData->run_gui_lock);
 	window->end();
@@ -87,7 +97,8 @@ void * start_stream(void * data) {
 
 	pthread_mutex_unlock(videoData->run_gui_lock);
 
-	for(;;) {
+	//for(;;) {
+    while(videoData->live){
 		if( window->visible() ) {
 			if(!Fl::check())
 				break;
@@ -96,8 +107,14 @@ void * start_stream(void * data) {
 			break;
 		videoData->imageWindow->redraw();
 	}
-
+    pthread_mutex_lock(videoData->refresh_lock);
+    std::cerr << "Deleting windows!" << std::endl;
 	videoData->live = 0;
+    imageWindow->hide();
+    delete imageWindow;
+    delete window;
+    videoData->imageWindow = NULL;
+    pthread_mutex_unlock(videoData->refresh_lock);
 	pthread_exit(NULL);
     return NULL;
 }
@@ -148,6 +165,8 @@ void * display_stream(void * data) {
 			pthread_cond_wait(videoData->signal_display, 
 					videoData->refresh_lock);
 
+        if ( !videoData->live ) break;
+
 		//printf("Picture Received\n");
 
 		pthread_mutex_lock(videoData->filterLock);
@@ -174,8 +193,9 @@ void * display_stream(void * data) {
 
 		//printf("Image Updated\n");
 
-		pthread_mutex_unlock(videoData->refresh_lock);
+		//pthread_mutex_unlock(videoData->refresh_lock);
 	}
+    pthread_mutex_unlock(videoData->refresh_lock);
 
 	pthread_exit(NULL);
     return NULL;
@@ -237,6 +257,7 @@ void * capture_image(void * data) {
 
 void VideoStream::startStream() {
 	_data videoData = (_data)malloc(sizeof(struct Data));
+    this->data = videoData;
 	videoData->image = image_buffer;
 	videoData->robot = myScrib;
 	videoData->live = 1;
@@ -262,7 +283,19 @@ void VideoStream::startStream() {
 		= (pthread_cond_t*)malloc(sizeof(pthread_cond_t));
 	pthread_cond_init(videoData->signal_run_gui, NULL);
 
+	videoData->setup_lock
+		= (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(videoData->setup_lock, NULL);
+	videoData->signal_setup
+		= (pthread_cond_t*)malloc(sizeof(pthread_cond_t));
+	pthread_cond_init(videoData->signal_setup, NULL);
+
+    pthread_mutex_lock(videoData->setup_lock);
 	pthread_create(&camThread, NULL, start_stream, (void*)videoData);
+    pthread_cond_wait(videoData->signal_setup, videoData->setup_lock);
+	pthread_create(&captureThread, NULL, capture_image, (void*)videoData);
+	pthread_create(&displayThread, NULL, display_stream, (void*)videoData);
+    pthread_mutex_unlock(videoData->setup_lock);
 }
 
 int VideoStream::addFilter(Filter * filter) {
@@ -286,7 +319,11 @@ int VideoStream::delFilter(int filter_location) {
 }
 
 void VideoStream::endStream() {
-	if(live) 
+	if(live) {
 		*(this->live) = 0;
+        pthread_join(camThread, NULL);
+        pthread_join(captureThread, NULL);
+        pthread_join(displayThread, NULL);
+    }
 }
 
