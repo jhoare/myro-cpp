@@ -13,7 +13,12 @@ ImageWindow::ImageWindow(int x, int y, int width,
 		image = NULL;
 }
 
+ImageWindow::~ImageWindow(){
+    if (image) delete image;
+}
+
 void ImageWindow::loadImageSource(unsigned char * data, int width, int height) {
+        boost::mutex::scoped_lock l(exclusive);
 	if(image)
 		delete image;
 	image = new Fl_RGB_Image((const unsigned char*)data, width, height);
@@ -33,4 +38,9 @@ void ImageWindow::draw() {
 			fl_draw_image((unsigned char*)(*(image->data())), 0, 0, image->w(),
 					image->h(), 1);
 	}
+}
+
+void ImageWindow::refresh() {
+    boost::mutex::scoped_lock l(exclusive);
+    this->redraw();
 }

@@ -2,6 +2,7 @@ CC = g++
 INCLUDES = headers `fltk-config --cxxflags` `Magick++-config --cppflags`
 FLTKLIB = `fltk-config --ldflags`
 MAGICKLIB = `Magick++-config --ldflags --libs`
+BOOSTLIB = -lboost_thread-mt
 CFLAGS = -g -Wall -I$(INCLUDES) 
 OSTYPE := $(shell uname -o)
 
@@ -30,25 +31,25 @@ libscribbler.a: src/Myro.cpp src/Scribbler.cpp src/serial.cpp src/Robot.cpp src/
 
 test_motor: test/test_motor.cpp libscribbler.a
 	$(CC) $(CFLAGS) -c test/test_motor.cpp
-	$(CC) -o test_motor test_motor.o libscribbler.a $(MAGICKLIB)
+	$(CC) -o test_motor test_motor.o libscribbler.a $(MAGICKLIB) 
 
 test_camera: test/test_camera.cpp libscribbler.a
 	$(CC) $(CFLAGS) -c test/test_camera.cpp
-	$(CC) -o test_camera test_camera.o libscribbler.a $(MAGICKLIB)
+	$(CC) -o test_camera test_camera.o libscribbler.a $(MAGICKLIB) 
 
 test_blob: test/test_blob.cpp libscribbler.a libvideostream.a
 	$(CC) $(CFLAGS) -c test/test_blob.cpp
 	$(CC) -o test_blob test_blob.o libscribbler.a libvideostream.a $(MAGICKLIB) \
-	$(FLTKLIB)
+	$(FLTKLIB) $(BOOSTLIB)
 
 libvideostream.a: src/VideoStream.cpp src/ImageWindow.cpp src/Filter.cpp \
 				  libscribbler.a
 	$(CC) $(CFLAGS) -c src/VideoStream.cpp src/ImageWindow.cpp  \
-	src/Filter.cpp
-	ar ru libvideostream.a VideoStream.o ImageWindow.o Filter.o libscribbler.a
+	src/Filter.cpp 
+	ar ru libvideostream.a VideoStream.o ImageWindow.o Filter.o libscribbler.a 
 	ranlib libvideostream.a
 
 video_stream: test/video_stream.cpp libvideostream.a
 	$(CC) $(CFLAGS) -c test/video_stream.cpp
-	$(CC) -o video_stream video_stream.o libvideostream.a libscribbler.a $(MAGICKLIB) $(FLTKLIB)
+	$(CC) -o video_stream video_stream.o libvideostream.a libscribbler.a $(MAGICKLIB) $(FLTKLIB)  $(BOOSTLIB)
 

@@ -9,36 +9,119 @@
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
 #include <iostream>
+#include <exception>
+#include "Threaded.h"
 
 #define image_height 192
 #define image_width 256
 #define RGB 3
+static const int BUFFER_SIZE = 512;
+
+class Fl_Thread : public Threaded{
+    public:
+    Fl_Thread(Fl_Window * window, ImageWindow* imageWindow);
+    //void start();
+    virtual void run();
+    //void stop();
+    private:
+    Fl_Window * window;
+    ImageWindow * imageWindow;
+};
+
+class DisplayThread : public Threaded{
+    public:
+    DisplayThread(ImageWindow* imageWindow, circbuf* cb,
+                          std::vector<Filter*>* filters,
+                              boost::mutex& _filterLock);
+    //void start();
+    virtual void run();
+    //void stop();
+    private:
+    ImageWindow * imageWindow;
+    circbuf* cb;
+    std::vector<Filter*>* filters;
+    boost::mutex& filterLock;
+};
+
+class CaptureThread : public Threaded{
+    public:
+    CaptureThread(Scribbler* robot, circbuf* cb, int color_mode);
+    //void start();
+    virtual void run();
+    private:
+    Scribbler* robot;
+    circbuf* cb;
+    int color_mode;
+};
+
+class circbuf{
+    public:
+        circbuf(int size){
+            this->buf = new unsigned char*[size];
+            this->size = size;
+            this->start = this->end = 0;
+        }
+        ~circbuf(){
+            delete buf;
+        }
+        void push(unsigned char* item){
+            boost::mutex::scoped_lock l(_lock);
+            buf[end] = item;
+            end = (end+1)%size;
+            cv.notify_one();
+            if ( end == start ){
+                // We're overwriting old data.
+                //start = (start+1)%size;
+                // TODO: Handle this Better
+                throw new std::exception;
+            }
+        }
+        unsigned char* pop(){
+            unsigned char* val;
+            boost::mutex::scoped_lock l(_lock);
+            while ( start == end ){
+                // We need to block and wait for something.
+                cv.wait(l);
+            }
+            val = buf[start]; 
+            start = (start+1)%size;
+            return val;
+        }
+        bool isEmpty(){
+            return start == end;
+        }
+    private:
+        unsigned char** buf;
+        unsigned int size;
+        unsigned int start;
+        unsigned int end;
+        boost::mutex _lock;
+        boost::condition_variable cv;
+};
 
 typedef struct Data {
-	unsigned char ** image;
-	Scribbler * robot;
-	int live;
-	ImageWindow * imageWindow;
+    unsigned char ** image;
+    Scribbler * robot;
+    int live;
+    Fl_Window * window;
+    ImageWindow * imageWindow;
 
-    pthread_mutex_t * setup_lock;
-    pthread_cond_t * signal_setup;
+    pthread_mutex_t * refresh_lock;
+    pthread_cond_t * signal_display;
 
-	pthread_mutex_t * refresh_lock;
-	pthread_cond_t * signal_display;
+    pthread_mutex_t * run_gui_lock;
+    pthread_cond_t * signal_run_gui;
 
-	pthread_mutex_t * run_gui_lock;
-	pthread_cond_t * signal_run_gui;
+    pthread_mutex_t * filterLock;
 
-	pthread_mutex_t * filterLock;
+    //int runGUI; 
+    //int imageReady;
 
-	int runGUI; 
-	int imageReady;
+    //int image_buffer_write;
+    //int image_buffer_read; 
+    int color_mode;
 
-	int image_buffer_write;
-	int image_buffer_read; 
-	int color_mode;
-
-	std::vector<Filter*> * filters;
+    std::vector<Filter*> * filters;
 
 } * _data;
 
@@ -47,283 +130,184 @@ void * capture_image(void * data);
 void * display_stream(void * data);
 
 VideoStream::VideoStream(Scribbler * scrib, int color_mode) {
-	image_buffer 
-		= (unsigned char**)malloc(sizeof(unsigned char*) * image_height
-				* image_width);
-	memset(image_buffer, 0, image_width * image_height);
-	this->myScrib = scrib;
-	this->color_mode = color_mode;
-	this->filters = new std::vector<Filter*>();
-
-	filterLock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(filterLock, NULL);
+    this->myScrib = scrib;
+    this->color_mode = color_mode;
+    this->filters = new std::vector<Filter*>();
 }
 
 VideoStream::~VideoStream() {
     this->endStream();
-	free(image_buffer);
-	free(filterLock);
-	filters->clear();
-	delete filters;
+    filters->clear();
+    delete filters;
 }
 
-void * start_stream(void * data) {
-
-	Fl_Window * window = new Fl_Window(256,192, "Robot Image");
-	ImageWindow * imageWindow = new ImageWindow(0,0,256,192,NULL);
-
-	_data videoData = (_data)data;
-    pthread_mutex_lock(videoData->setup_lock);
-	videoData->imageWindow = imageWindow;
-	videoData->runGUI = 0;
-	videoData->imageReady = 0;
-	imageWindow->set_color_mode(videoData->color_mode);
-    pthread_cond_signal(videoData->signal_setup);
-    pthread_mutex_unlock(videoData->setup_lock);
-
-    /*
-	pthread_t capture_thread;
-	pthread_create(&capture_thread, NULL, capture_image, data);
-
-	pthread_t display_thread;
-	pthread_create(&display_thread, NULL, display_stream, data);
-    */
-
-    pthread_mutex_lock(videoData->run_gui_lock);
-	while(!videoData->runGUI)
-		pthread_cond_wait(videoData->signal_run_gui, videoData->run_gui_lock);
-	window->end();
-	window->show();
-
-	pthread_mutex_unlock(videoData->run_gui_lock);
-
-	//for(;;) {
-    while(videoData->live){
-		if( window->visible() ) {
-			if(!Fl::check())
-				break;
-		}
-		else if( !Fl::wait() )
-			break;
-		videoData->imageWindow->redraw();
-	}
-    pthread_mutex_lock(videoData->refresh_lock);
-    std::cerr << "Deleting windows!" << std::endl;
-	videoData->live = 0;
-    imageWindow->hide();
-    delete imageWindow;
-    delete window;
-    videoData->imageWindow = NULL;
-    pthread_mutex_unlock(videoData->refresh_lock);
-	pthread_exit(NULL);
-    return NULL;
+Fl_Thread::Fl_Thread(Fl_Window* window, ImageWindow * imageWindow):Threaded(){
+    this->window = window;
+    this->imageWindow = imageWindow;
 }
 
-void * display_stream(void * data) {
+// FL Thread
+void Fl_Thread::run(){
+    this->window->show();
 
-	_data videoData = (_data)data;
-	pthread_mutex_lock(videoData->run_gui_lock);
+    while(!this->stopRequested){
+        if( this->window->visible() ) {
+            if(!Fl::check())
+                break;
+        }
+        else if( !Fl::wait() )
+            break;
+        //printf("start_stream() : imageWindow->redraw()\n");
+        //this->imageWindow->redraw();
+        this->imageWindow->refresh();
+    }
+    this->window->hide();
+    this->imageWindow->hide();
 
-	videoData->runGUI = 1;
-	//printf("waiting on Picture\n");
-	while(!videoData->image[videoData->image_buffer_read]) {
-		//printf("IMAGE NOT READY\n");
-		pthread_cond_wait(videoData->signal_display, videoData->refresh_lock);
-	}
-
-	//printf("Picture Received\n");
-	pthread_mutex_lock(videoData->filterLock);	
-	for(unsigned int i = 0; i < videoData->filters->size(); i++) {
-		videoData->filters->at(i)->
-			applyFilter(videoData->image[videoData->image_buffer_read]);
-	}
-	pthread_mutex_unlock(videoData->filterLock);
-
-	videoData->imageWindow->
-		loadImageSource(videoData->image[videoData->image_buffer_read],
-				image_width, image_height);
-
-	//printf("Image Constructed Preparing to free buffered Image\n");
-	if(videoData->image_buffer_read != 0) {
-		free(videoData->image[videoData->image_buffer_read-1]);
-		videoData->image[videoData->image_buffer_read-1] = NULL;
-	}
-	videoData->image_buffer_read = 
-		(videoData->image_buffer_read + 1)%(image_height * image_width);
-
-	videoData->imageReady = 0;
-	videoData->imageWindow->redraw();
-
-	pthread_mutex_unlock(videoData->refresh_lock);
-
-	pthread_cond_signal(videoData->signal_run_gui);
-	pthread_mutex_unlock(videoData->run_gui_lock);
-
-	while(videoData->live) {
-		//printf("Waiting on Picture\n");
-		while(!videoData->image[videoData->image_buffer_read])
-			pthread_cond_wait(videoData->signal_display, 
-					videoData->refresh_lock);
-
-        if ( !videoData->live ) break;
-
-		//printf("Picture Received\n");
-
-		pthread_mutex_lock(videoData->filterLock);
-		for(unsigned int i = 0; i < videoData->filters->size(); i++) {
-			videoData->filters->at(i)->
-				applyFilter(videoData->image[videoData->image_buffer_read]);
-		}
-		pthread_mutex_unlock(videoData->filterLock);
-
-		videoData->imageWindow->
-			loadImageSource(videoData->image[videoData->image_buffer_read],
-					image_width, image_height);
-
-		if(videoData->image_buffer_read != 0) {
-			assert(videoData->image[videoData->image_buffer_read-1] != NULL);
-			free(videoData->image[videoData->image_buffer_read-1]);
-			videoData->image[videoData->image_buffer_read-1] = NULL;
-		}
-		videoData->image_buffer_read =
-			(videoData->image_buffer_read + 1)%(image_height * image_width);
-
-		videoData->imageReady = 0;
-		videoData->imageWindow->redraw();
-
-		//printf("Image Updated\n");
-
-		//pthread_mutex_unlock(videoData->refresh_lock);
-	}
-    pthread_mutex_unlock(videoData->refresh_lock);
-
-	pthread_exit(NULL);
-    return NULL;
+    return;
 }
 
-void * capture_image(void * data) {
-	_data videoData = (_data)data;
+// Dispaly/Update Thread
+DisplayThread::DisplayThread(ImageWindow* imageWindow, circbuf* cb,
+                                      std::vector<Filter*>* filters,
+                                          boost::mutex& _filterLock)
+:  Threaded(), filterLock(_filterLock)
+{
+    this->imageWindow = imageWindow;
+    this->cb = cb;
+    this->filters = filters;
+}
 
-	unsigned char * tempImageBuffer; 
+void DisplayThread::run() {
+    unsigned char* img_cur=NULL;
+    unsigned char* img_new=NULL;
 
-	while(videoData->live) {
-		pthread_mutex_lock(videoData->refresh_lock);	
+    while(!this->stopRequested){
+        //printf("display_stream() Waiting on Picture\n");
+        img_new = cb->pop();
 
-		//printf("Capturing Image\n");
+        if ( this->stopRequested ) break;
 
-		switch(videoData->color_mode) {
-			case 0: tempImageBuffer
-						= videoData->robot
-							->takePicture("grayjpeg")->getRawImage();
-				break;
-			case 1:
-					tempImageBuffer
-						= videoData
-						 ->robot->takePicture("jpeg")->getRawImage();
-				break;
-			case 2:
-					tempImageBuffer
-						= videoData->robot
-						 ->takePicture("blob")->getRawImage();
-				break;
-			default: 
-			{
-				fprintf(stderr, "Invalid Color Mode\n");
-				videoData->live = 0;
-				pthread_cond_signal(videoData->signal_display);
-				pthread_mutex_unlock(videoData->refresh_lock);
-				pthread_exit(NULL);
-			}
-		}
+        //printf("display_stream() Picture Received\n");
 
-		//printf("Image Loaded into Memory\n");
+        {
+            boost::mutex::scoped_lock l(filterLock);
+            for(unsigned int i = 0; i < this->filters->size(); i++) {
+                this->filters->at(i)->applyFilter(img_new);
+            }
+        }
 
-		videoData->image[videoData->image_buffer_write] = tempImageBuffer;
-		videoData->image_buffer_write 
-			= (videoData->image_buffer_write+1)%(image_width * image_height);
-		videoData->imageReady = 1;
+        imageWindow->loadImageSource(img_new, image_width, image_height);
 
-		//printf("Image Captured\n");
+        if ( img_cur != NULL ){
+            free(img_cur);
+        }
+        img_cur = img_new;
 
-		pthread_mutex_unlock(videoData->refresh_lock);
-		pthread_cond_signal(videoData->signal_display);
-		//if(!videoData->color_mode) legacy!
-		usleep(1000); //hack to slow down the capture thread
-					  //so that the other threads are scheduled
-	}
-	pthread_exit(NULL);
-    return NULL;
+        imageWindow->refresh();
+
+        //printf("display_stream() Image Updated\n");
+
+    }
+    return;
+}
+
+
+CaptureThread::CaptureThread(Scribbler* robot, circbuf* buf, int color_mode)
+:Threaded()
+{
+    this->robot = robot;
+    this->cb = buf;
+    this->color_mode = color_mode;
+}
+
+void CaptureThread::run(){
+    unsigned char * tempImageBuffer; 
+
+    while(!this->stopRequested){
+        //pthread_mutex_lock(videoData->refresh_lock);    
+
+        //printf("capture_image() Capturing Image\n");
+
+        switch(this->color_mode) {
+            case 0: tempImageBuffer
+                        = robot->takePicture("grayjpeg")->getRawImage();
+                break;
+            case 1:
+                    tempImageBuffer
+                        = robot->takePicture("jpeg")->getRawImage();
+                break;
+            case 2:
+                    tempImageBuffer
+                        = robot->takePicture("blob")->getRawImage();
+                break;
+            default: 
+            {
+                throw "Invalid Color Mode\n";
+            }
+        }
+
+        //printf("capture_image(): Image Loaded into Memory\n"); 
+        cb->push(tempImageBuffer);
+        //usleep(1000); //hack to slow down the capture thread
+                      //so that the other threads are scheduled
+    }
+    return;
 }
 
 void VideoStream::startStream() {
-	_data videoData = (_data)malloc(sizeof(struct Data));
-    this->data = videoData;
-	videoData->image = image_buffer;
-	videoData->robot = myScrib;
-	videoData->live = 1;
-	videoData->image_buffer_write = 0;
-	videoData->image_buffer_read = 0;
-	videoData->color_mode = this->color_mode;
-	videoData->filters = this->filters;
-	videoData->filterLock = this->filterLock;
+    window = new Fl_Window(256,192, "Robot Image");
+    imageWindow = new ImageWindow(0,0,256,192,NULL);
+    window->end();
+    imageWindow->set_color_mode(color_mode);
+    fl_thread = new Fl_Thread(window,imageWindow);
+    shared_buffer = new circbuf(BUFFER_SIZE);
+    display_thread = new DisplayThread(imageWindow, shared_buffer, filters, 
+                                                                filterLock);
+    capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
-	this->live = &videoData->live;
-
-	videoData->refresh_lock 
-		= (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(videoData->refresh_lock, NULL);
-	videoData->signal_display 
-		= (pthread_cond_t*)malloc(sizeof(pthread_cond_t));
-	pthread_cond_init(videoData->signal_display, NULL);
-
-	videoData->run_gui_lock
-		= (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(videoData->run_gui_lock, NULL);
-	videoData->signal_run_gui
-		= (pthread_cond_t*)malloc(sizeof(pthread_cond_t));
-	pthread_cond_init(videoData->signal_run_gui, NULL);
-
-	videoData->setup_lock
-		= (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(videoData->setup_lock, NULL);
-	videoData->signal_setup
-		= (pthread_cond_t*)malloc(sizeof(pthread_cond_t));
-	pthread_cond_init(videoData->signal_setup, NULL);
-
-    pthread_mutex_lock(videoData->setup_lock);
-	pthread_create(&camThread, NULL, start_stream, (void*)videoData);
-    pthread_cond_wait(videoData->signal_setup, videoData->setup_lock);
-	pthread_create(&captureThread, NULL, capture_image, (void*)videoData);
-	pthread_create(&displayThread, NULL, display_stream, (void*)videoData);
-    pthread_mutex_unlock(videoData->setup_lock);
+    fl_thread->start();
+    display_thread->start();
+    capture_thread->start();
+    running = true;
 }
 
 int VideoStream::addFilter(Filter * filter) {
-	pthread_mutex_lock(filterLock);
-	int result = 0;
-	filters->push_back(filter);
-	result = filters->size()-1;
-	pthread_mutex_unlock(filterLock);
-	return result;
+    boost::mutex::scoped_lock l(filterLock);
+    //pthread_mutex_lock(filterLock);
+    int result = 0;
+    filters->push_back(filter);
+    result = filters->size()-1;
+    //pthread_mutex_unlock(filterLock);
+    return result;
 }
 
 int VideoStream::delFilter(int filter_location) {
-	if(filter_location < 0 || filter_location > (int)filters->size())
-		return -1;
+    if(filter_location < 0 || filter_location > (int)filters->size())
+        return -1;
 
-	pthread_mutex_lock(filterLock);
-	filters->erase(filters->begin() + filter_location);
-	pthread_mutex_unlock(filterLock);
+    boost::mutex::scoped_lock l(filterLock);
+    filters->erase(filters->begin() + filter_location);
 
-	return 0;
+    return 0;
 }
 
 void VideoStream::endStream() {
-	if(live) {
-		*(this->live) = 0;
-        pthread_join(camThread, NULL);
-        pthread_join(captureThread, NULL);
-        pthread_join(displayThread, NULL);
+    if ( running ){
+        fl_thread->stop();
+        display_thread->stop();
+        capture_thread->stop();
+
+        delete imageWindow;
+        delete window;
+        // Free all the memory that is sitting on the buffer that hasn't been displayed.
+        while ( !shared_buffer->isEmpty() ) free(shared_buffer->pop());
+        delete shared_buffer;
+        delete fl_thread;
+        delete display_thread;
+        delete capture_thread;
+        running = false;
+        Fl::run();
     }
 }
 
