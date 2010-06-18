@@ -5,7 +5,7 @@
 #include "serial.h"
 #include "Picture.h"
 #include <vector>
-#include <pthread.h>
+#include <boost/thread/mutex.hpp>
 
 /**
  * @class Scribbler
@@ -682,9 +682,8 @@ class Scribbler: public Robot {
 	unsigned char CAM_COMB_EXPOSURE_CONTROL_ON;
 	unsigned char CAM_COMB_EXPOSURE_CONTROL_OFF;
 
-	pthread_mutex_t * robot_lock;
-	pthread_mutex_t * image_lock;
-
+    boost::mutex robot_lock;
+    boost::mutex image_lock;
 };
 
 #endif
