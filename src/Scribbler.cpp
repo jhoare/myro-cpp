@@ -738,13 +738,9 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
 	unsigned char * decompressedBuffer;
 	unsigned char * resizedDecompressedBuffer;
 
-    std::cerr << "size = " << size << std::endl;
 	Blob jpegBlob(jpegBuffer, size);
 
-    try{
-    std::cerr << "BEFORE" << std::endl;
 	Image jpegImage;
-    std::cerr << "AFTER" << std::endl;
 	jpegImage.magick("JPG");
 	jpegImage.size("256x192");
 	jpegImage.read(jpegBlob);
@@ -796,10 +792,6 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
 			break;
 	}
 	free(decompressedBuffer);
-    }
-    catch (Exception &error_ ) {
-        std::cerr << "Caught exception: " << error_.what() << std::endl; 
-    } 
 	return resizedDecompressedBuffer;
 }
 
