@@ -6,6 +6,7 @@
 #include "Picture.h"
 #include <vector>
 #include <boost/thread/mutex.hpp>
+#include <Magick++.h>
 
 /**
  * @class Scribbler
@@ -684,6 +685,8 @@ class Scribbler: public Robot {
 
     boost::mutex robot_lock;
     boost::mutex image_lock;
+
+    Magick::Image jpegImage;
 };
 
 #endif

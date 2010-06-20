@@ -65,6 +65,7 @@ class circbuf{
             delete buf;
         }
         void push(unsigned char* item){
+            //std::cerr << "push()" << std::endl;
             boost::mutex::scoped_lock l(_lock);
             buf[end] = item;
             end = (end+1)%size;
@@ -78,10 +79,15 @@ class circbuf{
         }
         unsigned char* pop(){
             unsigned char* val;
-            boost::mutex::scoped_lock l(_lock);
-            while ( start == end ){
-                // We need to block and wait for something.
-                cv.wait(l);
+            //std::cerr << "pop()" << std::endl;
+            if ( start == end ){
+                boost::mutex::scoped_lock l(_lock);
+                while ( start == end ){
+                    // We need to block and wait for something.
+                    //std::cerr << "waiting up" << std::endl;
+                    cv.wait(l);
+                    //std::cerr << "waking up" << std::endl;
+                }
             }
             val = buf[start]; 
             start = (start+1)%size;
@@ -96,7 +102,7 @@ class circbuf{
         unsigned int start;
         unsigned int end;
         boost::mutex _lock;
-        boost::condition_variable cv;
+        boost::condition cv;
 };
 
 typedef struct Data {
@@ -160,6 +166,7 @@ void Fl_Thread::run(){
         //printf("start_stream() : imageWindow->redraw()\n");
         //this->imageWindow->redraw();
         this->imageWindow->refresh();
+        boost::thread::yield();
     }
     this->window->hide();
     this->imageWindow->hide();
@@ -206,6 +213,7 @@ void DisplayThread::run() {
 
         imageWindow->refresh();
 
+        boost::thread::yield();
         //printf("display_stream() Image Updated\n");
 
     }
@@ -227,7 +235,7 @@ void CaptureThread::run(){
     while(!this->stopRequested){
         //pthread_mutex_lock(videoData->refresh_lock);    
 
-        //printf("capture_image() Capturing Image\n");
+        //fprintf(stderr, "capture_image() Capturing Image\n");
 
         switch(this->color_mode) {
             case 0: tempImageBuffer
@@ -251,6 +259,7 @@ void CaptureThread::run(){
         cb->push(tempImageBuffer);
         //usleep(1000); //hack to slow down the capture thread
                       //so that the other threads are scheduled
+        boost::thread::yield();
     }
     return;
 }
@@ -266,9 +275,9 @@ void VideoStream::startStream() {
                                                                 filterLock);
     capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
-    fl_thread->start();
-    display_thread->start();
     capture_thread->start();
+    display_thread->start();
+    fl_thread->start();
     running = true;
 }
 
@@ -300,14 +309,14 @@ void VideoStream::endStream() {
 
         delete imageWindow;
         delete window;
-        // Free all the memory that is sitting on the buffer that hasn't been displayed.
+        // Free all the memory that is sitting on the buffer that hasn't been 
+        // displayed.
         while ( !shared_buffer->isEmpty() ) free(shared_buffer->pop());
         delete shared_buffer;
         delete fl_thread;
         delete display_thread;
         delete capture_thread;
         running = false;
-        Fl::run();
     }
 }
 

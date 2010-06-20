@@ -82,6 +82,7 @@ Scribbler::Scribbler() {
 	/**
 	 * ctrl+c exit hack, to make sure the connect is close correctly.
 	 **/
+	jpegImage.magick("JPG");
 	create_exit_robot(this);
 }
 
@@ -734,65 +735,37 @@ unsigned char * Scribbler::grab_jpeg_gray(int reliable, int &size) {
 
 unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer, 
 		int color_space, int &size) {
+    //std::cerr<< "jpegStretch()" << std::endl;
 
-	unsigned char * decompressedBuffer;
-	unsigned char * resizedDecompressedBuffer;
+	unsigned char * stretched;
 
 	Blob jpegBlob(jpegBuffer, size);
 
-	Image jpegImage;
-	jpegImage.magick("JPG");
-	jpegImage.size("256x192");
+	//Image jpegImage;
+    //std::cerr << "before" << std::endl;
+	//jpegImage.magick("JPG");
+    //std::cerr << "after" << std::endl;
+    jpegImage.size("128x192");
 	jpegImage.read(jpegBlob);
+    // ! Makes it so that the aspect ratio is not preseved, which we need.
+    jpegImage.scale("256x192!");
 
-	switch(color_space) {
-		case 0:		decompressedBuffer 
-					= (unsigned char*)malloc(sizeof(unsigned char) 
-							* 128 * 192);
-					resizedDecompressedBuffer 
-					= (unsigned char*)malloc(sizeof(unsigned char) 
-							* 256 * 192);
-					jpegImage.write(0, 0,
-							128, 192, "G", CharPixel, decompressedBuffer);
-					for(int h = 0; h < 192; h++) {
-						for(int w = 0; w < 128; w++) {
-							resizedDecompressedBuffer[(h * 256) + (2 * w)] 
-								= decompressedBuffer[(h * 128) + w];
-							resizedDecompressedBuffer[(h * 256) + (2 * w + 1)]
-								= decompressedBuffer[(h * 128) + w];
-						}
-					}
-							
-			break;
-		case 1:		decompressedBuffer
-					= (unsigned char*)malloc(sizeof(unsigned char)
-							* 128 * 192 * 3);
-					resizedDecompressedBuffer
-					= (unsigned char*)malloc(sizeof(unsigned char)
-							* 256 * 192 * 3);
-					jpegImage.write(0, 0,
-							128, 192, "RGB", CharPixel, decompressedBuffer);
-					for(int h = 0; h < 192; h++) {
-						for(int w = 0; w < 128; w++) 
-							for(int rgb = 0; rgb < 3; rgb++) {
-								resizedDecompressedBuffer
-									[(h * 256 * 3) + (2 * w * 3) + rgb]
-									= decompressedBuffer
-									[(h * 128 * 3) + (w * 3) + rgb];
-								resizedDecompressedBuffer
-									[(h * 256 * 3) + ((2 * w + 1) * 3) + rgb]
-									= decompressedBuffer
-									[(h * 128 * 3) + (w * 3) + rgb];
-							}
-						
-					}
-			break;
-		default:	fprintf(stderr, "Invalid Color Space!\n");
-					return NULL;
-			break;
-	}
-	free(decompressedBuffer);
-	return resizedDecompressedBuffer;
+    switch(color_space) {
+    case 0:		
+        stretched = (unsigned char*)malloc(sizeof(unsigned char)*256*192);
+        jpegImage.write(0, 0, 256, 192, "G", CharPixel, stretched);
+        break;
+    case 1:		
+        stretched = (unsigned char*)malloc(sizeof(unsigned char)*256*192*3);
+        jpegImage.write(0, 0, 256, 192, "RGB", CharPixel, stretched);
+        break;
+    default:	
+        fprintf(stderr, "Invalid Color Space!\n");
+        return NULL;
+        break;
+    }
+    //std::cerr<< "jpegStretch():done" << std::endl;
+	return stretched;
 }
 
 int Scribbler::set(std::string item, int position, int value) {

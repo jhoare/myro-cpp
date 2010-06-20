@@ -2,13 +2,16 @@ CC = g++
 INCLUDES = headers `fltk-config --cxxflags` `Magick++-config --cppflags`
 FLTKLIB = `fltk-config --ldflags`
 MAGICKLIB = `Magick++-config --ldflags --libs`
-BOOSTLIB = -lboost_thread-mt
 CFLAGS = -g -Wall -I$(INCLUDES) 
 OSTYPE := $(shell uname -o)
 
 # Special includes required to build in cygwin
 ifeq ($(OSTYPE),Cygwin)
 CFLAGS += -D__int8=char -D__int16=short -D__int32=int "-D__int64=long long"
+INCLUDES += -I/usr/include/boost-1_33_1/
+BOOSTLIB = -lboost_thread-gcc-mt
+else 
+BOOSTLIB = -lboost_thread-mt
 endif
 
 EXECUTABLES = test_motor test_camera video_stream test_blob \
@@ -31,11 +34,11 @@ libscribbler.a: src/Myro.cpp src/Scribbler.cpp src/serial.cpp src/Robot.cpp src/
 
 test_motor: test/test_motor.cpp libscribbler.a
 	$(CC) $(CFLAGS) -c test/test_motor.cpp
-	$(CC) -o test_motor test_motor.o libscribbler.a $(MAGICKLIB) 
+	$(CC) -o test_motor test_motor.o libscribbler.a $(MAGICKLIB) $(BOOSTLIB)
 
 test_camera: test/test_camera.cpp libscribbler.a
 	$(CC) $(CFLAGS) -c test/test_camera.cpp
-	$(CC) -o test_camera test_camera.o libscribbler.a $(MAGICKLIB) 
+	$(CC) -o test_camera test_camera.o libscribbler.a $(MAGICKLIB) $(BOOSTLIB)
 
 test_blob: test/test_blob.cpp libscribbler.a libvideostream.a
 	$(CC) $(CFLAGS) -c test/test_blob.cpp
