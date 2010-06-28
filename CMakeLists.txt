@@ -12,16 +12,22 @@ FIND_PACKAGE(FLTK REQUIRED)
 INCLUDE_DIRECTORIES(${FLTK_INCLUDE_DIRS})
 
 
-set(Boost_DEBUG TRUE)
-set(Boost_USE_STATIC_LIBS ON)
+#set(Boost_DEBUG TRUE)
+#set(Boost_USE_STATIC_LIBS ON)
 # Check for Boost Threading Library
-#FIND_PACKAGE(BOOST REQUIRED)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_DETAILED_FAILURE_MSG TRUE)
+SET(Boost_USE_MULTITHREADED ON)
+SET(Boost_DETAILED_FAILURE_MSG TRUE)
 FIND_PACKAGE(BOOST 1.41.0 COMPONENTS thread NO_MODULE)
-MESSAGE(STATUS "INCLUDES: ${Boost_INCLUDE_DIRS}")
+#MESSAGE(STATUS "INCLUDES: ${Boost_INCLUDE_DIRS}")
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-set (Boost_THREAD_LIBRARY boost_thread-mt)
+#TODO: Try to fix this, this is a hack because I can't get the FIND_PACKAGE for boost to actually find
+# the threading library, despite it being installed. It looks like a common problem, because player 
+# appears to do the same thing.
+IF (NOT Boost_THREAD_FOUND)
+SET (Boost_THREAD_LIBRARY boost_thread-mt)
+ENDIF (NOT Boost_THREAD_FOUND)
+
+
 #MESSAGE(STATUS "Threading Found?: ${Boost_THREAD_FOUND}")
 #MESSAGE(STATUS "LIBRARIES: ${Boost_LIBRARIES}")
 #MESSAGE(STATUS "Thread: ${Boost_THREAD_LIBRARY}")
@@ -41,23 +47,13 @@ libfind_package(Magick++ Magick QUIET)
 libfind_pkg_check_modules(Magick++_PKGCONF ImageMagick++)
 
 # Include dir
-find_path(Magick++_INCLUDE_DIR
-  NAMES Magick++.h
-  PATHS ${Magick++_PKGCONF_INCLUDE_DIRS}
-)
+FIND_PATH(Magick++_INCLUDE_DIR NAMES Magick++.h PATHS ${Magick++_PKGCONF_INCLUDE_DIRS})
 
 # Finally the library itself
-find_library(Magick++_LIBRARY
-  NAMES Magick++ 
-  PATHS ${Magick++_PKGCONF_LIBRARY_DIRS}
-)
+FIND_LIBRARY(Magick++_LIBRARY NAMES Magick++ PATHS ${Magick++_PKGCONF_LIBRARY_DIRS})
+FIND_LIBRARY(MagickCore_LIBRARY NAMES MagickCore PATHS ${Magick++_PKGCONF_LIBRARY_DIRS})
 
-find_library(MagickCore_LIBRARY
-  NAMES MagickCore
-  PATHS ${Magick++_PKGCONF_LIBRARY_DIRS}
-)
-MESSAGE(STATUS "MagickCore_LIBRARY = ${MagickCore_LIBRARY}")
-
+#MESSAGE(STATUS "MagickCore_LIBRARY = ${MagickCore_LIBRARY}")
 
 # Set the include dir variables and the libraries and let libfind_process do the rest.
 # NOTE: Singular variables for this library, plural for libraries this this lib depends on.

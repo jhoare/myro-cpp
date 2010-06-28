@@ -12,4 +12,4 @@ TARGET_LINK_LIBRARIES(myro-cpp ${FLTK_LIBRARIES})
 #TARGET_LINK_LIBRARIES(videostream ${FLTK_LIBRARIES})
 #TARGET_LINK_LIBRARIES(videostream scribbler)
 
-install_targets(lib myro-cpp)
+install_targets(/lib myro-cpp)
