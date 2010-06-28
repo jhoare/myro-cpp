@@ -1,12 +1,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # Include this File to help us to search for dependencies
 INCLUDE(${CMAKE_SOURCE_DIR}/cmake/LibFindMacros.cmake)
+#INCLUDE(${CMAKE_SOURCE_DIR}/cmake/FindOS.cmake)
 #
 #
 # Name the Project
 PROJECT(Myro-Cpp)
 
-#set(CMAKE_CXX_FLAGS "-g -Wall")
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 
 FIND_PACKAGE(FLTK REQUIRED)
 INCLUDE_DIRECTORIES(${FLTK_INCLUDE_DIRS})
@@ -17,7 +18,7 @@ INCLUDE_DIRECTORIES(${FLTK_INCLUDE_DIRS})
 # Check for Boost Threading Library
 SET(Boost_USE_MULTITHREADED ON)
 SET(Boost_DETAILED_FAILURE_MSG TRUE)
-FIND_PACKAGE(BOOST 1.41.0 COMPONENTS thread NO_MODULE)
+FIND_PACKAGE(BOOST COMPONENTS thread NO_MODULE)
 #MESSAGE(STATUS "INCLUDES: ${Boost_INCLUDE_DIRS}")
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 #TODO: Try to fix this, this is a hack because I can't get the FIND_PACKAGE for boost to actually find
