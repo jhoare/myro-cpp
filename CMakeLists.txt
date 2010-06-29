@@ -6,6 +6,8 @@ INCLUDE(${CMAKE_SOURCE_DIR}/cmake/LibFindMacros.cmake)
 #
 # Name the Project
 PROJECT(Myro-Cpp)
+SET(PKG_VERSION 2.1.0)
+SET(PKG_DESC "C++ port of the IPRE Myro Library supporting control of the Scribbler Robot & IPRE Fluke")
 
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 
@@ -62,6 +64,15 @@ set(Magick++_PROCESS_INCLUDES Magick++_INCLUDE_DIR Magick_INCLUDE_DIRS)
 set(Magick++_PROCESS_LIBS Magick++_LIBRARY MagickCore_LIBRARY Magick_LIBRARIES)
 libfind_process(Magick++)
 INCLUDE_DIRECTORIES(${Magick++_INCLUDE_DIR})
+
+# Make uninstall target
+CONFIGURE_FILE(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+ADD_CUSTOM_TARGET(uninstall
+        "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 add_subdirectory(src)
 add_subdirectory(headers)

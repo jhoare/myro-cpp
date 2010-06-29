@@ -12,4 +12,10 @@ TARGET_LINK_LIBRARIES(myro-cpp ${FLTK_LIBRARIES})
 #TARGET_LINK_LIBRARIES(videostream ${FLTK_LIBRARIES})
 #TARGET_LINK_LIBRARIES(videostream scribbler)
 
-install_targets(/lib myro-cpp)
+INSTALL_TARGETS(/lib myro-cpp)
+
+# Set up a pkg-config file 
+CONFIGURE_FILE (${CMAKE_SOURCE_DIR}/cmake/pkgconfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp.pc @ONLY)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp.pc 
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+        COMPONENT pkgconfig)
