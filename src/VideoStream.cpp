@@ -139,6 +139,7 @@ VideoStream::VideoStream(Scribbler * scrib, int color_mode) {
     this->myScrib = scrib;
     this->color_mode = color_mode;
     this->filters = new std::vector<Filter*>();
+    this->id = -1;
 }
 
 VideoStream::~VideoStream() {
@@ -265,20 +266,23 @@ void CaptureThread::run(){
 }
 
 void VideoStream::startStream() {
-    window = new Fl_Window(256,192, "Robot Image");
-    imageWindow = new ImageWindow(0,0,256,192,NULL);
-    window->end();
-    imageWindow->set_color_mode(color_mode);
-    fl_thread = new Fl_Thread(window,imageWindow);
-    shared_buffer = new circbuf(BUFFER_SIZE);
-    display_thread = new DisplayThread(imageWindow, shared_buffer, filters, 
-                                                                filterLock);
-    capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
+    if ( !running ){
+        window = new Fl_Window(256,192, "Robot Image");
+        imageWindow = new ImageWindow(0,0,256,192,NULL);
+        window->end();
+        imageWindow->set_color_mode(color_mode);
+        fl_thread = new Fl_Thread(window,imageWindow);
+        shared_buffer = new circbuf(BUFFER_SIZE);
+        display_thread = new DisplayThread(imageWindow, shared_buffer, filters, 
+                                                                    filterLock);
+        capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
-    capture_thread->start();
-    display_thread->start();
-    fl_thread->start();
-    running = true;
+        capture_thread->start();
+        display_thread->start();
+        fl_thread->start();
+        running = true;
+        id = myScrib->registerVideoStream(this);
+    }
 }
 
 int VideoStream::addFilter(Filter * filter) {
@@ -317,6 +321,8 @@ void VideoStream::endStream() {
         delete display_thread;
         delete capture_thread;
         running = false;
+        myScrib->unregisterVideoStream(id);
+        id = -1;
     }
 }
 

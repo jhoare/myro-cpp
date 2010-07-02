@@ -70,6 +70,7 @@ class VideoStream {
     void endStream();
 
     private:
+    int id;
 
     std::vector<Filter*> * filters;
     Scribbler * myScrib;

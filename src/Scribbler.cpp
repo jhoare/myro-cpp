@@ -9,6 +9,7 @@
 #include <cstring>
 #include "ColorPicture.h"
 #include "GrayPicture.h"
+#include "VideoStream.h"
 
 using namespace Magick;
 
@@ -83,6 +84,8 @@ Scribbler::Scribbler() {
 	 * ctrl+c exit hack, to make sure the connect is close correctly.
 	 **/
 	jpegImage.magick("JPG");
+    shutdown = false;
+    newid = 0;
 	create_exit_robot(this);
 }
 
@@ -150,6 +153,12 @@ int Scribbler::disconnect() {
 	int status = 0;
 	//pthread_mutex_lock(this->robot_lock);
 	if(con) {
+        std::map<int,VideoStream*>::iterator it;
+        shutdown = true;
+        for ( it = videostreams.begin(); it != videostreams.end(); it++ )
+            it->second->endStream();
+        videostreams.clear();
+        shutdown = false;
 		con->disconnect();
 	}
 	else {
@@ -1825,4 +1834,18 @@ int Scribbler::yuv2rgb(int Y, int U, int V, unsigned char &R,
 	G = std::max(std::min(tG, 255),0);
 	B = std::max(std::min(tB, 255),0);
 	return 0;
+}
+
+int Scribbler::registerVideoStream(VideoStream* vs){
+    boost::mutex::scoped_lock l(videoStreamLock);
+    int id = newid++;
+    videostreams[id] = vs;
+    return id;
+}
+
+void Scribbler::unregisterVideoStream(int id){
+    if ( !shutdown ){
+        boost::mutex::scoped_lock l(videoStreamLock);
+        videostreams.erase(id);
+    }
 }

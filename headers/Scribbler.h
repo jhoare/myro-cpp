@@ -5,8 +5,11 @@
 #include "serial.h"
 #include "Picture.h"
 #include <vector>
+#include <map>
 #include <boost/thread/mutex.hpp>
 #include <Magick++.h>
+
+class VideoStream;
 
 /**
  * @class Scribbler
@@ -687,6 +690,16 @@ class Scribbler: public Robot {
     boost::mutex image_lock;
 
     Magick::Image jpegImage;
+
+    // Videostream Cleanup Stuff!
+    private:
+    boost::mutex videoStreamLock;
+    int  registerVideoStream(VideoStream* vs);
+    void unregisterVideoStream(int id);
+    int  newid;
+    bool shutdown;
+    std::map<int,VideoStream*> videostreams;
+    friend class VideoStream;
 };
 
 #endif

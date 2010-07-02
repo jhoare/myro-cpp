@@ -9,7 +9,6 @@ PROJECT(Myro-Cpp)
 SET(PKG_VERSION 2.1.0)
 SET(PKG_DESC "C++ port of the IPRE Myro Library supporting control of the Scribbler Robot & IPRE Fluke")
 
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 
 FIND_PACKAGE(FLTK REQUIRED)
 INCLUDE_DIRECTORIES(${FLTK_INCLUDE_DIRS})
@@ -20,7 +19,8 @@ INCLUDE_DIRECTORIES(${FLTK_INCLUDE_DIRS})
 # Check for Boost Threading Library
 SET(Boost_USE_MULTITHREADED ON)
 SET(Boost_DETAILED_FAILURE_MSG TRUE)
-FIND_PACKAGE(BOOST COMPONENTS thread NO_MODULE)
+FIND_PACKAGE(Boost)
+#FIND_PACKAGE(Boost COMPONENTS thread NO_MODULE)
 #MESSAGE(STATUS "INCLUDES: ${Boost_INCLUDE_DIRS}")
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 #TODO: Try to fix this, this is a hack because I can't get the FIND_PACKAGE for boost to actually find
@@ -73,6 +73,8 @@ CONFIGURE_FILE(
 
 ADD_CUSTOM_TARGET(uninstall
         "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 
 add_subdirectory(src)
 add_subdirectory(headers)
