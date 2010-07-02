@@ -153,12 +153,14 @@ int Scribbler::disconnect() {
 	int status = 0;
 	//pthread_mutex_lock(this->robot_lock);
 	if(con) {
+        /*
         std::map<int,VideoStream*>::iterator it;
         shutdown = true;
         for ( it = videostreams.begin(); it != videostreams.end(); it++ )
             it->second->endStream();
         videostreams.clear();
         shutdown = false;
+        */
 		con->disconnect();
 	}
 	else {

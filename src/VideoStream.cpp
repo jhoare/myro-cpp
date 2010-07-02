@@ -167,7 +167,8 @@ void Fl_Thread::run(){
         //printf("start_stream() : imageWindow->redraw()\n");
         //this->imageWindow->redraw();
         this->imageWindow->refresh();
-        boost::thread::yield();
+        usleep(50000); // Sleep for .05 seconds, giving a 20hz refresh rate
+        //boost::thread::yield();
     }
     this->window->hide();
     this->imageWindow->hide();
