@@ -5,10 +5,10 @@
 #include <boost/thread/condition.hpp>
 #include <boost/shared_ptr.hpp>
 
-/// Inherit from this to get threading.  The usage is:
-///     threaded.start()
-///     threaded.join()
-/// Implement the run() function as the thread.
+// Inherit from this to get threading.  The usage is:
+//     threaded.start()
+//     threaded.join()
+// Implement the run() function as the thread.
 class Threaded {
     public:
         Threaded() : stopRequested(false), runThread() {}
