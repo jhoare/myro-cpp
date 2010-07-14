@@ -156,8 +156,10 @@ Fl_Thread::Fl_Thread(Fl_Window* window, ImageWindow * imageWindow):Threaded(){
 // FL Thread
 void Fl_Thread::run(){
     this->window->show();
+    //std::cerr << "Fl_Thread::run() - started" << std::endl;
 
     while(!this->stopRequested){
+        //std::cerr << "Fl_Thread::run()" << std::endl;
         if( this->window->visible() ) {
             if(!Fl::check())
                 break;
@@ -172,6 +174,8 @@ void Fl_Thread::run(){
     }
     this->window->hide();
     this->imageWindow->hide();
+
+    //std::cerr << "Fl_Thread::run() - ending" << std::endl;
 
     return;
 }
@@ -192,6 +196,7 @@ void DisplayThread::run() {
     unsigned char* img_new=NULL;
 
     while(!this->stopRequested){
+        //std::cerr << "DisplayThread::run()" << std::endl;
         //printf("display_stream() Waiting on Picture\n");
         img_new = cb->pop();
 
@@ -215,7 +220,9 @@ void DisplayThread::run() {
 
         imageWindow->refresh();
 
-        boost::thread::yield();
+        //boost::thread::yield();
+        usleep(1000); //hack to slow down the capture thread
+                      //so that the other threads are scheduled
         //printf("display_stream() Image Updated\n");
 
     }
@@ -235,6 +242,7 @@ void CaptureThread::run(){
     unsigned char * tempImageBuffer; 
 
     while(!this->stopRequested){
+        //std::cerr << "CaptureThread::run()" << std::endl;
         //pthread_mutex_lock(videoData->refresh_lock);    
 
         //fprintf(stderr, "capture_image() Capturing Image\n");
@@ -259,9 +267,9 @@ void CaptureThread::run(){
 
         //printf("capture_image(): Image Loaded into Memory\n"); 
         cb->push(tempImageBuffer);
-        //usleep(1000); //hack to slow down the capture thread
+        usleep(1000); //hack to slow down the capture thread
                       //so that the other threads are scheduled
-        boost::thread::yield();
+        //boost::thread::yield();
     }
     return;
 }
@@ -278,6 +286,9 @@ void VideoStream::startStream() {
                                                                     filterLock);
         capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
+        /// @TODO: on cygwin, in the video_test test program, the image does not show
+        /// up until you hit enter on the keyboard. I can probably put a mutex/cv in 
+        /// here to make sure each thread has "started"
         capture_thread->start();
         display_thread->start();
         fl_thread->start();
