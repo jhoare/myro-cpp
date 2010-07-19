@@ -21,13 +21,15 @@ class VideoStream;
  * @brief This class implements all of the needed methods and 
  * components for controlling a scribbler robot.
  *
- * @author Richard Edwards
+ * @author Richard Edwards, John Hoare
  */
 class Scribbler: public Robot {
 
 	public:
 
+    /// Default Constructor
 	Scribbler();
+    /// Default Destructor
 	~Scribbler();
 
 	/**

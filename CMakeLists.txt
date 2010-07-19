@@ -42,7 +42,6 @@ ENDIF (NOT Boost_THREAD_FOUND)
 #  Magick++_FOUND - system has Magick++
 #  Magick++_INCLUDE_DIRS - the Magick++ include directories
 #  Magick++_LIBRARIES - link these to use Magick++
-
 # Dependencies
 libfind_package(Magick++ Magick QUIET)
 

@@ -19,13 +19,16 @@ static const int BUFFER_SIZE = 512;
 
 class Fl_Thread : public Threaded{
     public:
-    Fl_Thread(Fl_Window * window, ImageWindow* imageWindow);
+    Fl_Thread(Fl_Window * window, ImageWindow* imageWindow,
+              boost::mutex& setup, boost::condition& setup_notify);
     //void start();
     virtual void run();
     //void stop();
     private:
     Fl_Window * window;
     ImageWindow * imageWindow;
+    boost::mutex& setup;
+    boost::condition& setup_notify;
 };
 
 class DisplayThread : public Threaded{
@@ -33,7 +36,7 @@ class DisplayThread : public Threaded{
     DisplayThread(ImageWindow* imageWindow, circbuf* cb,
                           std::vector<Filter*>* filters,
                               boost::mutex& _filterLock);
-    //void start();
+    //virtual void start();
     virtual void run();
     //void stop();
     private:
@@ -105,36 +108,6 @@ class circbuf{
         boost::condition cv;
 };
 
-typedef struct Data {
-    unsigned char ** image;
-    Scribbler * robot;
-    int live;
-    Fl_Window * window;
-    ImageWindow * imageWindow;
-
-    pthread_mutex_t * refresh_lock;
-    pthread_cond_t * signal_display;
-
-    pthread_mutex_t * run_gui_lock;
-    pthread_cond_t * signal_run_gui;
-
-    pthread_mutex_t * filterLock;
-
-    //int runGUI; 
-    //int imageReady;
-
-    //int image_buffer_write;
-    //int image_buffer_read; 
-    int color_mode;
-
-    std::vector<Filter*> * filters;
-
-} * _data;
-
-void * start_stream(void * data);
-void * capture_image(void * data);
-void * display_stream(void * data);
-
 VideoStream::VideoStream(Scribbler * scrib, int color_mode) {
     this->myScrib = scrib;
     this->color_mode = color_mode;
@@ -148,15 +121,22 @@ VideoStream::~VideoStream() {
     delete filters;
 }
 
-Fl_Thread::Fl_Thread(Fl_Window* window, ImageWindow * imageWindow):Threaded(){
+Fl_Thread::Fl_Thread(Fl_Window* window, ImageWindow * imageWindow,
+                     boost::mutex& _setup, boost::condition& _setup_notify)
+: Threaded(), setup(_setup), setup_notify(_setup_notify) 
+{
     this->window = window;
     this->imageWindow = imageWindow;
 }
 
 // FL Thread
 void Fl_Thread::run(){
-    this->window->show();
-    //std::cerr << "Fl_Thread::run() - started" << std::endl;
+    {
+        boost::mutex::scoped_lock l(setup);
+        this->window->show();
+        //std::cerr << "Fl_Thread::run() - started" << std::endl;
+        setup_notify.notify_one();
+    }
 
     while(!this->stopRequested){
         //std::cerr << "Fl_Thread::run()" << std::endl;
@@ -276,23 +256,30 @@ void CaptureThread::run(){
 
 void VideoStream::startStream() {
     if ( !running ){
+        // This lock/condition variable combo is addressing an issue that 
+        // shows up in cygwin where the fl_window thread doesn't get run
+        // sometimes, depending on what happens immediately after startStream
+        // is called. These are used so that the thread calling startStream
+        // blocks until it has begun running.
+        boost::mutex setup_lock;
+        boost::condition setup_notify;
         window = new Fl_Window(256,192, "Robot Image");
         imageWindow = new ImageWindow(0,0,256,192,NULL);
         window->end();
         imageWindow->set_color_mode(color_mode);
-        fl_thread = new Fl_Thread(window,imageWindow);
+        fl_thread = new Fl_Thread(window,imageWindow, setup_lock, setup_notify);
         shared_buffer = new circbuf(BUFFER_SIZE);
         display_thread = new DisplayThread(imageWindow, shared_buffer, filters, 
                                                                     filterLock);
         capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
-        /// @TODO: on cygwin, in the video_test test program, the image does not show
-        /// up until you hit enter on the keyboard. I can probably put a mutex/cv in 
-        /// here to make sure each thread has "started"
+        boost::mutex::scoped_lock l(setup_lock);
         capture_thread->start();
         display_thread->start();
         fl_thread->start();
         running = true;
+        // Wait until the fl_thread has actually started running
+        setup_notify.wait(l);
         id = myScrib->registerVideoStream(this);
     }
 }

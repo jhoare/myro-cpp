@@ -19,7 +19,7 @@ using namespace Magick;
 #define SENSOR_ON 1
 #define SENSOR_OFF 0
 
-/** Begin C code for handling Control C through the robot Lib **/
+/* Begin C code for handling Control C through the robot Lib */
 typedef struct exit_struct {
 	Scribbler * robot;
 } *_exit_struct;
@@ -41,7 +41,7 @@ extern "C" {
 		signal(SIGINT, ctrlc_routine);
 	}
 }
-/** End C code for handling Control C through the robot lib **/
+/* End C code for handling Control C through the robot lib */
 
 Scribbler::Scribbler() {
 	con = NULL;
@@ -80,9 +80,9 @@ Scribbler::Scribbler() {
 	//image_lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	//pthread_mutex_init(robot_lock, NULL);
 	//pthread_mutex_init(image_lock, NULL);
-	/**
+	/*
 	 * ctrl+c exit hack, to make sure the connect is close correctly.
-	 **/
+	 */
 	jpegImage.magick("JPG");
     shutdown = false;
     newid = 0;
