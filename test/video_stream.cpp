@@ -163,33 +163,28 @@ int main(int argc, char ** argv) {
 
 	InvertFilter * myInvertFilter;
 	LightMask * myLightMask;
-    while ( 1 ){
-      VideoStream video(foo, color_mode);
+    VideoStream video(foo, color_mode);
 
-      if(enableInvert) {
-          myInvertFilter = new InvertFilter(256, 192, color_mode);
-          video.addFilter(myInvertFilter);
-      }
-      if(enableLightMask) {
-          myLightMask = new LightMask(256, 192, color_mode);
-          video.addFilter(myLightMask);
-      }
-
-      video.startStream();
-
-      int close = 0;
-      std::string quit;
-      while(!close) {
-          std::cout << "Type in E or Exit to quit\n";
-          std::cin >> quit;
-          if(quit == "E" || quit == "Exit" || quit == "e" || quit == "exit")
-              close = 1;
-      }
-      std::cout << "Closing Window" << std::endl;
-      video.endStream();
-      sleep(5);
-      std::cout << "Starting Over!" << std::endl;
+    if(enableInvert) {
+        myInvertFilter = new InvertFilter(256, 192, color_mode);
+        video.addFilter(myInvertFilter);
     }
+    if(enableLightMask) {
+        myLightMask = new LightMask(256, 192, color_mode);
+        video.addFilter(myLightMask);
+    }
+
+    video.startStream();
+
+    int close = 0;
+    std::string quit;
+    while(!close) {
+        std::cout << "Type in E or Exit to quit\n";
+        std::cin >> quit;
+        if(quit == "E" || quit == "Exit" || quit == "e" || quit == "exit")
+            close = 1;
+    }
+    video.endStream();
 	foo->disconnect();
 	if(enableInvert)
 		delete myInvertFilter;

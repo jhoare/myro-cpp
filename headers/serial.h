@@ -7,7 +7,7 @@
  * @brief Used to manipulate a serial connection in Linux for
  * connecting, reading, and writing. 
  *
- * @Author Richard Edwards
+ * @author Richard Edwards
  */
 class serial {
 

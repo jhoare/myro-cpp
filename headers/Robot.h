@@ -9,7 +9,7 @@
  * @brief A generic robot class that specifies general required
  * functions for basic robot operation. 
  *
- * @Author Richard Edwards
+ * @author Richard Edwards
  */
 class Robot {
 

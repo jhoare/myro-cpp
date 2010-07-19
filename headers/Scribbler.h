@@ -52,21 +52,21 @@ class Scribbler: public Robot {
 	/**
 	 * Move issues a desired velocity and desired angular velocity,
 	 * 
-	 * @param double translate - velocity [-1,1]
-	 * @param double rotate - angular velocity [-1,1]
+	 * @param translate - velocity [-1,1]
+	 * @param rotate - angular velocity [-1,1]
 	 */
 	void move(double translate, double rotate, double z=0);
 
 	/**
 	 * Function for giving the robot a desired angular velocity.
-	 * @param double amount - angular velocity [-1,1]
+	 * @param amount - angular velocity [-1,1]
 	 */
 	void rotate(double amount);
 
 	/**
 	 * Function for giving the robot a desired velocity.
 	 *
-	 * @param double amount - angular velocity [-1,1]
+	 * @param amount - angular velocity [-1,1]
 	 */
 	void translate(double amount);
 
@@ -83,9 +83,9 @@ class Scribbler: public Robot {
 	/**
 	 * Function for sending tones to the robot.
 	 *
-	 * @param double duration - time specified in seconds
-	 * @param int freq - the frequency of the tone
-	 * @param int freq2 - an optional second frequency, defaults to 0
+	 * @param duration - time specified in seconds
+	 * @param freq - the frequency of the tone
+	 * @param freq2 - an optional second frequency, defaults to 0
 	 */
 	void beep(double duration, int freq, int freq2 = 0);
 
@@ -93,8 +93,8 @@ class Scribbler: public Robot {
 	 * Store a single byte value on the robot.
 	 * There are 8 byte values which can be accessed and modified.
 	 *
-	 * @param int position - index bounded on [0,7]
-	 * @param int value - the desired value, bounded on [0,255] 
+	 * @param position - index bounded on [0,7]
+	 * @param value - the desired value, bounded on [0,255] 
 	 */
 	void setData(int position, int value);
 
@@ -103,15 +103,15 @@ class Scribbler: public Robot {
 	 * different robot message, which doesn't require the 
 	 * resubmission of all 8 bytes.
 	 *
-	 * @param int position - index bounded on [0,7]
-	 * @param int value - the desired value, bounded on [0,255]
+	 * @param position - index bounded on [0,7]
+	 * @param value - the desired value, bounded on [0,255]
 	 */
 	void setSingleData(int position, int value);
 
 	/**
 	 * Used to turn the robot's echo mode on or off.
 	 *
-	 * @param int value - 0 for off, and 1 for on
+	 * @param value - 0 for off, and 1 for on
 	 */
 	void setEchoMode(int value);
 
@@ -119,7 +119,7 @@ class Scribbler: public Robot {
 	 * Changes the 16 byte name stored on the robot to the
 	 * specified 16 byte name.
 	 * 
-	 * @param string newName - A character string that isn't longer than
+	 * @param newName - A character string that isn't longer than
 	 * 16 characters(does not count null character).
 	 */
 	void setName(std::string newName);
@@ -128,7 +128,7 @@ class Scribbler: public Robot {
 	 * Changes the 16 byte password stored on the robot to the
 	 * new specified 16 byte password.
 	 *
-	 * @param string password - A character string that isn't longer than
+	 * @param password - A character string that isn't longer than
 	 * 16 characters(does not count null character).
 	 */
 	void setPassword(std::string password);
@@ -430,7 +430,7 @@ class Scribbler: public Robot {
 	std::vector<std::string> getInfo();
 
 	/**
-	 * @param An optional vector used to specify desired byte indexes.
+	 * @param position An optional vector used to specify desired byte indexes.
 	 * @return This function returns either all 8 bytes stored on the robot,
 	 * or a set of the data based on the input vector. 
 	 *

@@ -12,7 +12,7 @@
  * which can manipulate images, and apply any changes in the image 
  * data back to the image.
  *
- * @Author Richard Edwards
+ * @author Richard Edwards
  */
 
 class Filter {
