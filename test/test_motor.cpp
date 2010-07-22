@@ -14,6 +14,8 @@ int main(int argc, char ** argv) {
 		return -1;
 	}
 
+    robot->setForwardness("fluke-forward");
+
 	cout << "Connected to Robot\n";
 	cout << "Proceeding to test motor commands\n";
 
