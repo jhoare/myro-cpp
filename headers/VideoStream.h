@@ -28,7 +28,7 @@ class VideoStream {
 
     public:
     /// The possible color modes for the VideoStream
-    enum color_mode { GREY=0, COLOR=1, BLOB=2 };
+    enum color_mode { GRAY=0, COLOR=1, BLOB=2 };
 
     /**
      * @param scrib - A pointer to a scribbler robot instance.
