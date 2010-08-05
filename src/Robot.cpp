@@ -62,14 +62,14 @@ void Robot::turn(std::string direction, double speed, double time) {
 
 void Robot::forward(double speed, double time) {
 	int utime = (int)(time * pow(10, 6));
-    printf("issuing move command\n");
+    //printf("issuing move command\n");
 	this->move(speed, 0);
-    printf("move command issued\n");
+    //printf("move command issued\n");
 	if(time != 0) {
 		usleep(utime);
 		this->stop();
 	}
-    printf("Leaving forward call\n");
+    //printf("Leaving forward call\n");
 }
 
 void Robot::backward(double speed, double time) {

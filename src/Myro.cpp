@@ -4,9 +4,8 @@
 #include <cmath>
 #include <unistd.h>
 
-static struct timeval start_clock_time;
-static struct timezone tz;
-static int q = 0;
+static time_t start_time;
+static bool running = false;
 
 Scribbler robot;
 
@@ -16,22 +15,16 @@ void wait(double time) {
 		usleep(utime);
 }
 
-bool timeRemaining(double start_time) {	
-	if(!q) {
-		q = 1;
-		gettimeofday(&start_clock_time, &tz);
+bool timeRemaining(double desired_time) {	
+	if(!running) {
+		running = true;
+        start_time = time(NULL);
 		return true;
 	}
 
-	bool result = true;
-
-	struct timeval currenttime;
-	gettimeofday(&currenttime, &tz);
-
-	if( start_time * pow(10,6) + start_clock_time.tv_usec 
-			>= currenttime.tv_usec ) {
-		result = false;
-		q = 0;
-	}
-	return result;
+    if ( difftime(time(NULL), start_time) >= desired_time ){
+      running = false;
+      return false;
+    }
+    return true;
 }

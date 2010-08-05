@@ -1,4 +1,5 @@
 #include "Scribbler.h"
+#include "serial.h"
 #include "message_headers.h"
 #include <math.h>
 #include <signal.h>
@@ -1149,6 +1150,15 @@ void * Scribbler::get(std::string item, std::vector<int> position) {
 		std::cout << "Invalid sensor name: " << sensor << std::endl;
 	
 	return retval;
+}
+
+std::vector<int> Scribbler::getLights() {
+    int * light = this->_get(GET_LIGHT_ALL, 6, "word");
+    std::vector<int> list;
+    for(int i = 0; i < 3; i++)
+        list.push_back( light[i] );
+    free(light);
+    return list;
 }
 
 std::vector<int> Scribbler::getLastSensors() {

@@ -2,14 +2,15 @@
 #define __SCRIBBLER_H__
 
 #include "Robot.h"
-#include "serial.h"
 #include "Picture.h"
 #include <vector>
 #include <map>
 #include <boost/thread/mutex.hpp>
 #include <Magick++.h>
 
+// Forward Declarations
 class VideoStream;
+class serial;
 
 /**
  * @class Scribbler
@@ -195,6 +196,14 @@ class Scribbler: public Robot {
 	 * to know which return value they are expecting and to cast accordingly.
 	 */
 	void * get(std::string item, std::vector<int> position);
+
+    /**
+     * Get the values of the light sensors.
+     *
+     * @return A vector of ints each one corresponding to a light sensor. 
+     * 0 is left sensor, 1 is center, and 2 is right light sensor. 
+     */
+    std::vector<int> getLights();
 
 	/**
 	 * Every set command will read the values for all eleven on board robot
