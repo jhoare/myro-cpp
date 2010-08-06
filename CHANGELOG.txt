@@ -1,0 +1,11 @@
+2.1.1 (2010-08-06)
+ - First official (external) release
+ - Adds support for Windows (via cygwin) and OSX
+ - Adds a build-system supporting installation
+ - Fixes bug #589323 VideoStream object causes segfaults on object destruction
+ - Fixes numerous memory leaks
+ - Fixes bug where robot takes picture at startup, sometime causing garbage data to show up.
+
+2.0.0 
+ - First Internal Release 
+ - Supports Ubuntu Linux
