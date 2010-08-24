@@ -1,3 +1,6 @@
+2.1.2 (2010-08-23)
+ - Fixed a bug where the VideoStream does not always start when requested
+
 2.1.1 (2010-08-06)
  - First official (external) release
  - Adds support for Windows (via cygwin) and OSX
