@@ -112,6 +112,7 @@ VideoStream::VideoStream(Scribbler * scrib, int color_mode) {
     this->myScrib = scrib;
     this->color_mode = color_mode;
     this->filters = new std::vector<Filter*>();
+    this->running = false;
     this->id = -1;
 }
 
