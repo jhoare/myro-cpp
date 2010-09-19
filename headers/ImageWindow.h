@@ -5,6 +5,8 @@
 #include <Fl/Fl_Image.H>
 #include <boost/thread/mutex.hpp>
 
+class Fl_Thread; // Forward Declaration
+
 class ImageWindow : public Fl_Window {
 
 	public:
@@ -14,13 +16,14 @@ class ImageWindow : public Fl_Window {
 		void set_color_mode(int color_mode);
 		void loadImageSource(unsigned char * data, int width, int height);
 		virtual void draw();
-                void refresh();
+        void refresh();
 
 	private:
 
 		Fl_RGB_Image* image;
 		int color_mode;
         boost::mutex exclusive;
+        Fl_Thread *fl_thread;
 };
 
 #endif

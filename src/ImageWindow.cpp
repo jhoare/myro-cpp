@@ -1,11 +1,34 @@
 #include "ImageWindow.h"
+#include "Threaded.h"
+#include <FL/Fl.H>
+#include <FL/Fl_Image.H>
+#include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
 #include <iostream>
 
+class Fl_Thread : public Threaded{
+    public:
+    Fl_Thread(ImageWindow * window);
+              //boost::mutex& setup, boost::condition& setup_notify);
+    //void start();
+    virtual void run();
+    //void stop();
+    private:
+    //Fl_Window * window;
+    ImageWindow * window;
+    //boost::mutex& setup;
+    //boost::condition& setup_notify;
+};
+
 ImageWindow::ImageWindow(int width, int height, char * title) 
-	: Fl_Window(width, height, title) {
-		image = NULL;
+	: Fl_Window(width, height, title), 
+      image(NULL),
+      fl_thread(new Fl_Thread(this))
+{ 
+    // Start the Fl_Thread display thread.
+    fl_thread->start();
 }
+
 
 ImageWindow::ImageWindow(int x, int y, int width,
 		int height, char * title)
@@ -14,6 +37,9 @@ ImageWindow::ImageWindow(int x, int y, int width,
 }
 
 ImageWindow::~ImageWindow(){
+    // Close and clean up our display thread
+    fl_thread->stop();
+    delete fl_thread;
     if (image) delete image;
 }
 
@@ -43,4 +69,38 @@ void ImageWindow::draw() {
 void ImageWindow::refresh() {
     boost::mutex::scoped_lock l(exclusive);
     this->redraw();
+}
+
+Fl_Thread::Fl_Thread(ImageWindow* window) : Threaded(), window(window)
+{}
+
+// FL Thread
+void Fl_Thread::run(){
+    {
+        //boost::mutex::scoped_lock l(setup);
+        this->window->show();
+        //std::cerr << "Fl_Thread::run() - started" << std::endl;
+        //setup_notify.notify_one();
+    }
+
+    while(!this->stopRequested){
+        //std::cerr << "Fl_Thread::run()" << std::endl;
+        if( this->window->visible() ) {
+            if(!Fl::check())
+                break;
+        }
+        else if( !Fl::wait() )
+            break;
+        //printf("start_stream() : imageWindow->redraw()\n");
+        //this->imageWindow->redraw();
+        this->window->refresh();
+        usleep(50000); // Sleep for .05 seconds, giving a 20hz refresh rate
+        //boost::thread::yield();
+    }
+    this->window->hide();
+    //this->imageWindow->hide();
+
+    //std::cerr << "Fl_Thread::run() - ending" << std::endl;
+
+    return;
 }

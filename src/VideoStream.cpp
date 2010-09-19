@@ -17,20 +17,6 @@
 #define RGB 3
 static const int BUFFER_SIZE = 512;
 
-class Fl_Thread : public Threaded{
-    public:
-    Fl_Thread(ImageWindow * window,
-              boost::mutex& setup, boost::condition& setup_notify);
-    //void start();
-    virtual void run();
-    //void stop();
-    private:
-    //Fl_Window * window;
-    ImageWindow * window;
-    boost::mutex& setup;
-    boost::condition& setup_notify;
-};
-
 class DisplayThread : public Threaded{
     public:
     DisplayThread(ImageWindow* imageWindow, circbuf* cb,
@@ -122,44 +108,6 @@ VideoStream::~VideoStream() {
     delete filters;
 }
 
-Fl_Thread::Fl_Thread(ImageWindow* window,
-                     boost::mutex& _setup, boost::condition& _setup_notify)
-: Threaded(), setup(_setup), setup_notify(_setup_notify) 
-{
-    this->window = window;
-//    this->imageWindow = imageWindow;
-}
-
-// FL Thread
-void Fl_Thread::run(){
-    {
-        boost::mutex::scoped_lock l(setup);
-        this->window->show();
-        //std::cerr << "Fl_Thread::run() - started" << std::endl;
-        setup_notify.notify_one();
-    }
-
-    while(!this->stopRequested){
-        //std::cerr << "Fl_Thread::run()" << std::endl;
-        if( this->window->visible() ) {
-            if(!Fl::check())
-                break;
-        }
-        else if( !Fl::wait() )
-            break;
-        //printf("start_stream() : imageWindow->redraw()\n");
-        //this->imageWindow->redraw();
-        this->window->refresh();
-        usleep(50000); // Sleep for .05 seconds, giving a 20hz refresh rate
-        //boost::thread::yield();
-    }
-    this->window->hide();
-    //this->imageWindow->hide();
-
-    //std::cerr << "Fl_Thread::run() - ending" << std::endl;
-
-    return;
-}
 
 // Dispaly/Update Thread
 DisplayThread::DisplayThread(ImageWindow* imageWindow, circbuf* cb,
@@ -262,25 +210,27 @@ void VideoStream::startStream() {
         // sometimes, depending on what happens immediately after startStream
         // is called. These are used so that the thread calling startStream
         // blocks until it has begun running.
-        boost::mutex setup_lock;
-        boost::condition setup_notify;
+        // TODO: I've removed this all, moving the fl_thread to the ImageWindow class...
+        // very likely I'll need to do something similarly hacky over there.
+        //boost::mutex setup_lock;
+        //boost::condition setup_notify;
         window = new ImageWindow(256,192, "Robot Image");
         //imageWindow = new ImageWindow(0,0,256,192,NULL);
         window->end();
         window->set_color_mode(color_mode);
-        fl_thread = new Fl_Thread(window, setup_lock, setup_notify);
+        //fl_thread = new Fl_Thread(window, setup_lock, setup_notify);
         shared_buffer = new circbuf(BUFFER_SIZE);
         display_thread = new DisplayThread(window, shared_buffer, filters, 
                                                                     filterLock);
         capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
-        boost::mutex::scoped_lock l(setup_lock);
+        //boost::mutex::scoped_lock l(setup_lock);
         capture_thread->start();
         display_thread->start();
-        fl_thread->start();
+        //fl_thread->start();
         running = true;
         // Wait until the fl_thread has actually started running
-        setup_notify.wait(l);
+        //setup_notify.wait(l);
         id = myScrib->registerVideoStream(this);
     }
 }
@@ -307,7 +257,7 @@ int VideoStream::delFilter(int filter_location) {
 
 void VideoStream::endStream() {
     if ( running ){
-        fl_thread->stop();
+        //fl_thread->stop();
         display_thread->stop();
         capture_thread->stop();
 
@@ -317,7 +267,7 @@ void VideoStream::endStream() {
         // displayed.
         while ( !shared_buffer->isEmpty() ) free(shared_buffer->pop());
         delete shared_buffer;
-        delete fl_thread;
+        //delete fl_thread;
         delete display_thread;
         delete capture_thread;
         running = false;
