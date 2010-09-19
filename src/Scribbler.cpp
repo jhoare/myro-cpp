@@ -44,7 +44,34 @@ extern "C" {
 }
 /* End C code for handling Control C through the robot lib */
 
-Scribbler::Scribbler() {
+Scribbler::Scribbler() :
+    con(NULL),
+    lastRotate(0),
+    lastTranslate(0),
+    dongle(0),
+    sensors(new unsigned char[11]),
+    CAM_PID((unsigned char)0x0A),
+    CAM_PID_DEFAULT((unsigned char)0x76),
+	CAM_VER((unsigned char)0x0B),
+	CAM_VER_DEFAULT((unsigned char)0x48),
+	CAM_BRT((unsigned char)0x06),
+	CAM_BRT_DEFAULT((unsigned char)0x80),
+	CAM_EXP((unsigned char)0x10),
+	CAM_EXP_DEFAULT((unsigned char)0x41),
+	CAM_COMA((unsigned char)0x12),
+	CAM_COMA_DEFAULT((unsigned char)0x14),
+	CAM_COMA_WHITE_BALANCE_ON((CAM_COMA_DEFAULT | (1 << 2))),
+	CAM_COMA_WHITE_BALANCE_OFF((CAM_COMA_DEFAULT & ~(1 << 2))),
+	CAM_COMB((unsigned char)0x13),
+	CAM_COMB_DEFAULT((unsigned char)0xA3),
+	CAM_COMB_GAIN_CONTROL_ON((CAM_COMB_DEFAULT | (1 << 1))),
+	CAM_COMB_GAIN_CONTROL_OFF((CAM_COMB_DEFAULT & ~(1 << 1))),
+	CAM_COMB_EXPOSURE_CONTROL_ON((CAM_COMB_DEFAULT | (1 << 0))),
+	CAM_COMB_EXPOSURE_CONTROL_OFF((CAM_COMB_DEFAULT & ~(1 << 0))),
+    shutdown(false),
+    newid(0)
+{
+    /*
 	con = NULL;
 	lastRotate = 0;
 	lastTranslate = 0;
@@ -76,6 +103,7 @@ Scribbler::Scribbler() {
 	CAM_COMB_GAIN_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 1));
 	CAM_COMB_EXPOSURE_CONTROL_ON = (CAM_COMB_DEFAULT | (1 << 0));
 	CAM_COMB_EXPOSURE_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 0));
+    */
 
 	//robot_lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	//image_lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
@@ -85,8 +113,10 @@ Scribbler::Scribbler() {
 	 * ctrl+c exit hack, to make sure the connect is close correctly.
 	 */
 	jpegImage.magick("JPG");
+    /*
     shutdown = false;
     newid = 0;
+    */
 	create_exit_robot(this);
 }
 

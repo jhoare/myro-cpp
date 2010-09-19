@@ -19,14 +19,14 @@ static const int BUFFER_SIZE = 512;
 
 class Fl_Thread : public Threaded{
     public:
-    Fl_Thread(Fl_Window * window, ImageWindow* imageWindow,
+    Fl_Thread(ImageWindow * window,
               boost::mutex& setup, boost::condition& setup_notify);
     //void start();
     virtual void run();
     //void stop();
     private:
-    Fl_Window * window;
-    ImageWindow * imageWindow;
+    //Fl_Window * window;
+    ImageWindow * window;
     boost::mutex& setup;
     boost::condition& setup_notify;
 };
@@ -122,12 +122,12 @@ VideoStream::~VideoStream() {
     delete filters;
 }
 
-Fl_Thread::Fl_Thread(Fl_Window* window, ImageWindow * imageWindow,
+Fl_Thread::Fl_Thread(ImageWindow* window,
                      boost::mutex& _setup, boost::condition& _setup_notify)
 : Threaded(), setup(_setup), setup_notify(_setup_notify) 
 {
     this->window = window;
-    this->imageWindow = imageWindow;
+//    this->imageWindow = imageWindow;
 }
 
 // FL Thread
@@ -149,12 +149,12 @@ void Fl_Thread::run(){
             break;
         //printf("start_stream() : imageWindow->redraw()\n");
         //this->imageWindow->redraw();
-        this->imageWindow->refresh();
+        this->window->refresh();
         usleep(50000); // Sleep for .05 seconds, giving a 20hz refresh rate
         //boost::thread::yield();
     }
     this->window->hide();
-    this->imageWindow->hide();
+    //this->imageWindow->hide();
 
     //std::cerr << "Fl_Thread::run() - ending" << std::endl;
 
@@ -264,13 +264,13 @@ void VideoStream::startStream() {
         // blocks until it has begun running.
         boost::mutex setup_lock;
         boost::condition setup_notify;
-        window = new Fl_Window(256,192, "Robot Image");
-        imageWindow = new ImageWindow(0,0,256,192,NULL);
+        window = new ImageWindow(256,192, "Robot Image");
+        //imageWindow = new ImageWindow(0,0,256,192,NULL);
         window->end();
-        imageWindow->set_color_mode(color_mode);
-        fl_thread = new Fl_Thread(window,imageWindow, setup_lock, setup_notify);
+        window->set_color_mode(color_mode);
+        fl_thread = new Fl_Thread(window, setup_lock, setup_notify);
         shared_buffer = new circbuf(BUFFER_SIZE);
-        display_thread = new DisplayThread(imageWindow, shared_buffer, filters, 
+        display_thread = new DisplayThread(window, shared_buffer, filters, 
                                                                     filterLock);
         capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
@@ -311,7 +311,7 @@ void VideoStream::endStream() {
         display_thread->stop();
         capture_thread->stop();
 
-        delete imageWindow;
+        //delete imageWindow;
         delete window;
         // Free all the memory that is sitting on the buffer that hasn't been 
         // displayed.

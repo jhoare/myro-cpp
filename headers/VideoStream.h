@@ -78,8 +78,8 @@ class VideoStream {
     Scribbler * myScrib;
     int color_mode;
 
-    Fl_Window * window;
-    ImageWindow * imageWindow;
+    //Fl_Window * window;
+    ImageWindow * window;
     Fl_Thread * fl_thread;
     DisplayThread * display_thread;
     CaptureThread * capture_thread;

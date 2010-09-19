@@ -20,7 +20,7 @@ class ImageWindow : public Fl_Window {
 
 		Fl_RGB_Image* image;
 		int color_mode;
-                boost::mutex exclusive;
+        boost::mutex exclusive;
 };
 
 #endif
