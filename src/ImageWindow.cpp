@@ -33,7 +33,7 @@ ImageWindow::ImageWindow(int width, int height, char * title)
 
 ImageWindow::ImageWindow(int x, int y, int width,
         int height, char * title)
-: Fl_Window(x, y, width, height, title) {
+: m(NULL), cond(NULL), Fl_Window(x, y, width, height, title) {
     unsigned char temp[width*height*3];
     std::memset(temp,255,width*height*3);
     image = new Fl_RGB_Image(temp,width,height);
@@ -68,6 +68,31 @@ void ImageWindow::draw() {
                     image->h(), 1);
     }
 }
+
+void ImageWindow::NotifyWhenClosed(boost::mutex* mutex, 
+                                   boost::condition* condition){
+    m = mutex;
+    cond=condition;
+}
+
+int ImageWindow::handle(int event){
+    //std::cerr << "ImageWindow::handle(): " << event << std::endl;
+    if ( event == FL_CLOSE || event == FL_HIDE){
+        //std::cerr << "ImageWindow::handle():FL_CLOSE" << std::endl;
+        if ( m && cond ){
+            //std::cerr << "ImageWindow::handle():inside" << std::endl;
+            {
+                boost::mutex::scoped_lock l(*m);
+                cond->notify_one();
+            }
+            m = NULL;
+            cond = NULL;
+        }
+    }
+
+    return Fl_Window::handle(event);
+}
+
 
 void ImageWindow::refresh() {
     boost::mutex::scoped_lock l(exclusive);

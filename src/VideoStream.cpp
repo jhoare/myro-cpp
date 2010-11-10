@@ -234,7 +234,7 @@ void VideoStream::startStream() {
         // Wait until the fl_thread has actually started running
         //setup_notify.wait(l);
         id = myScrib->registerVideoStream(this);
-        std::cerr << "Done StartStream()" << std::endl;
+        //std::cerr << "Done StartStream()" << std::endl;
     }
 }
 

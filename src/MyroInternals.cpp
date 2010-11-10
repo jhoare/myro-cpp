@@ -30,8 +30,10 @@ void Threaded::join() {
 FLTKThread::FLTKThread(){};
 
 void FLTKThread::run(){
+    running = true;
     while (!stopRequested){
-        std::cerr << "FLTKThread::run()" << std::endl;
+        //std::cerr << "FLTKThread::run()" << std::endl;
+        /*
         {
             boost::mutex::scoped_lock l(vector_lock);
             for (unsigned int i=0; i<to_notify.size(); i++){
@@ -41,6 +43,7 @@ void FLTKThread::run(){
                 }
             }
         }
+        */
         {
             boost::mutex::scoped_lock l(window_lock);
             for(unsigned int i=0; i<windows.size(); i++){
@@ -66,14 +69,21 @@ FLTKThread FLTKManager::thread;
 
 void FLTKManager::block_until_closed(Fl_Window* win){
     if (!thread.running) thread.start();
-    fltknotify *notify = new fltknotify;
-    notify->win = win;
+    //std::cerr << "FLTKManager::block_until_closed(): Blocking" << std::endl;
+    //fltknotify *notify = new fltknotify;
+    //notify->win = win;
+    boost::mutex m;
+    boost::condition cond;
+    ((ImageWindow*)win)->NotifyWhenClosed(&m,&cond);
+    /*
     {
         boost::mutex::scoped_lock l(thread.vector_lock);
         thread.to_notify.push_back(notify);
     }
-    boost::mutex::scoped_lock l(notify->m);
-    notify->cond.wait(l);
+    */
+    boost::mutex::scoped_lock l(m);
+    cond.wait(m);
+    //std::cerr << "FLTKManager::block_until_closed(): Closed!" << std::endl;
 }
 
 ImageWindow* FLTKManager::get_image_window(int width, int height, char * title){
