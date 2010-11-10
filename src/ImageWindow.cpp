@@ -1,69 +1,72 @@
 #include "ImageWindow.h"
-#include "Threaded.h"
+#include "MyroInternals.h"
 #include <FL/Fl.H>
 #include <FL/Fl_Image.H>
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
 #include <iostream>
+#include <cstring>
 
 class Fl_Thread : public Threaded{
     public:
-    Fl_Thread(ImageWindow * window);
-              //boost::mutex& setup, boost::condition& setup_notify);
-    //void start();
-    virtual void run();
-    //void stop();
+        Fl_Thread(ImageWindow * window);
+        //boost::mutex& setup, boost::condition& setup_notify);
+        //void start();
+        virtual void run();
+        //void stop();
     private:
-    //Fl_Window * window;
-    ImageWindow * window;
-    //boost::mutex& setup;
-    //boost::condition& setup_notify;
+        //Fl_Window * window;
+        ImageWindow * window;
+        //boost::mutex& setup;
+        //boost::condition& setup_notify;
 };
 
 ImageWindow::ImageWindow(int width, int height, char * title) 
-	: Fl_Window(width, height, title), 
-      image(NULL),
-      fl_thread(new Fl_Thread(this))
+: Fl_Window(width, height, title), 
+    image(NULL)//,
+    //fl_thread(new Fl_Thread(this))
 { 
     // Start the Fl_Thread display thread.
-    fl_thread->start();
+    //fl_thread->start();
 }
 
 
 ImageWindow::ImageWindow(int x, int y, int width,
-		int height, char * title)
-	: Fl_Window(x, y, width, height, title) {
-		image = NULL;
+        int height, char * title)
+: Fl_Window(x, y, width, height, title) {
+    unsigned char temp[width*height*3];
+    std::memset(temp,255,width*height*3);
+    image = new Fl_RGB_Image(temp,width,height);
 }
 
 ImageWindow::~ImageWindow(){
     // Close and clean up our display thread
-    fl_thread->stop();
-    delete fl_thread;
+    //fl_thread->stop();
+    //delete fl_thread;
     if (image) delete image;
 }
 
 void ImageWindow::loadImageSource(unsigned char * data, int width, int height) {
-        boost::mutex::scoped_lock l(exclusive);
-	if(image)
-		delete image;
-	image = new Fl_RGB_Image((const unsigned char*)data, width, height);
+    boost::mutex::scoped_lock l(exclusive);
+    if(image)
+        delete image;
+    image = new Fl_RGB_Image((const unsigned char*)data, width, height);
 
 }
 
 void ImageWindow::set_color_mode(int color_mode) {
-	this->color_mode = color_mode;
+    this->color_mode = color_mode;
 }
 
 void ImageWindow::draw() {
-	if(image != NULL) {
-		if(color_mode)
-			fl_draw_image((unsigned char*)(*(image->data())), 0, 0, image->w(),
-					image->h());
-		else
-			fl_draw_image((unsigned char*)(*(image->data())), 0, 0, image->w(),
-					image->h(), 1);
-	}
+    if(image != NULL) {
+        if(color_mode)
+            fl_draw_image((unsigned char*)(*(image->data())), 0, 0, image->w(),
+                    image->h());
+        else
+            fl_draw_image((unsigned char*)(*(image->data())), 0, 0, image->w(),
+                    image->h(), 1);
+    }
 }
 
 void ImageWindow::refresh() {

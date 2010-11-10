@@ -10,7 +10,7 @@
 #include <FL/fl_draw.H>
 #include <iostream>
 #include <exception>
-#include "Threaded.h"
+#include "MyroInternals.h"
 
 #define image_height 192
 #define image_width 256
@@ -214,7 +214,9 @@ void VideoStream::startStream() {
         // very likely I'll need to do something similarly hacky over there.
         //boost::mutex setup_lock;
         //boost::condition setup_notify;
-        window = new ImageWindow(256,192, "Robot Image");
+
+        //window = new ImageWindow(256,192, (char*)"Robot Image");
+        window = FLTKManager::get_image_window(256,192, (char*)"Robot Image");
         //imageWindow = new ImageWindow(0,0,256,192,NULL);
         window->end();
         window->set_color_mode(color_mode);
@@ -232,6 +234,7 @@ void VideoStream::startStream() {
         // Wait until the fl_thread has actually started running
         //setup_notify.wait(l);
         id = myScrib->registerVideoStream(this);
+        std::cerr << "Done StartStream()" << std::endl;
     }
 }
 

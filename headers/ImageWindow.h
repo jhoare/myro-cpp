@@ -5,7 +5,7 @@
 #include <Fl/Fl_Image.H>
 #include <boost/thread/mutex.hpp>
 
-class Fl_Thread; // Forward Declaration
+//class Fl_Thread; // Forward Declaration
 
 class ImageWindow : public Fl_Window {
 
@@ -23,7 +23,7 @@ class ImageWindow : public Fl_Window {
 		Fl_RGB_Image* image;
 		int color_mode;
         boost::mutex exclusive;
-        Fl_Thread *fl_thread;
+        //Fl_Thread *fl_thread;
 };
 
 #endif
