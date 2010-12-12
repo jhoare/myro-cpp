@@ -7,8 +7,6 @@
 #include <FL/fl_draw.H>
 */
 #include "MyroInternals.h"
-//#include <Magick++.h>
-//using namespace Magick;
 
 ColorPicture::ColorPicture(unsigned char * data, int width, int height)
 	: Picture(width, height) {

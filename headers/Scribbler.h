@@ -6,7 +6,6 @@
 #include <vector>
 #include <map>
 #include <boost/thread/mutex.hpp>
-#include <Magick++.h>
 
 // Forward Declarations
 class VideoStream;
@@ -699,8 +698,6 @@ class Scribbler: public Robot {
 
     boost::mutex robot_lock;
     boost::mutex image_lock;
-
-    Magick::Image jpegImage;
 
     // Videostream Cleanup Stuff!
     private:

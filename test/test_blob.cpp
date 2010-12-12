@@ -8,8 +8,8 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
-#include <Magick++.h>
-using namespace Magick;
+//#include <Magick++.h>
+//using namespace Magick;
 using namespace std;
 
 class PictureInPicture: public Filter {
@@ -63,6 +63,7 @@ class PictureInPicture: public Filter {
 	Scribbler * robot;
 };
 
+/*
 class Record : public Filter {
 	public:
 
@@ -94,6 +95,7 @@ class Record : public Filter {
 	list<Image> * imageList;
 
 };
+*/
 
 int main(int argc, char ** argv) {
 
@@ -198,18 +200,20 @@ int main(int argc, char ** argv) {
 	cout << "Proceeding to Test Blob Tracking\n";
 
 	PictureInPicture * pnp;
-	Record * record;
+	//Record * record;
 	VideoStream foo(robot, 2);
 
 	if(enablePnp) {	
 		pnp = new PictureInPicture(robot,256,192,1);
 		foo.addFilter(pnp);
 	}
+    /*
 	if(enableRecord) {	
 		record = new Record(argv[path_index], argv[file_name_index], 
 				256,192,1);
 		foo.addFilter(record);
 	}
+    */
 	foo.startStream();
 
 	int close = 0;
@@ -224,8 +228,10 @@ int main(int argc, char ** argv) {
 	foo.endStream();
 	if(enablePnp) 
 		delete pnp;
+    /*
 	if(enableRecord)
 		delete record;
+        */
 	status = robot->disconnect();
 
 	return 0;

@@ -233,7 +233,7 @@ void VideoStream::startStream() {
         running = true;
         // Wait until the fl_thread has actually started running
         //setup_notify.wait(l);
-        id = myScrib->registerVideoStream(this);
+        //id = myScrib->registerVideoStream(this);
         //std::cerr << "Done StartStream()" << std::endl;
     }
 }
@@ -260,9 +260,15 @@ int VideoStream::delFilter(int filter_location) {
 
 void VideoStream::endStream() {
     if ( running ){
+        // Remove the window for the fltk mananager
+        FLTKManager::remove_image_window(window);
+
         //fl_thread->stop();
         display_thread->stop();
         capture_thread->stop();
+
+        display_thread->join();
+        capture_thread->join();
 
         //delete imageWindow;
         delete window;
@@ -270,11 +276,11 @@ void VideoStream::endStream() {
         // displayed.
         while ( !shared_buffer->isEmpty() ) free(shared_buffer->pop());
         delete shared_buffer;
-        //delete fl_thread;
+
         delete display_thread;
         delete capture_thread;
         running = false;
-        myScrib->unregisterVideoStream(id);
+        //myScrib->unregisterVideoStream(id);
         id = -1;
     }
 }

@@ -7,6 +7,8 @@
 
 #include "Scribbler.h"
 
+#include <iostream>
+
 extern Scribbler robot;
 
 #define connect() \
@@ -14,7 +16,7 @@ extern Scribbler robot;
 	if(status < 0) { \
 		return -1; \
 	} \
-    cout << "Connected to Robot\n";
+    std::cout << "Connected to Robot\n";
 
 #define disconnect() \
     robot.stop(); \
@@ -25,4 +27,4 @@ extern void wait(double time);
 extern bool timeRemaining(double start_time);
 
 
-#endif
+#endif // __MYRO_H__

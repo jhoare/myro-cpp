@@ -1,7 +1,5 @@
 #include "GrayPicture.h"
 #include "MyroInternals.h"
-//#include <Magick++.h>
-//using namespace Magick;
 
 GrayPicture::GrayPicture(int width, int height) 
 	:Picture(width, height) {

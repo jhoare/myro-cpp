@@ -1,11 +1,11 @@
-#include "VideoStream.h"
-#include "Scribbler.h"
+#include <VideoStream.h>
+#include <Myro.h>
+#include <iostream>
 #include <string>
 #include <cstring>
 #include <iostream>
-#include <math.h>
-#include <Magick++.h>
-using namespace Magick;
+#include <cmath>
+#include <cstdio>
 
 class InvertFilter: public Filter {
 
@@ -116,7 +116,6 @@ class LightMask: public Filter {
 };
 
 int main(int argc, char ** argv) {
-	Scribbler * foo = new Scribbler();
 
 	int color_mode = -1;
 	int enableInvert = 0;
@@ -157,13 +156,11 @@ int main(int argc, char ** argv) {
 		}
 	}
 
-	if(foo->connect() < 0) {
-		return -1;
-	}
+    connect();
 
 	InvertFilter * myInvertFilter;
 	LightMask * myLightMask;
-    VideoStream video(foo, color_mode);
+    VideoStream video(&robot, color_mode);
 
     if(enableInvert) {
         myInvertFilter = new InvertFilter(256, 192, color_mode);
@@ -174,6 +171,7 @@ int main(int argc, char ** argv) {
         video.addFilter(myLightMask);
     }
 
+    while(true){
     video.startStream();
 
     int close = 0;
@@ -185,7 +183,10 @@ int main(int argc, char ** argv) {
             close = 1;
     }
     video.endStream();
-	foo->disconnect();
+    sleep(5);
+    std::cout << "restarting" << std::endl;
+    }
+    disconnect();
 	if(enableInvert)
 		delete myInvertFilter;
 	if(enableLightMask)

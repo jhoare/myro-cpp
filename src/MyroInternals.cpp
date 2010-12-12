@@ -9,6 +9,7 @@ Threaded::Threaded() : stopRequested(false), running(false), runThread() {};
 
 void Threaded::start() {
     assert(!runThread);
+    stopRequested = false;
     runThread = boost::shared_ptr<boost::thread>
         (new boost::thread
          (boost::bind(&Threaded::run, this)));
@@ -60,6 +61,7 @@ void FLTKThread::run(){
         Fl::wait(0.05);
         usleep(50000);
     }
+    running = false;
 }
 
 //------------------------------
