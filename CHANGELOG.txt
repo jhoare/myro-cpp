@@ -1,3 +1,8 @@
+2.2.0 (bzr)
+ - Removed ImageMagick as a dependency. 
+ - VideoStream window now closes as expected when endStream() is called
+ - Displaying a greyscale image now displays it correctly (before it was pink)
+
 2.1.2 (2010-08-23)
  - Fixed a bug where the VideoStream does not always start when requested
 

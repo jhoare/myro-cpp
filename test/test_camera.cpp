@@ -1,56 +1,42 @@
-#include "Scribbler.h"
+#include <Myro.h>
 #include <math.h>
 #include <stdio.h>
 #include <iostream>
-#include <Magick++.h>
-using namespace Magick;
+//using namespace Magick;
 using namespace std;
 
 int main(int argc, char ** argv) {
 
-	Scribbler * robot = new Scribbler();
+    connect();
 
-	int status = 0;
-	status = robot->connect();
-	if(status < 0) {
-		return -1;
-	}
+	cout << "Connected to Robot" << endl;
+	cout << "Proceeding to test camera" << endl;
 
-	cout << "Connected to Robot\n";
-	cout << "Proceeding to test camera\n";
+	cout << "Testing Color, if image looks correct close display" << endl;
+	cout << "If not, try restarting robot, and rerunning test" << endl;
 
-	Image robotImage;
-	unsigned char * image_buffer;
+    Picture* img = robot.takePicture("color");
+    img->show();
+    delete img;
 
-	cout << "Testing Color, if image looks correct close display\n";
-	cout << "If not, try restarting robot, and rerunning test\n";
+	cout << "Testing Grayscale" << endl;
+    img = robot.takePicture("gray");
+    img->show();
+    delete img;
 
-	image_buffer = robot->takePicture("color")->getRawImage();
-	robotImage = Image(256,192,"RGB",CharPixel,image_buffer);
-	robotImage.display();
-	delete[] (image_buffer);
+	cout << "Testing Jpeg Color" << endl;
+    img = robot.takePicture("jpeg");
+    img->show();
+    delete img;
 
-	cout << "Testing Grayscale(Note Image should look Pink)\n";
-	image_buffer = robot->takePicture("gray")->getRawImage();
-	robotImage = Image(256,192,"G", CharPixel, image_buffer);
-	robotImage.display();
-	delete[] (image_buffer);
-
-	cout << "Testing Jpeg Color\n";
-	image_buffer = robot->takePicture("jpeg")->getRawImage();
-	robotImage = Image(256,192,"RGB", CharPixel, image_buffer);
-	robotImage.display();
-	delete[] (image_buffer);
-
-	cout << "Testing Jpeg Gray\n";
-	image_buffer = robot->takePicture("grayjpeg")->getRawImage();
-	robotImage = Image(256,192,"G", CharPixel, image_buffer);
-	robotImage.display();
-	delete[] (image_buffer);
-
+	cout << "Testing Jpeg Gray" << endl;
+    img = robot.takePicture("grayjpeg");
+    img->show();
+    delete img;
 
 	cout << "All Camera Test Completed\n";
-	status = robot->disconnect();
+
+    disconnect();
 
 	return 0;
 }

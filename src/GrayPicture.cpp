@@ -1,6 +1,5 @@
 #include "GrayPicture.h"
-#include <Magick++.h>
-using namespace Magick;
+#include "MyroInternals.h"
 
 GrayPicture::GrayPicture(int width, int height) 
 	:Picture(width, height) {
@@ -57,13 +56,10 @@ unsigned char * GrayPicture::getRawImage() {
 }
 
 void GrayPicture::show() {
-	unsigned char image_data_color[width * height * 3];
-	for(int h = 0; h < height; h++)
-		for(int w = 0; w < width; w++) {
-			for(int r = 0; r < 2; r++) 
-				image_data_color[(h * width * 3) 
-					+ (w * 3)] = image_data[(h*width)+w];
-		}
-	Image tempImage(width, height, "RGB", CharPixel, image_data_color);
-	tempImage.display();
+    ImageWindow * win = FLTKManager::get_image_window(width,height,
+                                                               "Gray Picture");
+    win->set_color_mode(0);
+    win->loadImageSource(image_data, width, height);
+
+    FLTKManager::block_until_closed(win);
 }

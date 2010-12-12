@@ -6,13 +6,16 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <iostream>
-#include <Magick++.h>
 #include <cstring>
+#include <cstdio>
 #include "ColorPicture.h"
 #include "GrayPicture.h"
 #include "VideoStream.h"
 
-using namespace Magick;
+extern "C"{
+#include "jmemsrc.h"
+}
+
 
 #define PACKET_SIZE 9
 #define ECHO_ON 1
@@ -29,7 +32,7 @@ _exit_struct exit_robot;
 
 extern "C" {
 	void ctrlc_routine(int foo) {
-		printf("Closing Connection to Robot\n");
+        std::cerr << "Closing Connection to Robot" << std::endl;
 		exit_robot->robot->disconnect();
 		delete exit_robot->robot;
 		free(exit_robot);
@@ -44,7 +47,34 @@ extern "C" {
 }
 /* End C code for handling Control C through the robot lib */
 
-Scribbler::Scribbler() {
+Scribbler::Scribbler() :
+    con(NULL),
+    lastRotate(0),
+    lastTranslate(0),
+    dongle(0),
+    sensors(new unsigned char[11]),
+    CAM_PID((unsigned char)0x0A),
+    CAM_PID_DEFAULT((unsigned char)0x76),
+	CAM_VER((unsigned char)0x0B),
+	CAM_VER_DEFAULT((unsigned char)0x48),
+	CAM_BRT((unsigned char)0x06),
+	CAM_BRT_DEFAULT((unsigned char)0x80),
+	CAM_EXP((unsigned char)0x10),
+	CAM_EXP_DEFAULT((unsigned char)0x41),
+	CAM_COMA((unsigned char)0x12),
+	CAM_COMA_DEFAULT((unsigned char)0x14),
+	CAM_COMA_WHITE_BALANCE_ON((CAM_COMA_DEFAULT | (1 << 2))),
+	CAM_COMA_WHITE_BALANCE_OFF((CAM_COMA_DEFAULT & ~(1 << 2))),
+	CAM_COMB((unsigned char)0x13),
+	CAM_COMB_DEFAULT((unsigned char)0xA3),
+	CAM_COMB_GAIN_CONTROL_ON((CAM_COMB_DEFAULT | (1 << 1))),
+	CAM_COMB_GAIN_CONTROL_OFF((CAM_COMB_DEFAULT & ~(1 << 1))),
+	CAM_COMB_EXPOSURE_CONTROL_ON((CAM_COMB_DEFAULT | (1 << 0))),
+	CAM_COMB_EXPOSURE_CONTROL_OFF((CAM_COMB_DEFAULT & ~(1 << 0))),
+    shutdown(false),
+    newid(0)
+{
+    /*
 	con = NULL;
 	lastRotate = 0;
 	lastTranslate = 0;
@@ -76,6 +106,7 @@ Scribbler::Scribbler() {
 	CAM_COMB_GAIN_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 1));
 	CAM_COMB_EXPOSURE_CONTROL_ON = (CAM_COMB_DEFAULT | (1 << 0));
 	CAM_COMB_EXPOSURE_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 0));
+    */
 
 	//robot_lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	//image_lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
@@ -84,9 +115,10 @@ Scribbler::Scribbler() {
 	/*
 	 * ctrl+c exit hack, to make sure the connect is close correctly.
 	 */
-	jpegImage.magick("JPG");
+    /*
     shutdown = false;
     newid = 0;
+    */
 	create_exit_robot(this);
 }
 
@@ -104,7 +136,8 @@ int Scribbler::connect() {
 	con = new serial(38400, 1);
 	int status = con->connect(device.c_str());
 	if(status < 0) {
-		fprintf(stderr, "Failed to connect to %s\n", device.c_str());
+		//fprintf(stderr, "Failed to connect to %s\n", device.c_str());
+        std::cerr << "Failed to connect to " << device << std::endl;
 		delete con;
 		con = NULL;
 		return -1;
@@ -745,6 +778,97 @@ unsigned char * Scribbler::grab_jpeg_gray(int reliable, int &size) {
 	return decompressedResizedJpeg;
 }
 
+
+/// Really this function does two things:
+/// 1.) Decode the Jpeg to an RGB Image
+/// 2.) Stretch it so it is the correct size
+/// Conversion to libjpeg heavily referenced 
+/// http://old.nabble.com/Decompress-JPEG-from-buffer-td21699805.html
+unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer, 
+		int color_space, int &size) {
+
+    FILE* f = fopen("rawimg.raw","wb");
+    for (int i = 0; i < size; i++)
+        fputc(jpegBuffer[i],f);
+    fclose(f);
+
+    unsigned char* raw_img;
+    int raw_img_index=0;
+    struct jpeg_error_mgr jerr;
+    jpeg_decompress_struct cinfo;
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_decompress(&cinfo);
+    JSAMPROW row_pointer[1];
+    jpeg_mem_src(&cinfo,jpegBuffer,size);
+    jpeg_read_header(&cinfo, TRUE); 
+
+    /*
+    std::cout << "width: " << cinfo.output_width << std::endl
+         << "height: " << cinfo.output_height << std::endl
+         << "num_components: " << cinfo.num_components;
+         */
+    //cinfo.output_width = 256;
+    //cinfo.output_height = 192;
+    //std::cout << "width: " << cinfo.output_width << std::endl
+    //     << "height: " << cinfo.output_height << std::endl;
+
+    jpeg_start_decompress(&cinfo); 
+    /*
+    std::cout << "width: " << cinfo.output_width << std::endl
+         << "height: " << cinfo.output_height << std::endl;
+         */
+
+    int i=0; 
+    int line_size = cinfo.output_width * cinfo.num_components;
+    row_pointer[0] = (unsigned char*)malloc(cinfo.output_width * cinfo.num_components);
+    /*
+    buffer = (*cinfo.mem->alloc_sarray) 
+        ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1); 
+        */
+    raw_img = (unsigned char*)malloc(cinfo.output_width*cinfo.output_height
+                                                         *cinfo.num_components);
+    while (cinfo.output_scanline < cinfo.output_height) { 
+        (void) jpeg_read_scanlines(&cinfo, row_pointer, 1); 
+        for (int i = 0; i < line_size; i++)
+            raw_img[raw_img_index++] = row_pointer[0][i];
+    } 
+    //std::cerr << "done!" << std::endl; 
+    jpeg_finish_decompress(&cinfo); 
+    //std::cerr << "finished decompress!" << std::endl; 
+
+    unsigned char* resized;
+
+    switch(color_space) {
+    case 0:         
+        resized = (unsigned char*)malloc(sizeof(unsigned char) * 256 * 192);
+        for(int h = 0; h < 192; h++) {
+            for(int w = 0; w < 128; w++) {
+                resized[(h * 256) + (2 * w)] = raw_img[(h * 128) + w];
+                resized[(h * 256) + (2 * w + 1)] = raw_img[(h * 128) + w];
+            }
+        }
+
+        break;
+    case 1:         
+        resized = (unsigned char*)malloc(sizeof(unsigned char) * 256 * 192 * 3);
+        for(int h = 0; h < 192; h++) {
+            for(int w = 0; w < 128; w++)
+                for(int rgb = 0; rgb < 3; rgb++) {
+                    resized [(h * 256 * 3) + (2 * w * 3) + rgb] = raw_img[(h * 128 * 3) + (w * 3) + rgb];
+                    resized [(h * 256 * 3) + ((2 * w + 1) * 3) + rgb] = raw_img [(h * 128 * 3) + (w * 3) + rgb];
+                }
+        }
+        break;
+    default:        
+        fprintf(stderr, "Invalid Color Space!\n");
+        return NULL;
+        break;
+    }
+
+    return resized;
+}
+
+/*
 unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer, 
 		int color_space, int &size) {
     //std::cerr<< "jpegStretch()" << std::endl;
@@ -779,6 +903,7 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
     //std::cerr<< "jpegStretch():done" << std::endl;
 	return stretched;
 }
+*/
 
 int Scribbler::set(std::string item, int position, int value) {
 

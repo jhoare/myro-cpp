@@ -1,6 +1,12 @@
 #include "ColorPicture.h"
-#include <Magick++.h>
-using namespace Magick;
+#include "ImageWindow.h"
+/*
+#include <FL/Fl.H>
+#include <FL/Fl_Image.H>
+#include <FL/Fl_Window.H>
+#include <FL/fl_draw.H>
+*/
+#include "MyroInternals.h"
 
 ColorPicture::ColorPicture(unsigned char * data, int width, int height)
 	: Picture(width, height) {
@@ -47,8 +53,25 @@ void ColorPicture::setPixel(int x, int y, Pixel pix) {
 }
 
 void ColorPicture::show() {
-	Image tempImage(width, height, "RGB", CharPixel, image_data);
-	tempImage.display();
+    ImageWindow * win = FLTKManager::get_image_window(width,height,
+                                                               "Color Picture");
+    win->set_color_mode(1);
+    win->loadImageSource(image_data, width, height);
+
+    FLTKManager::block_until_closed(win);
+    /*
+    ImageWindow imgwin(width,height,"Color Picture");
+    imgwin.end();
+    imgwin.set_color_mode(1);
+    imgwin.loadImageSource(image_data, width, height);
+    //imgwin.show();
+    usleep(1000);
+    // "block" for the image window to be closed
+    while ( imgwin.shown() ) Fl::wait();
+	//Image tempImage(width, height, "RGB", CharPixel, image_data);
+	//tempImage.display();
+    Fl::wait();
+    */
 }
 
 unsigned char * ColorPicture::getRawImage() {

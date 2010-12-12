@@ -17,6 +17,7 @@ int Picture::getWidth() {
 	return width;
 }
 
+// Below are the C-style Wrappers for the objects...
 int getWidth(Picture *p)
 {
         return p->getWidth();
@@ -51,3 +52,4 @@ void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
         P.B=B;
         p->setPixel(x, y, P);
 }
+// END C-style Wrappers for the objects...
