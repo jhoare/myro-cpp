@@ -12,10 +12,6 @@ GrayPicture::GrayPicture(int width, int height)
 	this->height = height;
 }
 
-GrayPicture::~GrayPicture() {
-	delete image_data;
-}
-
 GrayPicture::GrayPicture(unsigned char * data, int width, int height)
 	:Picture(width, height) {
 	
@@ -40,6 +36,8 @@ GrayPicture::GrayPicture(GrayPicture& pic)
 }
 
 Pixel GrayPicture::getPixel(int x, int y) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
 	Pixel result;
 	result.R = image_data[(y * width) + x];
 	result.G = result.R;
@@ -48,6 +46,8 @@ Pixel GrayPicture::getPixel(int x, int y) {
 }
 
 void GrayPicture::setPixel(int x, int y, Pixel pix) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
 	image_data[(y * width) + x] = pix.R;
 }
 

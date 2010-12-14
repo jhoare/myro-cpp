@@ -39,6 +39,8 @@ ColorPicture::ColorPicture(ColorPicture& pic):
 }
 
 Pixel ColorPicture::getPixel(int x, int y) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
 	Pixel result;
 	result.R = image_data[(y * width * 3) + (x * 3)];
 	result.G = image_data[(y * width * 3) + (x * 3)+1];
@@ -47,6 +49,8 @@ Pixel ColorPicture::getPixel(int x, int y) {
 }
 
 void ColorPicture::setPixel(int x, int y, Pixel pix) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
 	image_data[(y * width * 3) + (x * 3)] = pix.R;	
 	image_data[(y * width * 3) + (x * 3)+1] = pix.G;	
 	image_data[(y * width * 3) + (x * 3)+2] = pix.B;	
@@ -59,19 +63,6 @@ void ColorPicture::show() {
     win->loadImageSource(image_data, width, height);
 
     FLTKManager::block_until_closed(win);
-    /*
-    ImageWindow imgwin(width,height,"Color Picture");
-    imgwin.end();
-    imgwin.set_color_mode(1);
-    imgwin.loadImageSource(image_data, width, height);
-    //imgwin.show();
-    usleep(1000);
-    // "block" for the image window to be closed
-    while ( imgwin.shown() ) Fl::wait();
-	//Image tempImage(width, height, "RGB", CharPixel, image_data);
-	//tempImage.display();
-    Fl::wait();
-    */
 }
 
 unsigned char * ColorPicture::getRawImage() {

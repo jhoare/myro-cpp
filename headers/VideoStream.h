@@ -37,6 +37,13 @@ class VideoStream {
      * robot is taking blob images.
      */
     VideoStream(Scribbler * scrib, int color_mode);
+    /**
+     * @param scrib - A reference to a scribbler robot instance.
+     * @param color_mode - 0 If the stream is operating in gray scale
+     * 1 if the stream is operating in RGB color space, and 2 if the
+     * robot is taking blob images.
+     */
+    VideoStream(Scribbler&  scrib, int color_mode);
     ~VideoStream();
 
     /**

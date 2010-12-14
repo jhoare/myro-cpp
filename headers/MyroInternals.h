@@ -54,8 +54,9 @@ class FLTKManager{
     static FLTKThread thread;
     public:
     static void block_until_closed(Fl_Window* win);
-    static ImageWindow* get_image_window(int width, int height, char * title);
-    static ImageWindow* get_image_window(int x, int y, int width, int height, char* title);
+    static ImageWindow* get_image_window(int width, int height, char* title);
+    static ImageWindow* get_image_window(int x, int y, int width, int height, 
+                                                                  char* title);
     static bool remove_image_window(ImageWindow* win);
 };
 

@@ -12,15 +12,13 @@ class ColorPicture: public Picture {
 
 		//functions for scribbler code to use
 		ColorPicture(unsigned char * data, int width, int height);
-		~ColorPicture() {
+		~ColorPicture();
 
-        }
+		virtual Pixel getPixel(int x, int y);
+		virtual void setPixel(int x, int y, Pixel pix);
+		virtual void show();
 
-		Pixel getPixel(int x, int y);
-		void  setPixel(int x, int y, Pixel pix);
-		void  show();
-
-		unsigned char * getRawImage();
+		virtual unsigned char * getRawImage();
 
 	private:
 
