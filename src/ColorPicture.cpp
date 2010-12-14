@@ -65,6 +65,14 @@ void ColorPicture::show() {
     FLTKManager::block_until_closed(win);
 }
 
+Picture* ColorPicture::clone(){
+    Picture* newpic = new ColorPicture(width,height);
+    for(int x = 0; x < width; x++)
+        for(int y = 0; y < height; y++)
+            newpic->setPixel(x,y,this->getPixel(x,y));
+    return newpic;
+}
+
 unsigned char * ColorPicture::getRawImage() {
 	return image_data;
 }

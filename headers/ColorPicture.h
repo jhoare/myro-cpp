@@ -17,6 +17,7 @@ class ColorPicture: public Picture {
 		virtual Pixel getPixel(int x, int y);
 		virtual void setPixel(int x, int y, Pixel pix);
 		virtual void show();
+        virtual Picture* clone();
 
 		virtual unsigned char * getRawImage();
 

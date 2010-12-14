@@ -55,6 +55,14 @@ unsigned char * GrayPicture::getRawImage() {
 	return image_data;
 }
 
+Picture* GrayPicture::clone(){
+    Picture* newpic = new GrayPicture(width,height);
+    for(int x = 0; x < width; x++)
+        for(int y = 0; y < height; y++)
+            newpic->setPixel(x,y,this->getPixel(x,y));
+    return newpic;
+}
+
 void GrayPicture::show() {
     ImageWindow * win = FLTKManager::get_image_window(width,height,
                                                                "Gray Picture");
