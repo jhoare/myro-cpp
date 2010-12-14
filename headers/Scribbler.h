@@ -197,6 +197,70 @@ class Scribbler: public Robot {
 	void * get(std::string item, std::vector<int> position);
 
     /**
+     * Determine if the robot is stalled or not.
+     *
+     * NOTE: Every time you issue a move command, the stall sensor resets, 
+     * and it needs to wait a short time to see whether the motors are stalled. 
+     * This means that the sensor won’t give accurate results if you test it 
+     * too soon after the robot starts to move.
+     *
+     * @returns True if stalled, False otherwise.
+     */
+    bool getStall();
+
+    /**
+     * Gets which direction the robot is set to be forward
+     *
+     * @return "fluke-forward" or "scribbler-forward"
+     */
+    std::string getForwardness();
+
+    /**
+     * Gets the volume that the speaker is set to be
+     *
+     * @return 1 for "loud" 0 for "quiet"
+     */
+    int getVolume();
+
+
+    /**
+     * Get the Line sensors
+     *
+     * @return Vector of 2 integers representing the left, and right line 
+     * sensors. Value of 0 means that the line is seen, 1 means line not seen.
+     */
+    std::vector<int> getLine();
+
+    /**
+     * Return if an "obstacle" was seen for each Ir sensor.
+     *
+	 * @return A vector of values ranging from 0 - 6000 for each 
+     * Obstacle Sensor. The larger the value the closer to an obstacle. 
+     * However, the quality of the IR sensors decays over time. So it 
+     * may be possible for the upper bound to be lower than 6000.
+     */
+    std::vector<int> getObstacle();
+
+
+    /**
+     * read one of the Fluke's virtual light sensors. The Fluke's virtual 
+     * light sensors report the total intensity in the left, center, and 
+     * right sides of the Fluke's camera.
+     *
+     * @return A vector of integers representing the Fluke's virtual light
+     * sensors.
+     */
+    std::vector<int> getBright();
+
+    /**
+     * Gets all of the IR sensors on the scribbler.
+     *
+     * @return A vector of integers representing the value of each IR sensor
+     * on the scribbler.
+     */
+    std::vector<int> getIR();
+
+    /**
      * Get the values of the light sensors.
      *
      * @return A vector of ints each one corresponding to a light sensor. 
@@ -323,7 +387,7 @@ class Scribbler: public Robot {
 	 * sensors decays over time. So it may be possible for the upper
 	 * bound to be lower than 6000.
 	 */
-	int getObstacle(std::string value = "none");
+	int getObstacle(std::string value);
 
 	/**
 	 * Read the value for a specified dongle IR sensor.

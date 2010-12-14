@@ -818,7 +818,6 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
          << "height: " << cinfo.output_height << std::endl;
          */
 
-    int i=0; 
     int line_size = cinfo.output_width * cinfo.num_components;
     row_pointer[0] = (unsigned char*)malloc(cinfo.output_width * cinfo.num_components);
     /*
@@ -1275,6 +1274,56 @@ void * Scribbler::get(std::string item, std::vector<int> position) {
 		std::cout << "Invalid sensor name: " << sensor << std::endl;
 	
 	return retval;
+}
+
+bool Scribbler::getStall(){
+    return (bool)this->get("stall");
+}
+
+std::string Scribbler::getForwardness(){
+    std::string result;
+    if( read_mem(0,0) != 0xDF ) 
+        result = "fluke-forward";
+    else
+        result = "scribbler-forward";
+    return result;
+}
+
+int Scribbler::getVolume(){
+    return this->volume;
+}
+
+std::vector<int> Scribbler::getLine(){
+    int * line = this->_get(GET_LINE_ALL, 2);
+    std::vector<int> list;
+    for(int i = 0; i < 3; i++)
+        list.push_back( line[i] );
+    free(line);
+    return list;
+}
+
+std::vector<int> Scribbler::getObstacle(){
+    std::vector<int> ret;
+    ret.push_back(getObstacle("left"));
+    ret.push_back(getObstacle("center"));
+    ret.push_back(getObstacle("left"));
+    return ret;
+}
+
+std::vector<int> Scribbler::getBright(){
+    std::vector<int> ret;
+    ret.push_back(getBright("left"));
+    ret.push_back(getBright("center"));
+    ret.push_back(getBright("left"));
+    return ret;
+}
+
+std::vector<int> Scribbler::getIR(){
+    int * values = this->_get(GET_IR_ALL, 2);
+    std::vector<int> ir;
+    ir.push_back(values[0]);
+    ir.push_back(values[1]);
+    return ir;
 }
 
 std::vector<int> Scribbler::getLights() {
