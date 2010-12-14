@@ -7,24 +7,29 @@
 
 #include "Scribbler.h"
 
-#include <iostream>
 
 extern Scribbler robot;
 
-#define connect() \
-	int status = robot.connect(); \
-	if(status < 0) { \
-		return -1; \
-	} \
-    std::cout << "Connected to Robot\n";
+/// Connect the global robot
+void connect();
+/// Disconnect the global robot
+void disconnect();
 
-#define disconnect() \
-    robot.stop(); \
-	robot.disconnect(); \
-	return 0; 
+/** 
+ * Like sleep, but takes an argument of seconds, 
+ * and can take a fraction of seconds.
+ *
+ * @param time The number of seconds to wait
+ */
+void wait(double time);
 
-extern void wait(double time);
-extern bool timeRemaining(double start_time);
+/**
+ * Returns true until start_time ammount of time has passed.
+ * 
+ * For use in loops that you would like to run for longer then a certain number
+ * of minutes.
+ */
+bool timeRemaining(double start_time);
 
 
 #endif // __MYRO_H__
