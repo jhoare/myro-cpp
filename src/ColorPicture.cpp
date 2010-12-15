@@ -58,7 +58,7 @@ void ColorPicture::setPixel(int x, int y, Pixel pix) {
 
 void ColorPicture::show() {
     ImageWindow * win = FLTKManager::get_image_window(width,height,
-                                                               "Color Picture");
+                                                               (char*)"Color Picture");
     win->set_color_mode(1);
     win->loadImageSource(image_data, width, height);
 

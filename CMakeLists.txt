@@ -7,8 +7,8 @@ INCLUDE(${CMAKE_SOURCE_DIR}/cmake/LibFindMacros.cmake)
 # Name the Project
 PROJECT(myro-cpp)
 SET(MYRO_PKG_VER_MAJOR 2)
-SET(MYRO_PKG_VER_MINOR 1)
-SET(MYRO_PKG_VER_PATCH 2)
+SET(MYRO_PKG_VER_MINOR 2)
+SET(MYRO_PKG_VER_PATCH 0)
 SET(PKG_VERSION "${MYRO_PKG_VER_MAJOR}.${MYRO_PKG_VER_MINOR}.${MYRO_PKG_VER_PATCH}")
 SET(PKG_DESC "C++ port of the IPRE Myro Library supporting control of the Scribbler Robot & IPRE Fluke")
 

@@ -1,30 +1,27 @@
-#include "Scribbler.h"
-#include "VideoStream.h"
-#include "Filter.h"
+#include <Myro.h>
+#include <VideoStream.h>
+#include <Filter.h>
 #include <list>
 #include <sstream>
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
-//#include <Magick++.h>
-//using namespace Magick;
 using namespace std;
 
 class PictureInPicture: public Filter {
 
 	public:
 
-	PictureInPicture(Scribbler * robot, int width, int height, int color)
+	PictureInPicture(Scribbler& robot, int width, int height, int color)
 		: Filter(height, width, color) {
-			this->robot = robot;
 	}
 
 	~PictureInPicture(){}
 
 	void filter(unsigned char * image) {
-		unsigned char * colorImage = robot->takePicture("jpeg")->getRawImage();
+		unsigned char * colorImage = robot.takePicture("jpeg")->getRawImage();
 
 		int height = getHeight();
 		int width = getWidth();
@@ -57,10 +54,6 @@ class PictureInPicture: public Filter {
 		free(colorImage);
 		free(newImage);	
 	}
-
-	private:
-
-	Scribbler * robot;
 };
 
 /*
@@ -145,13 +138,7 @@ int main(int argc, char ** argv) {
 		return -1;
 	}
 
-	Scribbler * robot = new Scribbler();
-
-	int status = 0;
-	status = robot->connect();
-	if(status < 0) {
-		return -1;
-	}
+    connect();
 
 	cout << "Connected to Robot\n";
 	cout << "Proceeding to Train Blob\n";
@@ -164,38 +151,32 @@ int main(int argc, char ** argv) {
 	int x2 = mid_w + 10;
 	int y2 = mid_h + 10;
 
+    Pixel red = {255,0,0};
+
 	int train = 0;
 	string toTrain;
 
-	unsigned char * tempImageBuffer 
-		= (unsigned char*)malloc(sizeof(unsigned char) * 256 * 192 * 3);
-	unsigned char * rgb_image_buffer = robot->takePicture()->getRawImage();
+    Picture* showpic = robot.takePicture();
+    Picture* trainpic = showpic->clone();
 	while(!train) {
-		memcpy(tempImageBuffer, rgb_image_buffer, sizeof(unsigned char) *
-				256 * 192 * 3);
-		for(int h = y1; h < y2; h++) 
+		for(int h = y1; h < y2; h++) {
 			for(int w = x1; w < x2; w++) {
-					tempImageBuffer[(h * 256 * 3) + (w * 3)]
-						= 255;
-					for(int rgb = 1; rgb < 3; rgb++)
-						tempImageBuffer[(h * 256 * 3) + (w * 3) + rgb]
-							= 0;
+                showpic->setPixel(w,h,red);
 			}
-		Image tempImage(256,192,"RGB", CharPixel, tempImageBuffer);
+        }
 		cout << "Used this image to train?" << endl;
 		if(fork() == 0) {
-			tempImage.display();
+			showpic->show();
 			exit(0);
 		}
 		cin >> toTrain;
 		if(toTrain == "y" || toTrain == "yes")
 			train = 1;
 		else {
-			free(rgb_image_buffer);
-			rgb_image_buffer = robot->takePicture()->getRawImage();
+            delete showpic;
 		}
 	}
-	robot->conf_rle_range(rgb_image_buffer, x1, y1, x2, y2);
+	robot.conf_rle_range(trainpic->getRawImage(), x1, y1, x2, y2);
 
 	cout << "Proceeding to Test Blob Tracking\n";
 
@@ -232,7 +213,7 @@ int main(int argc, char ** argv) {
 	if(enableRecord)
 		delete record;
         */
-	status = robot->disconnect();
+    disconnect();
 
 	return 0;
 }

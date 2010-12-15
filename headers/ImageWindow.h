@@ -7,23 +7,23 @@
 
 class ImageWindow : public Fl_Window {
 
-	public:
-		ImageWindow(int width, int height, char * title);
-		ImageWindow(int x, int y, int width, int height, char * title);
-                ~ImageWindow();
-		void set_color_mode(int color_mode);
-		void loadImageSource(unsigned char * data, int width, int height);
+    public:
+        ImageWindow(int width, int height, char * title);
+        ImageWindow(int x, int y, int width, int height, char * title);
+        ~ImageWindow();
+        void set_color_mode(int color_mode);
+        void loadImageSource(unsigned char * data, int width, int height);
         /// Set if this window can be closed or not with the little 'x'
-		virtual void draw();
+        virtual void draw();
         virtual int handle(int event);
         //void NotifyWhenClosed(boost::mutex * mutex, boost::condition* cond);
         void NotifyWhenClosed(boost::mutex * mutex, void* cond);
         void refresh();
 
-	private:
+    private:
 
-		Fl_RGB_Image* image;
-		int color_mode;
+        Fl_RGB_Image* image;
+        int color_mode;
         boost::mutex* exclusive;
 
         // Mutex and Condition variables to notify when I am closed.

@@ -7,11 +7,11 @@
 /**
  * A pixel structure that respesents a single pixel of an Image. 
  */
-typedef struct Pixel_t {
+struct Pixel {
 	int R;
 	int G;
 	int B;
-} Pixel;
+};
 
 
 /**

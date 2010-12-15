@@ -18,6 +18,7 @@ class circbuf;
 class Fl_Thread;
 class DisplayThread;
 class CaptureThread;
+class ImageWindow;
 
 
 #endif

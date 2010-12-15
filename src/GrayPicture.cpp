@@ -65,7 +65,7 @@ Picture* GrayPicture::clone(){
 
 void GrayPicture::show() {
     ImageWindow * win = FLTKManager::get_image_window(width,height,
-                                                               "Gray Picture");
+                                                               (char*)"Gray Picture");
     win->set_color_mode(0);
     win->loadImageSource(image_data, width, height);
 

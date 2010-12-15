@@ -3,7 +3,6 @@
 
 #include <Scribbler.h>
 #include <Filter.h>
-#include <ImageWindow.h>
 #include <MyroForwardDec.h>
 
 
@@ -68,9 +67,8 @@ class VideoStream {
     int delFilter(int filter_location);
 
     /**
-     * Not yet fully functional, does not close the GUI.
-     *
-     * However, it does close the display and capture threads.
+     * Stops the VideoStream. Stops all the associated threads and closes
+     * the image window.
      */
     void endStream();
 

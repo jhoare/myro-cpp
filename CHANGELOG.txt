@@ -4,6 +4,7 @@
  - Displaying a greyscale image now displays it correctly (before it was pink)
  - Added clone() method to the Picture objects to create a copy of a picture
  - Added more error reporting for improper use of the library
+ - Added myro-cpp-config script to get compiling information, which can be used instead of pkg-config (but we do not remove pkg-config support)
 
 2.1.2 (2010-08-23)
  - Fixed a bug where the VideoStream does not always start when requested
