@@ -4,6 +4,8 @@
 #include <FL/Fl_Image.H>
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
 #include <iostream>
 #include <cstring>
 
@@ -23,7 +25,10 @@ class Fl_Thread : public Threaded{
 
 ImageWindow::ImageWindow(int width, int height, char * title) 
 : Fl_Window(width, height, title), 
-    image(NULL)//,
+    image(NULL),
+    exclusive(new boost::mutex()),
+    m(NULL),
+    cond(NULL)
     //fl_thread(new Fl_Thread(this))
 { 
     // Start the Fl_Thread display thread.
@@ -33,7 +38,12 @@ ImageWindow::ImageWindow(int width, int height, char * title)
 
 ImageWindow::ImageWindow(int x, int y, int width,
         int height, char * title)
-: m(NULL), cond(NULL), Fl_Window(x, y, width, height, title) {
+: Fl_Window(x, y, width, height, title),
+  image(NULL),
+  exclusive(new boost::mutex()), 
+  m(NULL), 
+  cond(NULL)
+{
     unsigned char temp[width*height*3];
     std::memset(temp,255,width*height*3);
     image = new Fl_RGB_Image(temp,width,height);
@@ -47,7 +57,7 @@ ImageWindow::~ImageWindow(){
 }
 
 void ImageWindow::loadImageSource(unsigned char * data, int width, int height) {
-    boost::mutex::scoped_lock l(exclusive);
+    boost::mutex::scoped_lock l(*exclusive);
     if(image)
         delete image;
     image = new Fl_RGB_Image((const unsigned char*)data, width, height);
@@ -70,20 +80,22 @@ void ImageWindow::draw() {
 }
 
 void ImageWindow::NotifyWhenClosed(boost::mutex* mutex, 
-                                   boost::condition* condition){
+                                   void* condition){
+                                   //boost::condition* condition){
     m = mutex;
     cond=condition;
 }
 
+
 int ImageWindow::handle(int event){
-    //std::cerr << "ImageWindow::handle(): " << event << std::endl;
+    std::cerr << "ImageWindow::handle(): " << event << std::endl;
     if ( event == FL_CLOSE || event == FL_HIDE){
         //std::cerr << "ImageWindow::handle():FL_CLOSE" << std::endl;
         if ( m && cond ){
             //std::cerr << "ImageWindow::handle():inside" << std::endl;
             {
                 boost::mutex::scoped_lock l(*m);
-                cond->notify_one();
+                ((boost::condition*)cond)->notify_one();
             }
             m = NULL;
             cond = NULL;
@@ -95,7 +107,7 @@ int ImageWindow::handle(int event){
 
 
 void ImageWindow::refresh() {
-    boost::mutex::scoped_lock l(exclusive);
+    boost::mutex::scoped_lock l(*exclusive);
     this->redraw();
 }
 

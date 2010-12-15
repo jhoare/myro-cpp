@@ -17,3 +17,8 @@ CONFIGURE_FILE (${CMAKE_SOURCE_DIR}/cmake/pkgconfig.cmake ${CMAKE_CURRENT_BINARY
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp.pc 
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
         COMPONENT pkgconfig)
+
+CONFIGURE_FILE (${CMAKE_SOURCE_DIR}/cmake/myro-cpp-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp-config @ONLY)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp-config
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+        COMPONENT myro-cpp-config)

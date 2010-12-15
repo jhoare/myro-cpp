@@ -1,7 +1,7 @@
 #ifndef __GRAY_PICTURE_H__
 #define __GRAY_PICTURE_H__
 
-#include "Picture.h"
+#include <Picture.h>
 
 class GrayPicture: public Picture {
 

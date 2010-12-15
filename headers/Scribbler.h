@@ -1,15 +1,11 @@
 #ifndef __SCRIBBLER_H__
 #define __SCRIBBLER_H__
 
-#include "Robot.h"
-#include "Picture.h"
+#include <Robot.h>
+#include <Picture.h>
 #include <vector>
 #include <map>
-#include <boost/thread/mutex.hpp>
-
-// Forward Declarations
-class VideoStream;
-class serial;
+#include <MyroForwardDec.h>
 
 /**
  * @class Scribbler
@@ -760,12 +756,12 @@ class Scribbler: public Robot {
 	unsigned char CAM_COMB_EXPOSURE_CONTROL_ON;
 	unsigned char CAM_COMB_EXPOSURE_CONTROL_OFF;
 
-    boost::mutex robot_lock;
-    boost::mutex image_lock;
+    boost::mutex* robot_lock;
+    boost::mutex* image_lock;
 
     // Videostream Cleanup Stuff!
     private:
-    boost::mutex videoStreamLock;
+    boost::mutex* videoStreamLock;
     int  registerVideoStream(VideoStream* vs);
     void unregisterVideoStream(int id);
     int  newid;

@@ -11,6 +11,7 @@
 #include "ColorPicture.h"
 #include "GrayPicture.h"
 #include "VideoStream.h"
+#include <boost/thread/mutex.hpp>
 
 extern "C"{
 #include "jmemsrc.h"
@@ -48,11 +49,13 @@ extern "C" {
 /* End C code for handling Control C through the robot lib */
 
 Scribbler::Scribbler() :
-    con(NULL),
-    lastRotate(0),
-    lastTranslate(0),
     dongle(0),
     sensors(new unsigned char[11]),
+    data(NULL),
+    con(NULL),
+    volume(1),
+    lastRotate(0),
+    lastTranslate(0),
     CAM_PID((unsigned char)0x0A),
     CAM_PID_DEFAULT((unsigned char)0x76),
 	CAM_VER((unsigned char)0x0B),
@@ -71,8 +74,11 @@ Scribbler::Scribbler() :
 	CAM_COMB_GAIN_CONTROL_OFF((CAM_COMB_DEFAULT & ~(1 << 1))),
 	CAM_COMB_EXPOSURE_CONTROL_ON((CAM_COMB_DEFAULT | (1 << 0))),
 	CAM_COMB_EXPOSURE_CONTROL_OFF((CAM_COMB_DEFAULT & ~(1 << 0))),
-    shutdown(false),
-    newid(0)
+    robot_lock(new boost::mutex()),
+    image_lock(new boost::mutex()),
+    videoStreamLock(new boost::mutex()),
+    newid(0),
+    shutdown(false)
 {
     /*
 	con = NULL;
@@ -123,6 +129,9 @@ Scribbler::Scribbler() :
 }
 
 Scribbler::~Scribbler() {
+    delete robot_lock;
+    delete image_lock;
+    delete videoStreamLock;
 	//free(robot_lock);
 	//free(image_lock);
 	free(sensors);
@@ -277,7 +286,7 @@ void Scribbler::_adjustSpeed(double translate, double rotate) {
 
 int Scribbler::_set(int message_header, ...) {
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	va_list list;
 	int nargs = 1;
 	int next;
@@ -305,7 +314,7 @@ int Scribbler::_set(int message_header, ...) {
 
 int * Scribbler::_get(int message_header, int bytes, std::string mode) {
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	send_message( (unsigned char*)(&message_header), 1, ECHO_ON, SENSOR_OFF);
 
 	unsigned char * buffer = 
@@ -362,7 +371,7 @@ int Scribbler::set_ir_power(int irpower) {
 	buffer[0] = SET_DONGLE_IR;
 	buffer[1] = irpower;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock(this->robot_lock);
+    boost::mutex::scoped_lock(*(this->robot_lock));
 	int status = con->_write(buffer, 2);
 	//pthread_mutex_unlock(this->robot_lock);
 	return status;
@@ -376,7 +385,7 @@ int Scribbler::set_cam_param(unsigned char addr, unsigned char byte) {
 	//pthread_mutex_lock(this->robot_lock);
     int status;
     {
-        boost::mutex::scoped_lock l(this->robot_lock);
+        boost::mutex::scoped_lock l(*(this->robot_lock));
         status = con->_write(buffer, 3);
     }
 	//pthread_mutex_unlock(this->robot_lock);
@@ -397,7 +406,7 @@ int Scribbler::conf_window(unsigned char window, unsigned char x_low,
 	buffer[6] = x_step;
 	buffer[7] = y_step;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	int status = con->_write(buffer, 8);
 	//pthread_mutex_unlock(this->robot_lock);
 	return status;
@@ -436,7 +445,7 @@ int Scribbler::conf_rle(unsigned char delay, unsigned char smooth_tresh,
 	buffer[7] = v_low;
 	buffer[8] = v_high;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	int status = con->_write(buffer, 9);
 	//pthread_mutex_unlock(this->robot_lock);
 	return status;
@@ -462,7 +471,7 @@ unsigned char * Scribbler::grab_array_rgb() {
 
 	//pthread_mutex_lock(this->robot_lock);
     {
-        boost::mutex::scoped_lock l(this->robot_lock);
+        boost::mutex::scoped_lock l(*(this->robot_lock));
         con->_write(&command, 1);
         con->_read(yuv_buffer, size);
     }
@@ -590,7 +599,7 @@ unsigned char * Scribbler::grab_blob_array() {
 	unsigned char * data_buffer;
 
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 
 	unsigned char command = GET_RLE;
 	unsigned char size_buffer[2] = {0,0};
@@ -699,7 +708,7 @@ std::vector<unsigned char> Scribbler::read_jpeg_scan() {
 
 unsigned char * Scribbler::grab_jpeg_color(int reliable, int &size) {
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	unsigned char * jpeg_header;
 	int jpeg_header_size = 0;
 	std::vector<unsigned char> jpeg_scan;
@@ -739,7 +748,7 @@ unsigned char * Scribbler::grab_jpeg_color(int reliable, int &size) {
 
 unsigned char * Scribbler::grab_jpeg_gray(int reliable, int &size) {
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 
 	int jpeg_header_size = 0;
 	std::vector<unsigned char> jpeg_scan;
@@ -1337,7 +1346,7 @@ std::vector<int> Scribbler::getLights() {
 
 std::vector<int> Scribbler::getLastSensors() {
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	std::vector<int> result;
 
 	for(int i = 2; i < 7; i+=2) {
@@ -1391,7 +1400,7 @@ void Scribbler::setName(std::string name) {
 		}
 	}
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	send_message(name_buffer, 18);
 	//pthread_mutex_unlock(this->robot_lock);
 	free(name_buffer);
@@ -1411,7 +1420,7 @@ void Scribbler::setPassword(std::string pass) {
 		}
 	}
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	send_message(pass_buffer, 18);
 	//pthread_mutex_unlock(this->robot_lock);
 	free(pass_buffer);
@@ -1425,7 +1434,7 @@ void Scribbler::setLEDFront(int value) {
 	else
 		buffer = SET_DONGLE_LED_OFF;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(&buffer, 1);
 	//pthread_mutex_unlock(this->robot_lock);
 }
@@ -1443,7 +1452,7 @@ void Scribbler::setLEDBack(double value) {
 	buffer[0] = SET_DIMMER_LED;
 	buffer[1] = (unsigned char)value;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(buffer, 2);
 	//pthread_mutex_unlock(this->robot_lock);
 }
@@ -1462,7 +1471,7 @@ void Scribbler::setForwardness(std::string direction) {
 	buffer[0] = SET_FORWARDNESS;
 	buffer[1] = (unsigned char)iDirection;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(buffer, 2);
 	//pthread_mutex_unlock(this->robot_lock);
 }
@@ -1481,7 +1490,7 @@ void Scribbler::setForwardness(int direction) {
 	buffer[0] = SET_FORWARDNESS;
 	buffer[1] = (unsigned char)direction;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(buffer, 2);
 	//pthread_mutex_unlock(this->robot_lock);
 }
@@ -1491,7 +1500,7 @@ void Scribbler::setIRPower(int power) {
 	buffer[0] = SET_DONGLE_IR;
 	buffer[1] = (unsigned char)power;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(buffer, 2);
 	//pthread_mutex_unlock(this->robot_lock);
 }
@@ -1503,7 +1512,7 @@ void Scribbler::setWhiteBalance(int value) {
 	else
 		buffer = SET_NO_WHITE_BALANCE;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(&buffer, 1);
 	//pthread_mutex_unlock(this->robot_lock);
 }
@@ -1595,7 +1604,7 @@ double Scribbler::getBattery() {
 	double battery = 0;
 	unsigned char command = GET_BATTERY;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(&command,1);
 	battery = read_2byte() / 20.9813;
 	//pthread_mutex_unlock(this->robot_lock);
@@ -1617,7 +1626,7 @@ int Scribbler::getObstacle(std::string value) {
 		obst = GET_DONGLE_C_IR;
 	}
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(&obst, 1);
 	int result = read_2byte();
 	//pthread_mutex_unlock(this->robot_lock);
@@ -1639,7 +1648,7 @@ int Scribbler::getObstacle(int value) {
 		obst = GET_DONGLE_R_IR;
 	}
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(&obst, 1);
 	int result = read_2byte();
 	//pthread_mutex_unlock(this->robot_lock);
@@ -1666,7 +1675,7 @@ int Scribbler::getBright(std::string value) {
 	buffer[0] = GET_WINDOW_LIGHT;
 	buffer[1] = window;
 	//pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(this->robot_lock);
+    boost::mutex::scoped_lock l(*(this->robot_lock));
 	con->_write(buffer, 2);
 	retval = read_3byte();
 	//pthread_mutex_unlock(this->robot_lock);
@@ -1737,7 +1746,7 @@ Picture * Scribbler::takePicture(std::string type) {
 	Picture * image;
 
 	//pthread_mutex_lock(this->image_lock);
-    boost::mutex::scoped_lock l(this->image_lock);
+    boost::mutex::scoped_lock l(*(this->image_lock));
 	if(type == "color") {
 		imageBuffer = grab_array_rgb();
 		image = new ColorPicture(imageBuffer, 256, 192);
@@ -1800,7 +1809,7 @@ std::vector<int> Scribbler::getBlob() {
 
 	//pthread_mutex_lock(this->robot_lock);
     {
-        boost::mutex::scoped_lock l(this->robot_lock);
+        boost::mutex::scoped_lock l(*(this->robot_lock));
 
         unsigned char command = GET_BLOB;
         con->_write(&command, 1);
@@ -2023,7 +2032,7 @@ int Scribbler::yuv2rgb(int Y, int U, int V, unsigned char &R,
 }
 
 int Scribbler::registerVideoStream(VideoStream* vs){
-    boost::mutex::scoped_lock l(videoStreamLock);
+    boost::mutex::scoped_lock l(*videoStreamLock);
     int id = newid++;
     videostreams[id] = vs;
     return id;
@@ -2031,7 +2040,7 @@ int Scribbler::registerVideoStream(VideoStream* vs){
 
 void Scribbler::unregisterVideoStream(int id){
     if ( !shutdown ){
-        boost::mutex::scoped_lock l(videoStreamLock);
+        boost::mutex::scoped_lock l(*videoStreamLock);
         videostreams.erase(id);
     }
 }

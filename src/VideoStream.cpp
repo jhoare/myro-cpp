@@ -94,7 +94,8 @@ class circbuf{
         boost::condition cv;
 };
 
-VideoStream::VideoStream(Scribbler * scrib, int color_mode) {
+VideoStream::VideoStream(Scribbler * scrib, int color_mode)
+: filterLock(new boost::mutex()){
     this->myScrib = scrib;
     this->color_mode = color_mode;
     this->filters = new std::vector<Filter*>();
@@ -102,7 +103,8 @@ VideoStream::VideoStream(Scribbler * scrib, int color_mode) {
     this->id = -1;
 }
 
-VideoStream::VideoStream(Scribbler& scrib, int color_mode) {
+VideoStream::VideoStream(Scribbler& scrib, int color_mode) 
+: filterLock(new boost::mutex()){
     this->myScrib = &scrib;
     this->color_mode = color_mode;
     this->filters = new std::vector<Filter*>();
@@ -231,7 +233,7 @@ void VideoStream::startStream() {
         //fl_thread = new Fl_Thread(window, setup_lock, setup_notify);
         shared_buffer = new circbuf(BUFFER_SIZE);
         display_thread = new DisplayThread(window, shared_buffer, filters, 
-                                                                    filterLock);
+                                                                    *filterLock);
         capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
 
         //boost::mutex::scoped_lock l(setup_lock);
@@ -247,7 +249,7 @@ void VideoStream::startStream() {
 }
 
 int VideoStream::addFilter(Filter * filter) {
-    boost::mutex::scoped_lock l(filterLock);
+    boost::mutex::scoped_lock l(*filterLock);
     //pthread_mutex_lock(filterLock);
     int result = 0;
     filters->push_back(filter);
@@ -260,7 +262,7 @@ int VideoStream::delFilter(int filter_location) {
     if(filter_location < 0 || filter_location > (int)filters->size())
         return -1;
 
-    boost::mutex::scoped_lock l(filterLock);
+    boost::mutex::scoped_lock l(*filterLock);
     filters->erase(filters->begin() + filter_location);
 
     return 0;

@@ -2,6 +2,8 @@
  - Removed ImageMagick as a dependency. 
  - VideoStream window now closes as expected when endStream() is called
  - Displaying a greyscale image now displays it correctly (before it was pink)
+ - Added clone() method to the Picture objects to create a copy of a picture
+ - Added more error reporting for improper use of the library
 
 2.1.2 (2010-08-23)
  - Fixed a bug where the VideoStream does not always start when requested

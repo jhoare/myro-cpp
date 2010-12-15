@@ -76,7 +76,7 @@ void FLTKManager::block_until_closed(Fl_Window* win){
     //notify->win = win;
     boost::mutex m;
     boost::condition cond;
-    ((ImageWindow*)win)->NotifyWhenClosed(&m,&cond);
+    ((ImageWindow*)win)->NotifyWhenClosed(&m,(void*)&cond);
     /*
     {
         boost::mutex::scoped_lock l(thread.vector_lock);

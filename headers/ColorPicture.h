@@ -1,7 +1,7 @@
 #ifndef __COLOR_PICTURE_H__
 #define __COLOR_PICTURE_H__
 
-#include "Picture.h"
+#include <Picture.h>
 
 class ColorPicture: public Picture {
 

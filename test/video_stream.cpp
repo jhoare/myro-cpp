@@ -171,7 +171,7 @@ int main(int argc, char ** argv) {
         video.addFilter(myLightMask);
     }
 
-    while(true){
+    //while(true){
     video.startStream();
 
     int close = 0;
@@ -183,9 +183,9 @@ int main(int argc, char ** argv) {
             close = 1;
     }
     video.endStream();
-    sleep(5);
-    std::cout << "restarting" << std::endl;
-    }
+    //sleep(5);
+    //std::cout << "restarting" << std::endl;
+    //}
     disconnect();
 	if(enableInvert)
 		delete myInvertFilter;

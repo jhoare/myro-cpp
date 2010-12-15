@@ -5,7 +5,7 @@
 //of a global robot variable. The global robot is created upon calling
 //connect and destroyed upon calling disconnect.
 
-#include "Scribbler.h"
+#include <Scribbler.h>
 
 
 extern Scribbler robot;

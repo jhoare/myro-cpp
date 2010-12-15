@@ -1,14 +1,10 @@
 #ifndef __VIDEOSTREAM_H__
 #define __VIDEOSTREAM_H__
 
-#include "Scribbler.h"
-#include "Filter.h"
-#include "ImageWindow.h"
-
-class circbuf;
-class Fl_Thread;
-class DisplayThread;
-class CaptureThread;
+#include <Scribbler.h>
+#include <Filter.h>
+#include <ImageWindow.h>
+#include <MyroForwardDec.h>
 
 
 /**
@@ -92,7 +88,7 @@ class VideoStream {
     CaptureThread * capture_thread;
     circbuf * shared_buffer;
 
-    boost::mutex filterLock;
+    boost::mutex* filterLock;
 
     bool running;
 };
