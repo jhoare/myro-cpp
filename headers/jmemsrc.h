@@ -1,7 +1,7 @@
 #pragma once 
 #include <jpeglib.h>
 GLOBAL(void)
-jpeg_mem_src (j_decompress_ptr cinfo,
+myro_jpeg_mem_src (j_decompress_ptr cinfo,
               JOCTET * pData,
               int FileSize);/*,
               void *pDataSrc,

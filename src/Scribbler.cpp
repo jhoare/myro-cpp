@@ -799,7 +799,7 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_decompress(&cinfo);
     JSAMPROW row_pointer[1];
-    jpeg_mem_src(&cinfo,jpegBuffer,size);
+    myro_jpeg_mem_src(&cinfo,jpegBuffer,size);
     jpeg_read_header(&cinfo, TRUE); 
 
     /*

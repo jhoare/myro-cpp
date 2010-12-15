@@ -103,7 +103,7 @@ term_source (j_decompress_ptr cinfo)
  */
 
 GLOBAL(void)
-jpeg_mem_src (
+myro_jpeg_mem_src (
               j_decompress_ptr cinfo,
               JOCTET * pData,
               int FileSize)/*,
