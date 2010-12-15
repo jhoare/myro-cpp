@@ -20,14 +20,6 @@ class ColorPicture: public Picture {
         virtual Picture* clone();
 
 		virtual unsigned char * getRawImage();
-
-	private:
-
-		unsigned char * image_data;
-		int width;
-		int height;
-
-	
 };
 
 #endif

@@ -9,7 +9,6 @@ Picture::Picture(int width, int height) {
 }
 
 Picture::~Picture() {
-	//nothing to be done for now
     delete image_data;
 }
 
