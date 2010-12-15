@@ -88,7 +88,7 @@ void ImageWindow::NotifyWhenClosed(boost::mutex* mutex,
 
 
 int ImageWindow::handle(int event){
-    std::cerr << "ImageWindow::handle(): " << event << std::endl;
+    //std::cerr << "ImageWindow::handle(): " << event << std::endl;
     if ( event == FL_CLOSE || event == FL_HIDE){
         //std::cerr << "ImageWindow::handle():FL_CLOSE" << std::endl;
         if ( m && cond ){
