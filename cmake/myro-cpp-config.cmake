@@ -61,7 +61,7 @@ do
     shift
 done
 
-if test "$echo_help" == "yes" ; then
+if test "$echo_help" = "yes" ; then
     usage 1
 fi
 
@@ -77,10 +77,10 @@ else
     libs=
 fi
 
-if test "$echo_cflags" == "yes" ; then 
+if test "$echo_cflags" = "yes" ; then 
     echo $includes 
 fi
 
-if test "$echo_libs" == "yes" ; then 
+if test "$echo_libs" = "yes" ; then 
     echo $libs $LDLIBS
 fi
