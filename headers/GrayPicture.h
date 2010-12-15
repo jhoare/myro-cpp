@@ -5,20 +5,20 @@
 
 class GrayPicture: public Picture {
 
-	public: 
+    public: 
 
-		GrayPicture(int width, int height);
-		~GrayPicture();
+        GrayPicture(int width, int height);
+        ~GrayPicture();
 
-		GrayPicture(unsigned char * data, int width, int height);
-		GrayPicture(GrayPicture& pic);
+        GrayPicture(unsigned char * data, int width, int height);
+        GrayPicture(GrayPicture& pic);
 
-		virtual Pixel getPixel(int x, int y);
-		virtual void  setPixel(int x, int y, Pixel pix);
-		virtual void  show();
+        virtual Pixel getPixel(int x, int y);
+        virtual void  setPixel(int x, int y, Pixel pix);
+        virtual void  show();
         virtual Picture* clone();
 
-		virtual unsigned char * getRawImage();
+        virtual unsigned char * getRawImage();
 };
 
 #endif

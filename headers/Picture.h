@@ -8,9 +8,9 @@
  * A pixel structure that respesents a single pixel of an Image. 
  */
 struct Pixel {
-	int R;
-	int G;
-	int B;
+    int R;
+    int G;
+    int B;
 };
 
 
@@ -36,28 +36,28 @@ class Picture {
     };
      */
 
-	public:
+    public:
 
-		Picture(int width, int height);
-		~Picture();
+        Picture(int width, int height);
+        ~Picture();
 
         /**
          * @return A pixel struct representing the pixel at x,y
          */
-		virtual Pixel getPixel(int x, int y)=0;
+        virtual Pixel getPixel(int x, int y)=0;
         /**
          * Set the value of a pixel at x,y to be the given pixel pix.
          */
-		virtual void  setPixel(int x, int y, Pixel pix)=0;
+        virtual void  setPixel(int x, int y, Pixel pix)=0;
         /**
          * Display the picture on the screen.
          */
-		virtual void  show()=0;
+        virtual void  show()=0;
         /**
          * Get a pointer to the underlying memory representing the 
          * image.
          */
-		virtual unsigned char * getRawImage()=0;
+        virtual unsigned char * getRawImage()=0;
 
         /** 
          * Get a "clone" of this picture. A clone is also a copy. 
@@ -75,8 +75,8 @@ class Picture {
          */
         virtual Picture* clone() = 0;
 
-		int getHeight();
-		int getWidth();
+        int getHeight();
+        int getWidth();
 
         /**
          * Static method to print out an error message when a user has 
@@ -85,11 +85,11 @@ class Picture {
         static void out_of_bounds_error(int width, int height, 
                             int given_width, int given_height);
 
-	protected:
+    protected:
 
-		unsigned char * image_data;
-		int width;
-		int height;
+        unsigned char * image_data;
+        int width;
+        int height;
 
 };
 // functions added for lab 6 by Nick

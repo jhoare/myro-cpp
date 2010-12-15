@@ -5,21 +5,21 @@
 
 class ColorPicture: public Picture {
 
-	public: 
-		//functions for students to use, if they need to create a picture.
-		ColorPicture(int width, int height);
-		ColorPicture(ColorPicture& pic);
+    public: 
+        //functions for students to use, if they need to create a picture.
+        ColorPicture(int width, int height);
+        ColorPicture(ColorPicture& pic);
 
-		//functions for scribbler code to use
-		ColorPicture(unsigned char * data, int width, int height);
-		~ColorPicture();
+        //functions for scribbler code to use
+        ColorPicture(unsigned char * data, int width, int height);
+        ~ColorPicture();
 
-		virtual Pixel getPixel(int x, int y);
-		virtual void setPixel(int x, int y, Pixel pix);
-		virtual void show();
+        virtual Pixel getPixel(int x, int y);
+        virtual void setPixel(int x, int y, Pixel pix);
+        virtual void show();
         virtual Picture* clone();
 
-		virtual unsigned char * getRawImage();
+        virtual unsigned char * getRawImage();
 };
 
 #endif
