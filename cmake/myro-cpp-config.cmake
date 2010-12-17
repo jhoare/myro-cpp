@@ -23,7 +23,7 @@ Options:
 	[--version]
 
 Options telling what information we request:
-	[--cflags]        return flags to compile C using FLTK
+	[--cflags]        return flags to compile
 	[--libs]          return myro-cpp libraries full path for dependencies
 "
     exit $1
