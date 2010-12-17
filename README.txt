@@ -6,7 +6,7 @@ Ubuntu Linux 10.04 and newer. If you are running either of these operating
 systems, you would likely prefer to install these. For information please 
 refer to:
 
-http://web.eecs.utk.edu/~jhoare/pm/index.php?n=Myro-cpp.Docs
+http://web.eecs.utk.edu/~jhoare/Myro-cpp/Docs
 
 or
 
