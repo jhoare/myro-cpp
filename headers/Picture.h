@@ -38,6 +38,7 @@ class Picture {
 
     public:
 
+        Picture();
         Picture(int width, int height);
         ~Picture();
 
@@ -57,7 +58,7 @@ class Picture {
          * Get a pointer to the underlying memory representing the 
          * image.
          */
-        virtual unsigned char * getRawImage()=0;
+        unsigned char * getRawImage();
 
         /** 
          * Get a "clone" of this picture. A clone is also a copy. 
@@ -77,6 +78,25 @@ class Picture {
 
         int getHeight();
         int getWidth();
+
+        /**
+         * Load an image from a filename, for now, only jpeg files are 
+         * supported.
+         *
+         * @param filename The file to read from.
+         * @return True if load sucessful, false if fails (for wrong
+         * colorspace, etc.)
+         */
+        virtual bool loadPicture(const char* filename)=0;
+
+        /**
+         * Save an image to a file, only jpeg files are supported. 
+         * A .jpg will be appended to the given filename.
+         *
+         * @param filename The name of the file you save (without the .jpg 
+         *  file extention)
+         */
+        virtual void savePicture(const char* filename)=0;
 
         /**
          * Static method to print out an error message when a user has 
@@ -99,5 +119,12 @@ void show(Picture *p);
 Pixel getPixel(Picture *p, int x, int y);
 int getPixelValue_grey(Picture *p, int x, int y);
 void setPixelColor(Picture *p, int x, int y, int R, int G, int B);
+
+/// Create a picture object from a saved image
+Picture* loadPicture(const char* filename);
+/// Load an image into the given Picture object
+void loadPicture(Picture * p, const char* filename);
+/// Save the Image to a file
+void savePicture(Picture * p, const char* filename);
 
 #endif

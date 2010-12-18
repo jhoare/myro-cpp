@@ -7,6 +7,7 @@ class GrayPicture: public Picture {
 
     public: 
 
+        GrayPicture();
         GrayPicture(int width, int height);
         ~GrayPicture();
 
@@ -17,8 +18,9 @@ class GrayPicture: public Picture {
         virtual void  setPixel(int x, int y, Pixel pix);
         virtual void  show();
         virtual Picture* clone();
+        virtual bool loadPicture(const char* filename);
+        virtual void savePicture(const char* filename);
 
-        virtual unsigned char * getRawImage();
 };
 
 #endif

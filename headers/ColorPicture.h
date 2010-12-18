@@ -7,6 +7,7 @@ class ColorPicture: public Picture {
 
     public: 
         //functions for students to use, if they need to create a picture.
+        ColorPicture();
         ColorPicture(int width, int height);
         ColorPicture(ColorPicture& pic);
 
@@ -18,8 +19,8 @@ class ColorPicture: public Picture {
         virtual void setPixel(int x, int y, Pixel pix);
         virtual void show();
         virtual Picture* clone();
-
-        virtual unsigned char * getRawImage();
+        virtual bool loadPicture(const char* filename);
+        virtual void savePicture(const char* filename);
 };
 
 #endif

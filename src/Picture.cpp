@@ -1,11 +1,17 @@
 #include "Picture.h"
+#include "ColorPicture.h"
+#include "GrayPicture.h"
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
 
+Picture::Picture(){
+    this->width = this->height = 0;
+}
+
 Picture::Picture(int width, int height) {
-	this->width =  width;
-	this->height = height;
+    this->width =  width;
+    this->height = height;
 }
 
 Picture::~Picture() {
@@ -13,11 +19,15 @@ Picture::~Picture() {
 }
 
 int Picture::getHeight() {
-	return height;
+    return height;
 }
 
 int Picture::getWidth() {
-	return width;
+    return width;
+}
+
+unsigned char* Picture::getRawImage(){
+    return image_data;
 }
 
 void Picture::out_of_bounds_error(int width, int height, int given_width, 
@@ -88,5 +98,24 @@ void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
         P.G=G;
         P.B=B;
         p->setPixel(x, y, P);
+}
+
+Picture* loadPicture(const char* filename){
+    Picture* ret = new ColorPicture();
+    if ( ret->loadPicture(filename) )
+        return ret;
+    delete ret;
+    ret = new GrayPicture();
+    if ( ret->loadPicture(filename) )
+        return ret;
+    
+    return NULL;
+}
+
+void loadPicture(Picture * p, const char* filename){
+    p->loadPicture(filename);
+}
+void savePicture(Picture * p, const char* filename){
+    p->savePicture(filename);
 }
 // END C-style Wrappers for the objects...
