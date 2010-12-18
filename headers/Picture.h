@@ -119,6 +119,7 @@ void show(Picture *p);
 Pixel getPixel(Picture *p, int x, int y);
 int getPixelValue_grey(Picture *p, int x, int y);
 void setPixelColor(Picture *p, int x, int y, int R, int G, int B);
+Picture* clone(Picture* p);
 
 /// Create a picture object from a saved image
 Picture* loadPicture(const char* filename);

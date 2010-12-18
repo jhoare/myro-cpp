@@ -118,4 +118,8 @@ void loadPicture(Picture * p, const char* filename){
 void savePicture(Picture * p, const char* filename){
     p->savePicture(filename);
 }
+
+Picture* clone(Picture* p){
+    return p->clone();
+}
 // END C-style Wrappers for the objects...
