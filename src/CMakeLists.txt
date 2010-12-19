@@ -15,11 +15,11 @@ INSTALL_TARGETS(/lib myro-cpp)
 # Set up a pkg-config file 
 CONFIGURE_FILE (${CMAKE_SOURCE_DIR}/cmake/pkgconfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp.pc @ONLY)
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp.pc 
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+        DESTINATION /lib/pkgconfig
         COMPONENT pkgconfig)
 
 CONFIGURE_FILE (${CMAKE_SOURCE_DIR}/cmake/myro-cpp-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp-config @ONLY)
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/myro-cpp-config
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+        DESTINATION /bin
         COMPONENT myro-cpp-config
         PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
