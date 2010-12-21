@@ -9,11 +9,11 @@ Filter::Filter(int image_height, int image_width, int color_mode){
 Filter::~Filter() {
 }
 
-void Filter::applyFilter(unsigned char * image) {
+void Filter::applyFilter(Picture * image) {
 	this->filter(image);
 }
 
-void Filter::filter(unsigned char * image) {
+void Filter::filter(Picture* image) {
 	return;
 }
 

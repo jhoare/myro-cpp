@@ -15,51 +15,51 @@ using namespace std;
 ColorPicture::ColorPicture(): Picture() {};
 
 ColorPicture::ColorPicture(unsigned char * data, int width, int height)
-	: Picture(width, height) {
+    : Picture(width, height) {
 
-	image_data = new unsigned char[width * height * 3];
-	for(int i = 0; i < width * height * 3; i++)
-		image_data[i] = data[i];
+    image_data = new unsigned char[width * height * 3];
+    for(int i = 0; i < width * height * 3; i++)
+        image_data[i] = data[i];
 
-	this->width = width;
-	this->height = height;
+    this->width = width;
+    this->height = height;
 }
 
 ColorPicture::ColorPicture(int width, int height): 
-	Picture(width, height) {
+    Picture(width, height) {
 
-	this->width = width;
-	this->height = height;
+    this->width = width;
+    this->height = height;
 
-	image_data = new unsigned char[width * height * 3];
-	for(int i = 0; i < width * height * 3; i++) {
-		image_data[i] = 0;
-	}
+    image_data = new unsigned char[width * height * 3];
+    for(int i = 0; i < width * height * 3; i++) {
+        image_data[i] = 0;
+    }
 }
 
 ColorPicture::ColorPicture(ColorPicture& pic):
-	Picture(pic.width, pic.height) {	
-	image_data = new unsigned char[pic.width * pic.height * 3];
-	for(int i = 0; i < pic.width * pic.height * 3; i++)
-		image_data[i] = pic.image_data[i];
+    Picture(pic.width, pic.height) {    
+    image_data = new unsigned char[pic.width * pic.height * 3];
+    for(int i = 0; i < pic.width * pic.height * 3; i++)
+        image_data[i] = pic.image_data[i];
 }
 
 Pixel ColorPicture::getPixel(int x, int y) {
     if ( x >= width || y >= height )
         Picture::out_of_bounds_error(width,height,x,y);
-	Pixel result;
-	result.R = image_data[(y * width * 3) + (x * 3)];
-	result.G = image_data[(y * width * 3) + (x * 3)+1];
-	result.B = image_data[(y * width * 3) + (x * 3)+2];
-	return result;
+    Pixel result;
+    result.R = image_data[(y * width * 3) + (x * 3)];
+    result.G = image_data[(y * width * 3) + (x * 3)+1];
+    result.B = image_data[(y * width * 3) + (x * 3)+2];
+    return result;
 }
 
 void ColorPicture::setPixel(int x, int y, Pixel pix) {
     if ( x >= width || y >= height )
         Picture::out_of_bounds_error(width,height,x,y);
-	image_data[(y * width * 3) + (x * 3)] = pix.R;	
-	image_data[(y * width * 3) + (x * 3)+1] = pix.G;	
-	image_data[(y * width * 3) + (x * 3)+2] = pix.B;	
+    image_data[(y * width * 3) + (x * 3)] = pix.R;  
+    image_data[(y * width * 3) + (x * 3)+1] = pix.G;    
+    image_data[(y * width * 3) + (x * 3)+2] = pix.B;    
 }
 
 void ColorPicture::show() {
@@ -67,6 +67,7 @@ void ColorPicture::show() {
                                                                (char*)"Color Picture");
     win->set_color_mode(1);
     win->loadImageSource(image_data, width, height);
+    win->show();
 
     FLTKManager::block_until_closed(win);
 }
@@ -90,9 +91,9 @@ bool ColorPicture::loadPicture(const char* filename){
    */
   /* More stuff */
   struct jpeg_error_mgr jerr;
-  FILE * infile;		/* source file */
-  JSAMPARRAY buffer;		/* Output row buffer */
-  int row_stride;		/* physical row width in output buffer */
+  FILE * infile;        /* source file */
+  JSAMPARRAY buffer;        /* Output row buffer */
+  int row_stride;       /* physical row width in output buffer */
 
   /* In this example we want to open the input file before doing anything else,
    * so that the setjmp() error recovery below can assume the file is open.
@@ -147,7 +148,7 @@ bool ColorPicture::loadPicture(const char* filename){
   row_stride = cinfo.output_width * cinfo.output_components;
   /* Make a one-row-high sample array that will go away when done with image */
   buffer = (*cinfo.mem->alloc_sarray)
-		((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+        ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
   // Check to make sure this is a color image.
   if ( cinfo.num_components != 3 ) 
@@ -225,9 +226,9 @@ void ColorPicture::savePicture(const char* filename){
    */
   struct jpeg_error_mgr jerr;
   /* More stuff */
-  FILE * outfile;		/* target file */
-  JSAMPROW row_pointer[1];	/* pointer to JSAMPLE row[s] */
-  int row_stride;		/* physical row width in image buffer */
+  FILE * outfile;       /* target file */
+  JSAMPROW row_pointer[1];  /* pointer to JSAMPLE row[s] */
+  int row_stride;       /* physical row width in image buffer */
 
   /* Step 1: allocate and initialize JPEG compression object */
 
@@ -259,10 +260,10 @@ void ColorPicture::savePicture(const char* filename){
   /* First we supply a description of the input image.
    * Four fields of the cinfo struct must be filled in:
    */
-  cinfo.image_width = this->width; 	/* image width and height, in pixels */
+  cinfo.image_width = this->width;  /* image width and height, in pixels */
   cinfo.image_height = this->height;
-  cinfo.input_components = 3;		/* # of color components per pixel */
-  cinfo.in_color_space = JCS_RGB; 	/* colorspace of input image */
+  cinfo.input_components = 3;       /* # of color components per pixel */
+  cinfo.in_color_space = JCS_RGB;   /* colorspace of input image */
   /* Now use the library's routine to set default compression parameters.
    * (You must set at least cinfo.in_color_space before calling this,
    * since the defaults depend on the source color space.)
@@ -288,7 +289,7 @@ void ColorPicture::savePicture(const char* filename){
    * To keep things simple, we pass one scanline per call; you can pass
    * more if you wish, though.
    */
-  row_stride = this->width * 3;	/* JSAMPLEs per row in image_buffer */
+  row_stride = this->width * 3; /* JSAMPLEs per row in image_buffer */
 
   while (cinfo.next_scanline < cinfo.image_height) {
     /* jpeg_write_scanlines expects an array of pointers to scanlines.

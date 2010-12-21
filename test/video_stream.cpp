@@ -1,5 +1,6 @@
-#include <VideoStream.h>
 #include <Myro.h>
+#include <VideoStream.h>
+#include <Filter.h>
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -9,157 +10,138 @@
 
 class InvertFilter: public Filter {
 
-	public:
+    public:
 
-	InvertFilter(int width, int height, int color)
-		: Filter(height, width, color){
-		}
-	~InvertFilter(){}
+    InvertFilter(int width, int height, int color)
+        : Filter(height, width, color){
+        }
+    ~InvertFilter(){}
 
-	void filter(unsigned char * image) {
-		int height = getHeight();
-		int width = getWidth();
-		int colorMode = getColorMode();
+    void filter(Picture * image) {
+        int height = getHeight();
+        int width = getWidth();
+        //int colorMode = getColorMode();
 
-		unsigned char temp;
-		unsigned char tempRGB[3] = {0,0,0};
+        Pixel temp;
+        for(int h = 0; h < height/2; h++) {
+            for(int w = 0; w < width; w++) {
+                temp = image->getPixel(w,h);
+                image->setPixel(w,h, image->getPixel(w,(height-1)-h));
+                image->setPixel(w,(height-1)-h,temp);
+            }
+        }
+    }
 
-
-		if(colorMode == 0) {
-			for(int i = 0; i < height * width/2; i++) {
-				temp = image[i];
-				image[i] = image[((height * width)-i-1)];
-				image[((height * width)-i-1)] = temp;
-			}
-		}
-		else {
-			for(int h = 0; h < height/2; h++) {
-				for(int w = 0; w < width; w++) {
-					for(int rgb = 0; rgb < 3; rgb++) {
-						tempRGB[rgb] 
-							= image[(h * width * 3) + (w * 3) + rgb];
-					}
-					for(int rgb = 0; rgb < 3; rgb++) {
-						image[(h * width * 3) + (w * 3) + rgb] = 
-						image[((height - h - 1) 
-								* width * 3) + (w * 3) + rgb];
-					}
-					for(int rgb = 0; rgb < 3; rgb++) {
-						image[((height - h - 1)
-								* width * 3) + (w * 3) + rgb]
-							= tempRGB[rgb];
-					}
-				}
-			}
-		}
-	}
-
-	private:
+    private:
 };
 
 class LightMask: public Filter {
-	
-	public:
+    
+    public:
 
-	LightMask(int width, int height, int color)
-		: Filter(height, width, color) {
-		}
-	~LightMask(){}
+    LightMask(int width, int height, int color)
+        : Filter(height, width, color) {
+        }
+    ~LightMask(){}
 
-	void filter(unsigned char * image) {
+    void filter(Picture * image) {
 
-		int color_mode = getColorMode();
-		if(color_mode)
-			return;
+        //int color_mode = getColorMode();
+        //if(color_mode)
+        //    return;
 
-		int numPartions = 4;
-		int imagePartion = getWidth()/numPartions;
+        int imageHeight =  getHeight();
+        int imageWidth = getWidth();
 
-		int imageHeight =  getHeight();
-		int imageWidth = getWidth();
+        int numPartitions = 4;
+        int partition_width = imageWidth/numPartitions;
 
-		int shadePartion;
-		double brightEst = 0;
-		int partion[6] = {0,0,0,0,0,0};
+        int shadePartition;
+        double brightEst = 0;
+        int partition_sum[6] = {0,0,0,0,0,0};
 
-		for(int i = 0; i < imageHeight; i++) {
-			for(int j = 0; j < numPartions; j++) {
-				for(int k = 0; k < imagePartion; k++) {
-					partion[j] += image[(i * imageWidth) 
-						+ (j * imagePartion) + k];
-				}
-			}
-		}
+        // Sum up each partition
+        for(int y = 0; y < imageHeight; y++) {
+            for(int partition = 0; partition < numPartitions; partition++) {
+                for(int x = partition*partition_width; x < (partition+1)*partition_width; x++) {
+                    //partion[j] += image[(h * imageWidth) + (h * partition_width) + k];
+                    Pixel pix = image->getPixel(x,y);
+                    partition_sum[partition] += pix.R + pix.G + pix.B;
+                }
+            }
+        }
 
-		shadePartion = 0;
-		brightEst = partion[0]/(imageHeight * imagePartion);
-		for(int i = 1; i < numPartions; i++) {
-			if( partion[i]/(imageHeight * imagePartion) > brightEst ) {
-				shadePartion = i;
-				brightEst = partion[i]/(imageHeight * imagePartion);
-			}
-		}
+        // Determine which partition is the brightest
+        shadePartition = 0;
+        brightEst = partition_sum[0]/(imageHeight * partition_width);
+        for(int i = 1; i < numPartitions; i++) {
+            if( partition_sum[i]/(imageHeight * partition_width) > brightEst ) {
+                shadePartition = i;
+                brightEst = partition_sum[i]/(imageHeight * partition_width);
+            }
+        }
 
-		for(int i = 0; i < imageHeight; i++) {
-			for(int j = 0; j < numPartions; j++) {
-				if(j != shadePartion) {
-					for(int k = 0; k < imagePartion; k++) {
-						image[(i * imageWidth) + (j * imagePartion) + k] = 0;
-					}
-				}
-			}
-		}
-		
-	}
+        Pixel black = {0,0,0};
+        // Make every region thats not the drawn one black
+        for(int y = 0; y < imageHeight; y++) {
+            for(int partition = 0; partition < numPartitions; partition++) {
+                if ( partition != shadePartition ){
+                    for(int x = partition*partition_width; x < (partition+1)*partition_width; x++) {
+                        image->setPixel(x,y,black);
+                    }
+                }
+            }
+        }
+    }
 
-	private:
+    private:
 };
 
 int main(int argc, char ** argv) {
 
-	int color_mode = -1;
-	int enableInvert = 0;
-	int enableLightMask = 0;
+    int color_mode = -1;
+    int enableInvert = 0;
+    int enableLightMask = 0;
 
-	if(argc < 2) {
-		fprintf(stderr, 
-				"Usuage: ./video_stream color|gray invert|light|none\n");
-		return -1;
-	}
-	else if(!strcmp(argv[1], "color")) {
-		color_mode = 1;
-	}
-	else if(!strcmp(argv[1], "gray")) {
-		color_mode = 0;
-	}
-	else {
-		fprintf(stderr, 
-				"Usuage: ./video_stream color|gray invert|light|none\n");
-		return -1;
-	}
+    if(argc < 2) {
+        fprintf(stderr, 
+                "Usuage: ./video_stream color|gray invert|light|none\n");
+        return -1;
+    }
+    else if(!strcmp(argv[1], "color")) {
+        color_mode = 1;
+    }
+    else if(!strcmp(argv[1], "gray")) {
+        color_mode = 0;
+    }
+    else {
+        fprintf(stderr, 
+                "Usuage: ./video_stream color|gray invert|light|none\n");
+        return -1;
+    }
 
-	if(argc < 5 && argc > 2) {
-		if(!strcmp(argv[2], "invert"))
-			enableInvert = 1;
-		else if(!strcmp(argv[2], "light"))
-			enableLightMask = 1;
-		else if(strcmp(argv[2], "none"))
-			fprintf(stderr, "Invalid Filter Opition\n");
+    if(argc < 5 && argc > 2) {
+        if(!strcmp(argv[2], "invert"))
+            enableInvert = 1;
+        else if(!strcmp(argv[2], "light"))
+            enableLightMask = 1;
+        else if(strcmp(argv[2], "none"))
+            fprintf(stderr, "Invalid Filter Opition\n");
 
-		if(argc > 3) {
-			if(!strcmp(argv[3], "invert"))
-				enableInvert = 1;
-			else if(!strcmp(argv[3], "light"))
-				enableLightMask = 1;
-			else if(strcmp(argv[3], "none"))
-				fprintf(stderr, "Invalid Filter Opition\n");
-		}
-	}
+        if(argc > 3) {
+            if(!strcmp(argv[3], "invert"))
+                enableInvert = 1;
+            else if(!strcmp(argv[3], "light"))
+                enableLightMask = 1;
+            else if(strcmp(argv[3], "none"))
+                fprintf(stderr, "Invalid Filter Opition\n");
+        }
+    }
 
     connect();
 
-	InvertFilter * myInvertFilter;
-	LightMask * myLightMask;
+    InvertFilter * myInvertFilter;
+    LightMask * myLightMask;
     VideoStream video(&robot, color_mode);
 
     if(enableInvert) {
@@ -187,10 +169,10 @@ int main(int argc, char ** argv) {
     //std::cout << "restarting" << std::endl;
     //}
     disconnect();
-	if(enableInvert)
-		delete myInvertFilter;
-	if(enableLightMask)
-		delete myLightMask;
-	return 1;
+    if(enableInvert)
+        delete myInvertFilter;
+    if(enableLightMask)
+        delete myLightMask;
+    return 1;
 }
 

@@ -8,9 +8,9 @@
  * A pixel structure that respesents a single pixel of an Image. 
  */
 struct Pixel {
-    int R;
-    int G;
-    int B;
+    unsigned char R;
+    unsigned char G;
+    unsigned char B;
 };
 
 

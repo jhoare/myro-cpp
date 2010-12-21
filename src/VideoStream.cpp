@@ -46,14 +46,14 @@ class CaptureThread : public Threaded{
 class circbuf{
     public:
         circbuf(int size){
-            this->buf = new unsigned char*[size];
+            this->buf = new Picture*[size];
             this->size = size;
             this->start = this->end = 0;
         }
         ~circbuf(){
             delete buf;
         }
-        void push(unsigned char* item){
+        void push(Picture* item){
             //std::cerr << "push()" << std::endl;
             boost::mutex::scoped_lock l(_lock);
             buf[end] = item;
@@ -66,8 +66,8 @@ class circbuf{
                 throw new std::exception;
             }
         }
-        unsigned char* pop(){
-            unsigned char* val;
+        Picture* pop(){
+            Picture* val;
             //std::cerr << "pop()" << std::endl;
             if ( start == end ){
                 boost::mutex::scoped_lock l(_lock);
@@ -86,7 +86,7 @@ class circbuf{
             return start == end;
         }
     private:
-        unsigned char** buf;
+        Picture** buf;
         unsigned int size;
         unsigned int start;
         unsigned int end;
@@ -131,8 +131,8 @@ DisplayThread::DisplayThread(ImageWindow* imageWindow, circbuf* cb,
 }
 
 void DisplayThread::run() {
-    unsigned char* img_cur=NULL;
-    unsigned char* img_new=NULL;
+    Picture* img_cur=NULL;
+    Picture* img_new=NULL;
 
     while(!this->stopRequested){
         //std::cerr << "DisplayThread::run()" << std::endl;
@@ -150,7 +150,7 @@ void DisplayThread::run() {
             }
         }
 
-        imageWindow->loadImageSource(img_new, image_width, image_height);
+        imageWindow->loadImageSource(img_new->getRawImage(), image_width, image_height);
 
         if ( img_cur != NULL ){
             free(img_cur);
@@ -178,7 +178,7 @@ CaptureThread::CaptureThread(Scribbler* robot, circbuf* buf, int color_mode)
 }
 
 void CaptureThread::run(){
-    unsigned char * tempImageBuffer; 
+    Picture * tempImageBuffer; 
 
     while(!this->stopRequested){
         //std::cerr << "CaptureThread::run()" << std::endl;
@@ -187,16 +187,14 @@ void CaptureThread::run(){
         //fprintf(stderr, "capture_image() Capturing Image\n");
 
         switch(this->color_mode) {
-            case 0: tempImageBuffer
-                        = robot->takePicture("grayjpeg")->getRawImage();
+            case 0: 
+                tempImageBuffer = robot->takePicture("grayjpeg");
                 break;
             case 1:
-                    tempImageBuffer
-                        = robot->takePicture("jpeg")->getRawImage();
+                tempImageBuffer = robot->takePicture("jpeg");
                 break;
             case 2:
-                    tempImageBuffer
-                        = robot->takePicture("blob")->getRawImage();
+                tempImageBuffer = robot->takePicture("blob");
                 break;
             default: 
             {

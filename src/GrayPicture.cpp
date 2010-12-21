@@ -8,53 +8,53 @@ using namespace std;
 GrayPicture::GrayPicture() : Picture() {};
 
 GrayPicture::GrayPicture(int width, int height) 
-        :Picture(width, height) {
-        
-        image_data = new unsigned char[width * height];
-        for(int i = 0; i < width * height; i++)
-                image_data = 0;
+:Picture(width, height) {
 
-        this->width = width;
-        this->height = height;
+    image_data = new unsigned char[width * height];
+    for(int i = 0; i < width * height; i++)
+        image_data = 0;
+
+    this->width = width;
+    this->height = height;
 }
 
 GrayPicture::GrayPicture(unsigned char * data, int width, int height)
-        :Picture(width, height) {
-        
-        image_data = new unsigned char[width * height];
-        for(int i = 0; i < width * height; i++)
-                image_data[i] = data[i];
+:Picture(width, height) {
 
-        this->width = width;
-        this->height = height;
+    image_data = new unsigned char[width * height];
+    for(int i = 0; i < width * height; i++)
+        image_data[i] = data[i];
+
+    this->width = width;
+    this->height = height;
 }
 
 GrayPicture::GrayPicture(GrayPicture& pic)
-        :Picture(pic.width, pic.height) {
-        
-        this->width = pic.width;
-        this->height = pic.height;
+:Picture(pic.width, pic.height) {
 
-        image_data = new unsigned char[pic.width * pic.height];
+    this->width = pic.width;
+    this->height = pic.height;
 
-        for(int i = 0; i < pic.width * pic.height; i++)
-                image_data[i] = pic.image_data[i];
+    image_data = new unsigned char[pic.width * pic.height];
+
+    for(int i = 0; i < pic.width * pic.height; i++)
+        image_data[i] = pic.image_data[i];
 }
 
 Pixel GrayPicture::getPixel(int x, int y) {
     if ( x >= width || y >= height )
         Picture::out_of_bounds_error(width,height,x,y);
-        Pixel result;
-        result.R = image_data[(y * width) + x];
-        result.G = result.R;
-        result.B = result.R;
-        return result;
+    Pixel result;
+    result.R = image_data[(y * width) + x];
+    result.G = result.R;
+    result.B = result.R;
+    return result;
 }
 
 void GrayPicture::setPixel(int x, int y, Pixel pix) {
     if ( x >= width || y >= height )
         Picture::out_of_bounds_error(width,height,x,y);
-        image_data[(y * width) + x] = pix.R;
+    image_data[(y * width) + x] = pix.R;
 }
 
 Picture* GrayPicture::clone(){
@@ -70,6 +70,7 @@ void GrayPicture::show() {
                                                                (char*)"Gray Picture");
     win->set_color_mode(0);
     win->loadImageSource(image_data, width, height);
+    win->show();
 
     FLTKManager::block_until_closed(win);
 }

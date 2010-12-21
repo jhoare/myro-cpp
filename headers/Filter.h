@@ -1,5 +1,6 @@
 #ifndef __FILTER_H__
 #define __FILTER_H__
+#include <Picture.h>
 
 /**
  * @class Filter
@@ -8,11 +9,14 @@
  * creation of various image filters, which can be applied to a stream
  * and the results will be visible in real time.
  *
- * @brief The class defines a frame work creating data filters
+ * As of version 2.2.0, the Filters class uses Picture* objects,
+ * instead of the origional unsigned char*
+ *
+ * @brief The class defines a framework for creating data filters
  * which can manipulate images, and apply any changes in the image 
  * data back to the image.
  *
- * @author Richard Edwards
+ * @author Richard Edwards and John Hoare
  */
 
 class Filter {
@@ -37,7 +41,7 @@ class Filter {
      * is extended to allow for a filter to yield data from its
      * application. 
      */
-    void applyFilter(unsigned char *);
+    void applyFilter(Picture*);
 
     /**
      * @return Returns the image height.
@@ -60,7 +64,7 @@ class Filter {
      * if you do not overwrite this function, then the filter's
      * default behavior is to do nothing.
      */
-    virtual void filter(unsigned char *);
+    virtual void filter(Picture*);
 
     private:
 
