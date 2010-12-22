@@ -13,50 +13,34 @@ using namespace std;
 class PictureInPicture: public Filter {
 
     public:
-        PictureInPicture(Scribbler& robot, int width, int height, int color)
-            : Filter(height, width, color) {}
+        PictureInPicture(Scribbler& rob): rob(rob) {}
 
         ~PictureInPicture(){}
 
         void filter(Picture* image) {
-            Picture* colorImage = robot.takePicture("jpeg");
+            Picture* colorImage = rob.takePicture("jpeg");
 
-            int height = getHeight();
-            int width = getWidth();
+            int height = image->getHeight();
+            int width = image->getWidth();
             int reduction = 4;
 
             int reduced_height = height/reduction;
             int reduced_width = width/reduction;
 
-            //May not need this allocation
-            //Picture* newImage = new ColorPicture(reduced_width,reduced_height);
 
             for(int h = 0; h < reduced_height; h++) {
                 for(int w = 0; w < reduced_width; w++) {
-                    image->setPixel(w,h,
+                    image->setPixel((width-reduced_width)+w,h,
                             colorImage->getPixel(reduction*w,reduction*h));
-                    /*
-                    newImage->setPixel(w,h, 
-                            colorImage->getPixel(reduction*w,reduction*h));
-                            */
                 }
             }
 
-            /*
-            for(int h = 0; h < reduced_height; h++) {
-                for(int w = width - reduced_width, 
-                        w2 = 0; w < width; w++, w2++) {
-                    image->setPixel(w,h,newImage->getPixel(w,h));
-                    //for(int rgb = 0; rgb < 3; rgb++) {
-                    //    image[(h * width * 3) + (w * 3) + rgb]
-                    //        = newImage[(h * width/reduction * 3) + (w2 * 3) + rgb];
-                    //}
-                }
-            }
-            */
             delete colorImage;
-            //free(newImage); 
         }
+
+    protected:
+        Scribbler& rob;
+
 };
 
 /*
@@ -167,7 +151,7 @@ int main(int argc, char ** argv) {
                 showpic->setPixel(w,h,red);
             }
         }
-        cout << "Used this image to train?" << endl;
+        cout << "Use this image to train?" << endl;
         if(fork() == 0) {
             showpic->show();
             exit(0);
@@ -188,7 +172,7 @@ int main(int argc, char ** argv) {
     VideoStream foo(robot, 2);
 
     if(enablePnp) { 
-        pnp = new PictureInPicture(robot,256,192,1);
+        pnp = new PictureInPicture(robot);
         foo.addFilter(pnp);
     }
     /*

@@ -12,15 +12,12 @@ class InvertFilter: public Filter {
 
     public:
 
-    InvertFilter(int width, int height, int color)
-        : Filter(height, width, color){
-        }
+    InvertFilter(){}
     ~InvertFilter(){}
 
     void filter(Picture * image) {
-        int height = getHeight();
-        int width = getWidth();
-        //int colorMode = getColorMode();
+        int height = image->getHeight();
+        int width = image->getWidth();
 
         Pixel temp;
         for(int h = 0; h < height/2; h++) {
@@ -39,9 +36,7 @@ class LightMask: public Filter {
     
     public:
 
-    LightMask(int width, int height, int color)
-        : Filter(height, width, color) {
-        }
+    LightMask(){}
     ~LightMask(){}
 
     void filter(Picture * image) {
@@ -50,8 +45,8 @@ class LightMask: public Filter {
         //if(color_mode)
         //    return;
 
-        int imageHeight =  getHeight();
-        int imageWidth = getWidth();
+        int imageHeight = image->getHeight();
+        int imageWidth  = image->getWidth();
 
         int numPartitions = 4;
         int partition_width = imageWidth/numPartitions;
@@ -145,11 +140,11 @@ int main(int argc, char ** argv) {
     VideoStream video(&robot, color_mode);
 
     if(enableInvert) {
-        myInvertFilter = new InvertFilter(256, 192, color_mode);
+        myInvertFilter = new InvertFilter();
         video.addFilter(myInvertFilter);
     }
     if(enableLightMask) {
-        myLightMask = new LightMask(256, 192, color_mode);
+        myLightMask = new LightMask();
         video.addFilter(myLightMask);
     }
 

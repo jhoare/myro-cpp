@@ -23,14 +23,9 @@ class Filter {
 
     public:
 
-    /**
-     * @param imageHeight - the height of images to be manipulated.
-     * @param imageWidth - the width of images to be manipulated.
-     * @param colorMode - An integer to determine the current 
-     * color space. (0 - GrayScale, 1 - RGB, 2 - RGB Blob)
-     */
 
-    Filter(int imageHeight, int imageWidth, int colorMode);
+    /// Default Constructor
+    Filter();
     ~Filter();
 
     /**
@@ -44,33 +39,12 @@ class Filter {
     void applyFilter(Picture*);
 
     /**
-     * @return Returns the image height.
-     */
-    int getHeight();
-
-    /**
-     * @return Returns the image width.
-     */
-    int getWidth();
-
-    /**
-     * @return Returns the color Mode.
-     */
-    int getColorMode();
-
-    /**
      * The function used by applyFilter to actually process
      * an image. However, when developing your own filter,
      * if you do not overwrite this function, then the filter's
      * default behavior is to do nothing.
      */
     virtual void filter(Picture*);
-
-    private:
-
-    int imageHeight;
-    int imageWidth;
-    int colorMode;
 
 };
 
