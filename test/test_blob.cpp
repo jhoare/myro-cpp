@@ -14,10 +14,9 @@ class PictureInPicture: public Filter {
 
     public:
         PictureInPicture(Scribbler& rob): rob(rob) {}
-
         ~PictureInPicture(){}
 
-        void filter(Picture* image) {
+        virtual void filter(Picture* image) {
             Picture* colorImage = rob.takePicture("jpeg");
 
             int height = image->getHeight();

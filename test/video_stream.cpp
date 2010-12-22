@@ -11,11 +11,7 @@
 class InvertFilter: public Filter {
 
     public:
-
-    InvertFilter(){}
-    ~InvertFilter(){}
-
-    void filter(Picture * image) {
+    virtual void filter(Picture * image) {
         int height = image->getHeight();
         int width = image->getWidth();
 
@@ -36,10 +32,7 @@ class LightMask: public Filter {
     
     public:
 
-    LightMask(){}
-    ~LightMask(){}
-
-    void filter(Picture * image) {
+    virtual void filter(Picture * image) {
 
         //int color_mode = getColorMode();
         //if(color_mode)
@@ -89,7 +82,6 @@ class LightMask: public Filter {
         }
     }
 
-    private:
 };
 
 int main(int argc, char ** argv) {
