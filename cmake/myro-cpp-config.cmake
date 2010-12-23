@@ -77,10 +77,14 @@ else
     libs=
 fi
 
+to_echo=""
+
 if test "$echo_cflags" = "yes" ; then 
-    echo $includes 
+    to_echo="$includes"
 fi
 
 if test "$echo_libs" = "yes" ; then 
-    echo $libs $LDLIBS
+    to_echo="$to_echo $libs $LDLIBS"
 fi
+
+echo $to_echo
