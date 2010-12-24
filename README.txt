@@ -12,6 +12,9 @@ or
 
 http://launchpad.net/myro-c++
 
+Windows (via cygwin... see README-Cygwin.txt file), Linux, and Mac OS X are 
+supported operating systems.
+
 
 Compiling
 =========
