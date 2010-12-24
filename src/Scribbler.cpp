@@ -142,6 +142,7 @@ int Scribbler::connect() {
     std::string device;
     std::cout << "Please enter the comport: ";
     std::cin >> device;
+    std::cin.ignore();
     con = new serial(38400, 1);
     int status = con->connect(device.c_str());
     if(status < 0) {
