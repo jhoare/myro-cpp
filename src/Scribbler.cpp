@@ -797,11 +797,6 @@ unsigned char * Scribbler::grab_jpeg_gray(int reliable, int &size) {
 unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer, 
         int color_space, int &size) {
 
-    FILE* f = fopen("rawimg.raw","wb");
-    for (int i = 0; i < size; i++)
-        fputc(jpegBuffer[i],f);
-    fclose(f);
-
     unsigned char* raw_img;
     int raw_img_index=0;
     struct jpeg_error_mgr jerr;
