@@ -32,14 +32,14 @@ int main(int argc, char ** argv) {
 	robot.set("Led", "right", 0);
 	robot.set("fowardness", 1);
 
-	std::vector<int> * obstacle;
+	std::vector<int> obstacle;
 	while(1) {
-		obstacle = (std::vector<int>*)robot.get("obstacle");
-		for(unsigned int i = 0; i < obstacle->size(); i++) {
-			std::cout << obstacle->at(i) << " ";
+		obstacle = robot.getObstacle();
+		for(unsigned int i = 0; i < obstacle.size(); i++) {
+			std::cout << obstacle.at(i) << " ";
 		}
 		std::cout << std::endl;
-		if(obstacle->at(1) < 1000) {
+		if(obstacle.at(1) < 1000) {
 			robot.move(1,0);
 		}
 		else {
@@ -48,7 +48,6 @@ int main(int argc, char ** argv) {
 			robot.move(0, 1);
 			robot.beep(0.5, 400, 400);
 		}
-		delete obstacle;
 	}
     disconnect();
 
