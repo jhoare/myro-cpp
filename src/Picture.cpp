@@ -91,6 +91,11 @@ int getPixelValue_grey(Picture *p, int x, int y)
         return P.R;
 }
 
+void setPixel(Picture* p, int x, int y, Pixel pix)
+{
+        p->setPixel(x, y, pix);
+}
+
 void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
 {
         Pixel P=p->getPixel(x,y);

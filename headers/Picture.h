@@ -118,6 +118,7 @@ int getHeight(Picture *p);
 void show(Picture *p);
 Pixel getPixel(Picture *p, int x, int y);
 int getPixelValue_grey(Picture *p, int x, int y);
+void setPixel(Picture* p, int x, int y, Pixel pix);
 void setPixelColor(Picture *p, int x, int y, int R, int G, int B);
 Picture* clone(Picture* p);
 
