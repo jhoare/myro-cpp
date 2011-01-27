@@ -5,6 +5,11 @@
 #include <Filter.h>
 #include <MyroForwardDec.h>
 
+/** @defgroup videostream VideoStream Related
+ * Contains all functions related to the VideoStream
+ * @{
+ */
+
 
 /**
  * @class VideoStream
@@ -91,5 +96,6 @@ class VideoStream {
     bool running;
 };
 
+///@}
 
 #endif

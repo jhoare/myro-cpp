@@ -3,6 +3,10 @@
 
 #include<exception>
 #include<string>
+/** @defgroup picture Picture Operations
+ * The collection of all Picture Related commands and operations
+ * @{
+ */
 
 /**
  * A pixel structure that respesents a single pixel of an Image. 
@@ -23,7 +27,7 @@ struct Pixel {
  */
 class Picture {
     public:
-    /**
+    /*
      * Exception that is thrown if the Picture is indexed out of Bounds
     class IndexOutOfBoundsException : public std::exception {
         public:
@@ -128,5 +132,7 @@ Picture* loadPicture(const char* filename);
 void loadPicture(Picture * p, const char* filename);
 /// Save the Image to a file
 void savePicture(Picture * p, const char* filename);
+
+///@}
 
 #endif

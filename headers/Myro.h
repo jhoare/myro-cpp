@@ -23,6 +23,12 @@ void connect();
 /// Disconnect the global robot
 void disconnect();
 
+/** @defgroup myro_general General Myro Commands
+ * This group contains general Myro Commands which are general "helper" 
+ * functions, but don't use the robot or picture functions.
+ * @{
+ */
+
 /** 
  * Like sleep, but takes an argument of seconds, 
  * and can take a fraction of seconds.
@@ -38,6 +44,7 @@ void wait(double time);
  * of minutes.
  */
 bool timeRemaining(double start_time);
+
 
 /**
  * Pop open a dialog box asking the user to answer a question. 

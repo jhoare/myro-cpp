@@ -3,6 +3,11 @@
 
 #include <Picture.h>
 
+/** @addtogroup picture
+ * @{
+ */
+
+/// Object Representing a Color Picture (also used for Blob Pictures)
 class ColorPicture: public Picture {
 
     public: 
@@ -22,5 +27,8 @@ class ColorPicture: public Picture {
         virtual bool loadPicture(const char* filename);
         virtual void savePicture(const char* filename);
 };
+
+
+///@}
 
 #endif

@@ -2,6 +2,10 @@
 #define __FILTER_H__
 #include <Picture.h>
 
+/** @addtogroup videostream
+ * @{
+ */
+
 /**
  * @class Filter
  *
@@ -47,5 +51,7 @@ class Filter {
     virtual void filter(Picture*);
 
 };
+
+///@}
 
 #endif

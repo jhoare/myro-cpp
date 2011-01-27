@@ -2,6 +2,10 @@
 #define __ROBOT_H__
 
 #include <string>
+/** @defgroup robot Robot Commands
+ *  All Robot Commands
+ *  @{
+ */
 
 /**
  * @class Robot
@@ -95,5 +99,9 @@ class Robot {
 
 	private:
 };
+
+/**
+ * @}
+ */
 
 #endif

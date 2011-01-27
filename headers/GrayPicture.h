@@ -3,6 +3,11 @@
 
 #include <Picture.h>
 
+/** @addtogroup picture
+ * @{
+ */
+
+/// Object Representing a Gray Picture 
 class GrayPicture: public Picture {
 
     public: 
@@ -22,5 +27,7 @@ class GrayPicture: public Picture {
         virtual void savePicture(const char* filename);
 
 };
+
+///@}
 
 #endif

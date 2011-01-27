@@ -8,6 +8,11 @@
 #include <MyroForwardDec.h>
 
 /**
+ * @addtogroup robot
+ * @{
+ */
+
+/**
  * @class Scribbler
  *
  * A port of the existing IPRE Scribbler Python code to C++. 
@@ -769,5 +774,7 @@ class Scribbler: public Robot {
     std::map<int,VideoStream*> videostreams;
     friend class VideoStream;
 };
+
+///@}
 
 #endif
