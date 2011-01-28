@@ -51,7 +51,7 @@ class circbuf{
             this->start = this->end = 0;
         }
         ~circbuf(){
-            delete buf;
+            delete[] buf;
         }
         void push(Picture* item){
             //std::cerr << "push()" << std::endl;
@@ -115,6 +115,7 @@ VideoStream::VideoStream(Scribbler& scrib, int color_mode)
 VideoStream::~VideoStream() {
     this->endStream();
     filters->clear();
+    delete filterLock;
     delete filters;
 }
 
@@ -138,6 +139,9 @@ void DisplayThread::run() {
         //std::cerr << "DisplayThread::run()" << std::endl;
         //printf("display_stream() Waiting on Picture\n");
         img_new = cb->pop();
+        // If we got a NULL picture, shut down thread
+        if ( img_new == NULL )
+            this->stopRequested = true;
 
         if ( this->stopRequested ) break;
 
@@ -153,7 +157,7 @@ void DisplayThread::run() {
         imageWindow->loadImageSource(img_new->getRawImage(), image_width, image_height);
 
         if ( img_cur != NULL ){
-            free(img_cur);
+            delete img_cur;
         }
         img_cur = img_new;
 
@@ -204,6 +208,10 @@ void CaptureThread::run(){
 
         //printf("capture_image(): Image Loaded into Memory\n"); 
         cb->push(tempImageBuffer);
+        if (tempImageBuffer==NULL){
+            this->stopRequested = true;
+            break;
+        }
         usleep(1000); //hack to slow down the capture thread
                       //so that the other threads are scheduled
         //boost::thread::yield();
@@ -257,7 +265,7 @@ int VideoStream::addFilter(Filter * filter) {
 }
 
 int VideoStream::delFilter(int filter_location) {
-    if(filter_location < 0 || filter_location > (int)filters->size())
+    if(filter_location < 0 || filter_location >= (int)filters->size())
         return -1;
 
     boost::mutex::scoped_lock l(*filterLock);
@@ -279,10 +287,11 @@ void VideoStream::endStream() {
         capture_thread->join();
 
         //delete imageWindow;
+        FLTKManager::remove_image_window(window);
         delete window;
         // Free all the memory that is sitting on the buffer that hasn't been 
         // displayed.
-        while ( !shared_buffer->isEmpty() ) free(shared_buffer->pop());
+        while ( !shared_buffer->isEmpty() ) delete shared_buffer->pop();
         delete shared_buffer;
 
         delete display_thread;

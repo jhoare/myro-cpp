@@ -134,7 +134,7 @@ Scribbler::~Scribbler() {
     delete videoStreamLock;
     //free(robot_lock);
     //free(image_lock);
-    free(sensors);
+    delete[] sensors;
     delete con;
 }
 
@@ -206,6 +206,8 @@ int Scribbler::disconnect() {
         shutdown = false;
         */
         con->disconnect();
+        delete con;
+        con = NULL;
     }
     else {
         fprintf(stderr, "Attempting to disconnect without connecting\n");
@@ -548,12 +550,15 @@ unsigned char * Scribbler::grab_gray_array() {
 
     unsigned char command = GET_WINDOW;
     unsigned char value = 0;//(char)48;
-    con->_write(&command, 1);
-    con->_write(&value, 1);
+    {
+        boost::mutex::scoped_lock l(*(this->robot_lock));
+        con->_write(&command, 1);
+        con->_write(&value, 1);
 
-    //printf("Reading Image\n");
+        //printf("Reading Image\n");
 
-    read_message(sm_gray_buffer, size);
+        read_message(sm_gray_buffer, size);
+    }
 
     //printf("Image Read\n");
 
@@ -599,20 +604,22 @@ unsigned char * Scribbler::grab_blob_array() {
 
     unsigned char * data_buffer;
 
-    //pthread_mutex_lock(this->robot_lock);
-    boost::mutex::scoped_lock l(*(this->robot_lock));
+    {
+        //pthread_mutex_lock(this->robot_lock);
+        boost::mutex::scoped_lock l(*(this->robot_lock));
 
-    unsigned char command = GET_RLE;
-    unsigned char size_buffer[2] = {0,0};
-    con->_write(&command, 1);
-    con->_read(size_buffer, 2);
+        unsigned char command = GET_RLE;
+        unsigned char size_buffer[2] = {0,0};
+        con->_write(&command, 1);
+        con->_read(size_buffer, 2);
 
-    size = (size_buffer[0] << 8) | size_buffer[1];
-    //printf("size %i\n", size);
+        size = (size_buffer[0] << 8) | size_buffer[1];
+        //printf("size %i\n", size);
 
-    data_buffer = (unsigned char*)malloc(sizeof(unsigned char) * size);
-    con->_read(data_buffer, size);
-    //pthread_mutex_unlock(this->robot_lock);
+        data_buffer = (unsigned char*)malloc(sizeof(unsigned char) * size);
+        con->_read(data_buffer, size);
+        //pthread_mutex_unlock(this->robot_lock);
+    }
 
     int inside = 0;
     int counter = 0;
@@ -783,6 +790,7 @@ unsigned char * Scribbler::grab_jpeg_gray(int reliable, int &size) {
             = jpeg_scan.at(jpeg_buffer_index);
 
     decompressedResizedJpeg = jpegStretch(jpeg_buffer, 0, size);
+    free(jpeg_header);
     free(jpeg_buffer);
     //pthread_mutex_unlock(this->robot_lock);
     return decompressedResizedJpeg;
@@ -838,9 +846,10 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
     } 
     //std::cerr << "done!" << std::endl; 
     jpeg_finish_decompress(&cinfo); 
+    jpeg_destroy_decompress(&cinfo);
     //std::cerr << "finished decompress!" << std::endl; 
 
-    unsigned char* resized;
+    unsigned char* resized = NULL;
 
     switch(color_space) {
     case 0:         
@@ -1767,7 +1776,11 @@ Picture * Scribbler::takePicture(std::string type) {
     unsigned char * imageBuffer = NULL;
     int size;
 
-    Picture * image;
+    Picture * image = NULL;
+
+    // Don't take a picture if we're not connected.
+    if ( con == NULL )
+        return NULL;
 
     //pthread_mutex_lock(this->image_lock);
     boost::mutex::scoped_lock l(*(this->image_lock));
