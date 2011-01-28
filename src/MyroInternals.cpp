@@ -5,14 +5,21 @@
 // Threaded
 //------------------------------
 
-Threaded::Threaded() : stopRequested(false), running(false), runThread() {};
+Threaded::Threaded() : stopRequested(false), _running(false), runThread() {};
+
+Threaded::~Threaded(){
+    if ( this->running() )
+        this->stop();
+}
 
 void Threaded::start() {
     assert(!runThread);
     stopRequested = false;
+    boost::mutex::scoped_lock l(startup_mutex);
     runThread = boost::shared_ptr<boost::thread>
         (new boost::thread
-         (boost::bind(&Threaded::run, this)));
+         (boost::bind(&Threaded::startRun, this)));
+    startup_condition.wait(l);
 }
 void Threaded::stop() {
     assert(runThread);
@@ -23,15 +30,36 @@ void Threaded::join() {
     runThread->join(); 
 }
 
+bool Threaded::running(){
+    boost::mutex::scoped_lock l(startup_mutex);
+    return _running;
+}
+
+void Threaded::startRun(){
+    {
+        // Hey I'm the new thread, and I've started running!
+        boost::mutex::scoped_lock l(startup_mutex);
+        _running = true;
+        startup_condition.notify_one();
+    }
+    this->run();
+    {
+        boost::mutex::scoped_lock l(startup_mutex);
+        _running = false;
+    }
+}
 
 //------------------------------
 // FLTKThread
 //------------------------------
 
 FLTKThread::FLTKThread(){};
+FLTKThread::~FLTKThread(){
+    if ( this->running() )
+        this->stop();
+}
 
 void FLTKThread::run(){
-    running = true;
     while (!stopRequested){
         //std::cerr << "FLTKThread::run()" << std::endl;
         /*
@@ -61,7 +89,6 @@ void FLTKThread::run(){
         Fl::wait(0.05);
         usleep(50000);
     }
-    running = false;
 }
 
 //------------------------------
@@ -70,7 +97,7 @@ void FLTKThread::run(){
 FLTKThread FLTKManager::thread;
 
 void FLTKManager::block_until_closed(Fl_Window* win){
-    if (!thread.running) thread.start();
+    if (!thread.running()) thread.start();
     //std::cerr << "FLTKManager::block_until_closed(): Blocking" << std::endl;
     //fltknotify *notify = new fltknotify;
     //notify->win = win;
@@ -93,7 +120,7 @@ ImageWindow* FLTKManager::get_image_window(int width, int height, char * title){
 }
 
 ImageWindow* FLTKManager::get_image_window(int x, int y, int width, int height, char* title){
-    if (!thread.running) thread.start();
+    if (!thread.running()) thread.start();
     ImageWindow* ret = new ImageWindow(x,y,width,height,title);
     {
         boost::mutex::scoped_lock l(thread.window_lock);
