@@ -262,6 +262,23 @@ class Scribbler: public Robot {
     std::vector<int> getIR();
 
     /**
+     * Get a specific direction of the IR sensors
+     * 0 - Left
+     * 1 - Right
+     * @param direction The direction to get: 0-left 1-right
+     * @return IR value, -1 if error
+     */
+    int getIRdir(int direction);
+
+    /**
+     * Get a specific direction of the IR sensors
+     * 
+     * @param direction The direction to get: "left" or "right"
+     * @return IR value, -1 if error
+     */
+    int getIRdir(std::string direction);
+
+    /**
      * Get the values of the light sensors.
      *
      * @return A vector of ints each one corresponding to a light sensor. 

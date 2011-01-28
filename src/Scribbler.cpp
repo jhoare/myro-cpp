@@ -1328,7 +1328,35 @@ std::vector<int> Scribbler::getIR(){
     std::vector<int> ir;
     ir.push_back(values[0]);
     ir.push_back(values[1]);
+    free(values);
     return ir;
+}
+
+int Scribbler::getIRdir(int direction){
+    if (direction != 0 && direction != 1)
+        return -1;
+    int * values = this->_get(GET_IR_ALL, 2);
+    std::vector<int> ir;
+    ir.push_back(values[0]);
+    ir.push_back(values[1]);
+    free(values);
+    return ir[direction];
+}
+
+int Scribbler::getIRdir(std::string direction){
+    int index = -1;
+    if (direction == "left") 
+        index = 0;
+    else if (direction == "right")
+        index = 1;
+    else
+        return -1;
+    int * values = this->_get(GET_IR_ALL, 2);
+    std::vector<int> ir;
+    ir.push_back(values[0]);
+    ir.push_back(values[1]);
+    free(values);
+    return ir[index];
 }
 
 std::vector<int> Scribbler::getLights() {

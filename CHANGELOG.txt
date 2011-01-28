@@ -1,3 +1,11 @@
+2.2.2 (2011-01-27)
+ - Added askQuestion() and askQuestionVector() variant.
+ - Added MyroIO.h which gives convienience operator overloading for vector & list stl objects.
+ - Improved Organization of Doxygen Documentation that is built.
+
+2.2.1 (2011-01-27)
+ - Release Recalled due to bug, see version 2.2.2 instead
+
 2.2.0 (2011-01-11)
  - Removed ImageMagick as a dependency. 
  - VideoStream window now closes as expected when endStream() is called
