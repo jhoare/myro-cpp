@@ -15,7 +15,7 @@ Picture::Picture(int width, int height) {
 }
 
 Picture::~Picture() {
-    delete image_data;
+    delete[] image_data;
 }
 
 int Picture::getHeight() {

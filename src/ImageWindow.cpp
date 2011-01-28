@@ -56,6 +56,7 @@ void ImageWindow::set_color_mode(int color_mode) {
 }
 
 void ImageWindow::draw() {
+    boost::mutex::scoped_lock l(*exclusive);
     if(image != NULL) {
         if(color_mode)
             fl_draw_image((unsigned char*)(*(image->data())), 0, 0, image->w(),

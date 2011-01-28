@@ -847,6 +847,7 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
     //std::cerr << "done!" << std::endl; 
     jpeg_finish_decompress(&cinfo); 
     jpeg_destroy_decompress(&cinfo);
+    free(row_pointer[0]);
     //std::cerr << "finished decompress!" << std::endl; 
 
     unsigned char* resized = NULL;
@@ -877,6 +878,8 @@ unsigned char * Scribbler::jpegStretch(unsigned char * jpegBuffer,
         return NULL;
         break;
     }
+
+    free(raw_img);
 
     return resized;
 }

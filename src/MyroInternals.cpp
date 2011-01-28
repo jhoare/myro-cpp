@@ -10,6 +10,8 @@ Threaded::Threaded() : stopRequested(false), _running(false), runThread(NULL) {}
 Threaded::~Threaded(){
     if ( this->running() )
         this->stop();
+    if ( runThread )
+        delete runThread;
 }
 
 void Threaded::start() {
@@ -25,9 +27,11 @@ void Threaded::stop() {
     this->join();
 }
 void Threaded::join() { 
-    if ( runThread )
+    if ( runThread ){
         runThread->join(); 
-    runThread = NULL;
+        delete runThread;
+        runThread = NULL;
+    }
 }
 
 bool Threaded::running(){
@@ -123,7 +127,15 @@ void FLTKManager::block_until_closed(Fl_Window* win){
 }
 
 ImageWindow* FLTKManager::get_image_window(int width, int height, char * title){
-    return get_image_window(0,0,width,height,title);
+    if (!thread.running()) thread.start();
+    ImageWindow* ret = new ImageWindow(width,height,title);
+    {
+        boost::mutex::scoped_lock l(thread.window_lock);
+        ret->show();
+        ret->end();
+        thread.windows.push_back(ret);
+    }
+    return ret;
 }
 
 ImageWindow* FLTKManager::get_image_window(int x, int y, int width, int height, char* title){
