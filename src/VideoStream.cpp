@@ -276,19 +276,13 @@ int VideoStream::delFilter(int filter_location) {
 
 void VideoStream::endStream() {
     if ( running ){
-        // Remove the window for the fltk mananager
-        FLTKManager::remove_image_window(window);
 
-        //fl_thread->stop();
         display_thread->stop();
         capture_thread->stop();
 
-        display_thread->join();
-        capture_thread->join();
-
         //delete imageWindow;
+        // Remove the window for the fltk mananager
         FLTKManager::remove_image_window(window);
-        delete window;
         // Free all the memory that is sitting on the buffer that hasn't been 
         // displayed.
         while ( !shared_buffer->isEmpty() ) delete shared_buffer->pop();

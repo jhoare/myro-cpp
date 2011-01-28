@@ -3,7 +3,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
-#include <boost/shared_ptr.hpp>
+//#include <boost/shared_ptr.hpp>
 #include <Fl/Fl.H>
 #include <vector>
 #include "ImageWindow.h"
@@ -26,7 +26,8 @@ class Threaded {
         void startRun();
         virtual void run() = 0;
         volatile bool _running;
-        boost::shared_ptr<boost::thread> runThread; 
+        boost::thread * runThread;
+        //boost::shared_ptr<boost::thread> runThread; 
         boost::mutex startup_mutex;
         boost::condition startup_condition;
 };

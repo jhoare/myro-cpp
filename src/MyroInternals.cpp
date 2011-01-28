@@ -5,7 +5,7 @@
 // Threaded
 //------------------------------
 
-Threaded::Threaded() : stopRequested(false), _running(false), runThread() {};
+Threaded::Threaded() : stopRequested(false), _running(false), runThread(NULL) {};
 
 Threaded::~Threaded(){
     if ( this->running() )
@@ -16,18 +16,18 @@ void Threaded::start() {
     assert(!runThread);
     stopRequested = false;
     boost::mutex::scoped_lock l(startup_mutex);
-    runThread = boost::shared_ptr<boost::thread>
-        (new boost::thread
-         (boost::bind(&Threaded::startRun, this)));
+    runThread = new boost::thread(boost::bind(&Threaded::startRun, this));
     startup_condition.wait(l);
 }
 void Threaded::stop() {
     assert(runThread);
     stopRequested = true;
-    runThread->join();
+    this->join();
 }
 void Threaded::join() { 
-    runThread->join(); 
+    if ( runThread )
+        runThread->join(); 
+    runThread = NULL;
 }
 
 bool Threaded::running(){
@@ -89,6 +89,10 @@ void FLTKThread::run(){
         Fl::wait(0.05);
         usleep(50000);
     }
+    {
+        boost::mutex::scoped_lock l(window_lock);
+        Fl::wait(0.05);
+    }
 }
 
 //------------------------------
@@ -110,8 +114,11 @@ void FLTKManager::block_until_closed(Fl_Window* win){
         thread.to_notify.push_back(notify);
     }
     */
-    boost::mutex::scoped_lock l(m);
-    cond.wait(m);
+    {
+        boost::mutex::scoped_lock l(m);
+        cond.wait(m);
+    }
+    
     //std::cerr << "FLTKManager::block_until_closed(): Closed!" << std::endl;
 }
 
@@ -131,13 +138,26 @@ ImageWindow* FLTKManager::get_image_window(int x, int y, int width, int height, 
 }
 
 bool FLTKManager::remove_image_window(ImageWindow* win){
-    boost::mutex::scoped_lock l(thread.window_lock);
-    std::vector<ImageWindow*>::iterator it;
-    for (it = thread.windows.begin(); it != thread.windows.end(); it++){
-        if (*it == win){
-            thread.windows.erase(it);
-            return true;
+    bool isEmpty = false;
+    bool removed = false;
+    {
+        boost::mutex::scoped_lock l(thread.window_lock);
+        std::vector<ImageWindow*>::iterator it;
+        for (it = thread.windows.begin(); it != thread.windows.end(); it++){
+            if (*it == win){
+                thread.windows.erase(it);
+                removed = true;
+                break;
+            }
         }
+        isEmpty = thread.windows.empty();
     }
-    return false;
+
+    delete win;
+    
+    // If there's no windows left, stop the thread.
+    if ( isEmpty ){
+        thread.stop();
+    }
+    return removed;
 }
