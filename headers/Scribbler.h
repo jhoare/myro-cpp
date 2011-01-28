@@ -268,7 +268,7 @@ class Scribbler: public Robot {
      * @param direction The direction to get: 0-left 1-right
      * @return IR value, -1 if error
      */
-    int getIRdir(int direction);
+    int getIR(int direction);
 
     /**
      * Get a specific direction of the IR sensors
@@ -276,7 +276,7 @@ class Scribbler: public Robot {
      * @param direction The direction to get: "left" or "right"
      * @return IR value, -1 if error
      */
-    int getIRdir(std::string direction);
+    int getIR(std::string direction);
 
     /**
      * Get the values of the light sensors.

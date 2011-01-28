@@ -10,10 +10,10 @@ int main(){
     for (int i = 0; i < 10; i++){
         vector<int> allir = robot.getIR();
         cout << "All: " << allir << endl;
-        cout << "Left  (int) " << robot.getIRdir(0) << endl;
-        cout << "Right (int) " << robot.getIRdir(1) << endl;
-        cout << "Left  (string) " << robot.getIRdir("left") << endl;
-        cout << "Right (string) " << robot.getIRdir("right") << endl << endl;
+        cout << "Left  (int) " << robot.getIR(0) << endl;
+        cout << "Right (int) " << robot.getIR(1) << endl;
+        cout << "Left  (string) " << robot.getIR("left") << endl;
+        cout << "Right (string) " << robot.getIR("right") << endl << endl;
     }
     disconnect();
     return 0;

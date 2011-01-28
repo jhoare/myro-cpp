@@ -1332,7 +1332,7 @@ std::vector<int> Scribbler::getIR(){
     return ir;
 }
 
-int Scribbler::getIRdir(int direction){
+int Scribbler::getIR(int direction){
     if (direction != 0 && direction != 1)
         return -1;
     int * values = this->_get(GET_IR_ALL, 2);
@@ -1343,7 +1343,7 @@ int Scribbler::getIRdir(int direction){
     return ir[direction];
 }
 
-int Scribbler::getIRdir(std::string direction){
+int Scribbler::getIR(std::string direction){
     int index = -1;
     if (direction == "left") 
         index = 0;
