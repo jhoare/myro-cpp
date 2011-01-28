@@ -73,6 +73,8 @@ void GrayPicture::show() {
     win->show();
 
     FLTKManager::block_until_closed(win);
+    FLTKManager::remove_image_window(win);
+    delete win;
 }
 
 bool GrayPicture::loadPicture(const char* filename){

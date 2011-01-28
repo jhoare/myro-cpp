@@ -70,6 +70,8 @@ void ColorPicture::show() {
     win->show();
 
     FLTKManager::block_until_closed(win);
+    FLTKManager::remove_image_window(win);
+    delete win;
 }
 
 Picture* ColorPicture::clone(){
