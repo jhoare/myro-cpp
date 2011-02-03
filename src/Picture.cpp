@@ -7,6 +7,7 @@
 
 Picture::Picture(){
     this->width = this->height = 0;
+    this->image_data = NULL;
 }
 
 Picture::Picture(int width, int height) {
