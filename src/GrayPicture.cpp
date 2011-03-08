@@ -12,7 +12,7 @@ GrayPicture::GrayPicture(int width, int height)
 
     image_data = new unsigned char[width * height];
     for(int i = 0; i < width * height; i++)
-        image_data = 0;
+        image_data[i] = 0;
 
     this->width = width;
     this->height = height;
