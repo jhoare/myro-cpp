@@ -1,3 +1,6 @@
+2.3.0 (bzr-trunk)
+ - Changed it so the connect() functions on the robot can take a string to hard-code into your code the commport of your robot. 
+
 2.2.2 (2011-01-28)
  - Added askQuestion() and askQuestionVector() variant.
  - Added MyroIO.h which gives convienience operator overloading for vector & list stl objects.

@@ -22,7 +22,7 @@ class Robot {
 	/**
 	 * Abstract function for connecting to the robot.
 	 */
-	virtual int connect()=0;
+	virtual int connect(std::string port="")=0;
 
 	/**
 	 * Abstract function for disconnecting from the robot.

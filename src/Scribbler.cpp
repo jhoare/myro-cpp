@@ -138,16 +138,20 @@ Scribbler::~Scribbler() {
     delete con;
 }
 
-int Scribbler::connect() {
-    std::string device;
-    std::cout << "Please enter the comport: ";
-    std::cin >> device;
-    std::cin.ignore();
+int Scribbler::connect(std::string port) {
+    if ( port == "" ){
+        std::cout << "Please enter the comport: ";
+        std::cin >> port;
+        std::cin.ignore();
+    } 
+    else{
+        std::cout << "Connecting to port: " << port << std::endl;
+    }
     con = new serial(38400, 1);
-    int status = con->connect(device.c_str());
+    int status = con->connect(port.c_str());
     if(status < 0) {
-        //fprintf(stderr, "Failed to connect to %s\n", device.c_str());
-        std::cerr << "Failed to connect to " << device << std::endl;
+        //fprintf(stderr, "Failed to connect to %s\n", port.c_str());
+        std::cerr << "Failed to connect to " << port << std::endl;
         delete con;
         con = NULL;
         return -1;

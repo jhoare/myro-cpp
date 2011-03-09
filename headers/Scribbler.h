@@ -40,7 +40,7 @@ class Scribbler: public Robot {
 	 * @return returns a value less than 0 to indicate failure and
 	 * a positive value greater than or equal to zero to indicate success.
 	 */
-	int connect();
+	int connect(std::string port);
 
 	/**
 	 * Attempts to disconnect from the robot.

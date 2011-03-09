@@ -19,7 +19,7 @@ extern Scribbler robot;
  */
 
 /// Connect the global robot
-void connect();
+void connect(std::string port="");
 /// Disconnect the global robot
 void disconnect();
 

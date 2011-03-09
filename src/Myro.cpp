@@ -42,8 +42,8 @@ bool timeRemaining(double desired_time) {
     return true;
 }
 
-void connect(){
-	int status = robot.connect(); 
+void connect(std::string port){
+	int status = robot.connect(port); 
 	if(status < 0) { 
 		exit(-1);
 	}
