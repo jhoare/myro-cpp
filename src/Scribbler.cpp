@@ -1432,13 +1432,16 @@ void Scribbler::setName(std::string name) {
     name_buffer[0] = SET_NAME1;
     name_buffer[9] = SET_NAME2;
 
-    for(int j = 0; j < 2; j++) {
-        for(int i = j * 9 + 1; i < 9 * (j+1); i++) {
-            if(i-1 < (int)name.length()) 
-                name_buffer[i] = name.at(i-1);
-            else name_buffer[i] = ' ';
-        }
+    int bi = 1;
+    for (int ni = 0; ni < 16; ni++){
+        if ( ni < (int)name.length() )
+            name_buffer[bi] = name.at(ni);
+        else 
+            name_buffer[bi] = ' ';
+        bi++;
+        if ( bi == 9 )  bi++;
     }
+
     //pthread_mutex_lock(this->robot_lock);
     boost::mutex::scoped_lock l(*(this->robot_lock));
     send_message(name_buffer, 18);
@@ -1452,12 +1455,14 @@ void Scribbler::setPassword(std::string pass) {
     pass_buffer[0] = SET_PASS1;
     pass_buffer[9] = SET_PASS2;
 
-    for(int j = 0; j < 2; j++) {
-        for(int i = j * 9 + 1; i < 9 * (j+1); i++) {
-            if(i - 1 < (int)pass.length())
-                pass_buffer[i] = pass.at(i-1);
-            else pass_buffer[i] = ' ';
-        }
+    int bi = 1;
+    for (int pi = 0; pi < 16; pi++){
+        if ( pi < (int)pass.length() )
+            pass_buffer[bi] = pass.at(pi);
+        else 
+            pass_buffer[bi] = ' ';
+        bi++;
+        if ( bi == 9 )  bi++;
     }
     //pthread_mutex_lock(this->robot_lock);
     boost::mutex::scoped_lock l(*(this->robot_lock));
