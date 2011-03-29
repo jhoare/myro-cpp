@@ -129,3 +129,39 @@ Picture* clone(Picture* p){
     return p->clone();
 }
 // END C-style Wrappers for the objects...
+
+
+// Pixel Functions
+inline void setRed(Pixel& p, int value){
+    if(value>=0 && value <= 255){
+        std::cerr << "Error: value should be between 0 and 255" << std::endl;
+        return;
+    }
+    p.R = value;
+}
+inline void setGreen(Pixel& p, int value){
+    if(value>=0 && value <= 255){
+        std::cerr << "Error: value should be between 0 and 255" << std::endl;
+        return;
+    }
+    p.G = value;
+}
+inline void setBlue(Pixel& p, int value){
+    if(value>=0 && value <= 255){
+        std::cerr << "Error: value should be between 0 and 255" << std::endl;
+        return;
+    }
+    p.B = value;
+}
+
+inline int getRed(Pixel& p){
+    return p.R;
+}
+
+inline int getGreen(Pixel& p){
+    return p.G;
+}
+
+inline int getBlue(Pixel& p){
+    return p.B;
+}

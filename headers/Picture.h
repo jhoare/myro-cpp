@@ -17,6 +17,38 @@ struct Pixel {
     unsigned char B;
 };
 
+/** 
+ * Set the Red channel of the pixel. 
+ *
+ * @param value Should be between 0->255
+ */
+void setRed(Pixel& p, int value);
+/** 
+ * Set the Green channel of the pixel. 
+ *
+ * @param value Should be between 0->255
+ */
+void setGreen(Pixel& p, int value);
+/** 
+ * Set the Blue channel of the pixel. 
+ *
+ * @param value Should be between 0->255
+ */
+void setBlue(Pixel& p, int value);
+
+/**
+ * Get the Red value of the given pixel
+ */
+int getRed(Pixel& p);
+/**
+ * Get the Green value of the given pixel
+ */
+int getGreen(Pixel& p);
+/**
+ * Get the Blue value of the given pixel
+ */
+int getBlue(Pixel& p);
+
 
 /**
  * @class Picture
