@@ -42,6 +42,15 @@ bool timeRemaining(double desired_time) {
     return true;
 }
 
+double currentTime(){
+    time_t theTime = time(NULL);
+    return (double)theTime;
+}
+
+double randomNumber(){
+    return (double)rand()/RAND_MAX;
+}
+
 void connect(std::string port){
 	int status = robot.connect(port); 
 	if(status < 0) { 

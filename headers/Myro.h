@@ -9,7 +9,6 @@
 
 #include <Scribbler.h>
 
-
 extern Scribbler robot;
 
 /** @defgroup myro_general General Myro Commands
@@ -44,6 +43,16 @@ void wait(double time);
  * of minutes.
  */
 bool timeRemaining(double start_time);
+
+/**
+ * Returns the time, in seconds, since the epoch.
+ */
+double currentTime();
+
+/**
+ * Returns a random number in the range of 0.0 and 1.0
+ */
+double randomNumber();
 
 
 /**
