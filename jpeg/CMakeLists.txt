@@ -33,5 +33,6 @@ jdsample.c jdcolor.c jquant1.c jquant2.c jdmerge.c
 
 #SET(myrocpp_jpeg_SRCS ${systemdependent_SRCS} ${common_SRCS} ${compression_SRCS} ${decompression_SRCS})
 ADD_LIBRARY(myrocpp_jpeg STATIC ${systemdependent_SRCS} ${common_SRCS} ${compression_SRCS} ${decompression_SRCS})
+SET_TARGET_PROPERTIES(myrocpp_jpeg PROPERTIES COMPILE_FLAGS -fPIC)
 #INSTALL_TARGETS(/lib fltk_jpeg)
 
