@@ -7,12 +7,6 @@
 #include <cstdlib>
 #include <cstdlib>
 #include <string>
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/fl_draw.H>
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Return_Button.H>
 #include <vector>
 #include <stdarg.h>
 #include <boost/algorithm/string/trim.hpp>

@@ -7,7 +7,6 @@
 
 Picture::Picture(){
     this->width = this->height = 0;
-    this->image_data = NULL;
 }
 
 Picture::Picture(int width, int height) {
@@ -16,7 +15,6 @@ Picture::Picture(int width, int height) {
 }
 
 Picture::~Picture() {
-    delete[] image_data;
 }
 
 int Picture::getHeight() {
@@ -25,10 +23,6 @@ int Picture::getHeight() {
 
 int Picture::getWidth() {
     return width;
-}
-
-unsigned char* Picture::getRawImage(){
-    return image_data;
 }
 
 void Picture::out_of_bounds_error(int width, int height, int given_width, 

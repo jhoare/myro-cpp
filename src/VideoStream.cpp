@@ -1,98 +1,32 @@
 #include "VideoStream.h"
-#include "ImageWindow.h"
 #include <assert.h>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
-#include <FL/Fl.H>
-#include <FL/Fl_Image.H>
-#include <FL/Fl_Window.H>
-#include <FL/fl_draw.H>
 #include <iostream>
 #include <exception>
 #include "MyroInternals.h"
+#include <MyroCImg.h>
 
 #define image_height 192
 #define image_width 256
 #define RGB 3
-static const int BUFFER_SIZE = 512;
 
 class DisplayThread : public Threaded{
     public:
-    DisplayThread(ImageWindow* imageWindow, circbuf* cb,
+    DisplayThread(Scribbler* robot, int colormode,
                           std::vector<Filter*>* filters,
                               boost::mutex& _filterLock);
     //virtual void start();
     virtual void run();
     //void stop();
     private:
-    ImageWindow * imageWindow;
-    circbuf* cb;
     std::vector<Filter*>* filters;
     boost::mutex& filterLock;
-};
-
-class CaptureThread : public Threaded{
-    public:
-    CaptureThread(Scribbler* robot, circbuf* cb, int color_mode);
-    //void start();
-    virtual void run();
-    private:
     Scribbler* robot;
-    circbuf* cb;
     int color_mode;
 };
 
-class circbuf{
-    public:
-        circbuf(int size){
-            this->buf = new Picture*[size];
-            this->size = size;
-            this->start = this->end = 0;
-        }
-        ~circbuf(){
-            delete[] buf;
-        }
-        void push(Picture* item){
-            //std::cerr << "push()" << std::endl;
-            boost::mutex::scoped_lock l(_lock);
-            buf[end] = item;
-            end = (end+1)%size;
-            cv.notify_one();
-            if ( end == start ){
-                // We're overwriting old data.
-                //start = (start+1)%size;
-                // TODO: Handle this Better
-                throw new std::exception;
-            }
-        }
-        Picture* pop(){
-            Picture* val;
-            //std::cerr << "pop()" << std::endl;
-            if ( start == end ){
-                boost::mutex::scoped_lock l(_lock);
-                while ( start == end ){
-                    // We need to block and wait for something.
-                    //std::cerr << "waiting up" << std::endl;
-                    cv.wait(l);
-                    //std::cerr << "waking up" << std::endl;
-                }
-            }
-            val = buf[start]; 
-            start = (start+1)%size;
-            return val;
-        }
-        bool isEmpty(){
-            return start == end;
-        }
-    private:
-        Picture** buf;
-        unsigned int size;
-        unsigned int start;
-        unsigned int end;
-        boost::mutex _lock;
-        boost::condition cv;
-};
 
 VideoStream::VideoStream(Scribbler * scrib, int color_mode)
 : filterLock(new boost::mutex()){
@@ -121,24 +55,38 @@ VideoStream::~VideoStream() {
 
 
 // Dispaly/Update Thread
-DisplayThread::DisplayThread(ImageWindow* imageWindow, circbuf* cb,
-                                      std::vector<Filter*>* filters,
+DisplayThread::DisplayThread(Scribbler* robot, int colormode, std::vector<Filter*>* filters,
                                           boost::mutex& _filterLock)
 :  Threaded(), filterLock(_filterLock)
 {
-    this->imageWindow = imageWindow;
-    this->cb = cb;
+    this->robot = robot;
+    this->color_mode = colormode;
     this->filters = filters;
 }
 
 void DisplayThread::run() {
     Picture* img_cur=NULL;
     Picture* img_new=NULL;
+    cil::CImgDisplay displaywin(image_width,image_height, "Video Stream");
 
     while(!this->stopRequested){
         //std::cerr << "DisplayThread::run()" << std::endl;
         //printf("display_stream() Waiting on Picture\n");
-        img_new = cb->pop();
+        switch(this->color_mode) {
+            case 0: 
+                img_new = robot->takePicture("grayjpeg");
+                break;
+            case 1:
+                img_new = robot->takePicture("jpeg");
+                break;
+            case 2:
+                img_new = robot->takePicture("blob");
+                break;
+            default: 
+            {
+                throw "Invalid Color Mode\n";
+            }
+        }
         // If we got a NULL picture, shut down thread
         if ( img_new == NULL )
             this->stopRequested = true;
@@ -154,17 +102,17 @@ void DisplayThread::run() {
             }
         }
 
-        imageWindow->loadImageSource(img_new->getRawImage(), image_width, image_height);
+        if ( displaywin.is_closed() ) displaywin.show();
+        displaywin.display(img_new->getRawImage());
 
         if ( img_cur != NULL ){
             delete img_cur;
         }
         img_cur = img_new;
 
-        imageWindow->refresh();
-
+        displaywin.wait(100);
         //boost::thread::yield();
-        usleep(1000); //hack to slow down the capture thread
+        //usleep(1000); //hack to slow down the capture thread
                       //so that the other threads are scheduled
         //printf("display_stream() Image Updated\n");
 
@@ -173,84 +121,12 @@ void DisplayThread::run() {
 }
 
 
-CaptureThread::CaptureThread(Scribbler* robot, circbuf* buf, int color_mode)
-:Threaded()
-{
-    this->robot = robot;
-    this->cb = buf;
-    this->color_mode = color_mode;
-}
-
-void CaptureThread::run(){
-    Picture * tempImageBuffer; 
-
-    while(!this->stopRequested){
-        //std::cerr << "CaptureThread::run()" << std::endl;
-        //pthread_mutex_lock(videoData->refresh_lock);    
-
-        //fprintf(stderr, "capture_image() Capturing Image\n");
-
-        switch(this->color_mode) {
-            case 0: 
-                tempImageBuffer = robot->takePicture("grayjpeg");
-                break;
-            case 1:
-                tempImageBuffer = robot->takePicture("jpeg");
-                break;
-            case 2:
-                tempImageBuffer = robot->takePicture("blob");
-                break;
-            default: 
-            {
-                throw "Invalid Color Mode\n";
-            }
-        }
-
-        //printf("capture_image(): Image Loaded into Memory\n"); 
-        cb->push(tempImageBuffer);
-        if (tempImageBuffer==NULL){
-            this->stopRequested = true;
-            break;
-        }
-        usleep(1000); //hack to slow down the capture thread
-                      //so that the other threads are scheduled
-        //boost::thread::yield();
-    }
-    return;
-}
-
 void VideoStream::startStream() {
     if ( !running ){
-        // This lock/condition variable combo is addressing an issue that 
-        // shows up in cygwin where the fl_window thread doesn't get run
-        // sometimes, depending on what happens immediately after startStream
-        // is called. These are used so that the thread calling startStream
-        // blocks until it has begun running.
-        // TODO: I've removed this all, moving the fl_thread to the ImageWindow class...
-        // very likely I'll need to do something similarly hacky over there.
-        //boost::mutex setup_lock;
-        //boost::condition setup_notify;
+        display_thread = new DisplayThread(myScrib, color_mode,filters, *filterLock);
 
-        //window = new ImageWindow(256,192, (char*)"Robot Image");
-        window = FLTKManager::get_image_window(256,192, (char*)"Robot Image");
-        //imageWindow = new ImageWindow(0,0,256,192,NULL);
-        window->end();
-        window->set_color_mode(color_mode);
-        //fl_thread = new Fl_Thread(window, setup_lock, setup_notify);
-        shared_buffer = new circbuf(BUFFER_SIZE);
-        display_thread = new DisplayThread(window, shared_buffer, filters, 
-                                                                    *filterLock);
-        capture_thread = new CaptureThread(myScrib, shared_buffer, color_mode);
-
-        //boost::mutex::scoped_lock l(setup_lock);
-        capture_thread->start();
         display_thread->start();
-        //fl_thread->start();
         running = true;
-        // Wait until the fl_thread has actually started running
-        //setup_notify.wait(l);
-        //id = myScrib->registerVideoStream(this);
-        //std::cerr << "Done StartStream()" << std::endl;
     }
 }
 
@@ -278,20 +154,9 @@ void VideoStream::endStream() {
     if ( running ){
 
         display_thread->stop();
-        capture_thread->stop();
-
-        //delete imageWindow;
-        // Remove the window for the fltk mananager
-        FLTKManager::remove_image_window(window);
-        // Free all the memory that is sitting on the buffer that hasn't been 
-        // displayed.
-        while ( !shared_buffer->isEmpty() ) delete shared_buffer->pop();
-        delete shared_buffer;
 
         delete display_thread;
-        delete capture_thread;
         running = false;
-        //myScrib->unregisterVideoStream(id);
         id = -1;
     }
 }

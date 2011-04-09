@@ -3,6 +3,7 @@
 
 #include<exception>
 #include<string>
+#include<MyroCImg.h>
 /** @defgroup picture Picture Operations
  * The collection of all Picture Related commands and operations
  * @{
@@ -94,7 +95,7 @@ class Picture {
          * Get a pointer to the underlying memory representing the 
          * image.
          */
-        unsigned char * getRawImage();
+        virtual myro_img& getRawImage()=0;
 
         /** 
          * Get a "clone" of this picture. A clone is also a copy. 
@@ -143,10 +144,11 @@ class Picture {
 
     protected:
 
-        unsigned char * image_data;
+        //unsigned char * image_data;
+        //cimg_library::CImg<unsigned char> image_data;
+        //myro_img image_data;
         int width;
         int height;
-
 };
 // functions added for lab 6 by Nick
 int getWidth(Picture *p);

@@ -25,7 +25,10 @@ class GrayPicture: public Picture {
         virtual Picture* clone();
         virtual bool loadPicture(const char* filename);
         virtual void savePicture(const char* filename);
+        virtual myro_img& getRawImage();
 
+    private:
+        myro_img image_data;
 };
 
 ///@}

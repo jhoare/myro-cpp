@@ -85,11 +85,15 @@ class VideoStream {
     int color_mode;
 
     //Fl_Window * window;
+    /*
     ImageWindow * window;
     Fl_Thread * fl_thread;
+    */
     DisplayThread * display_thread;
+    /*
     CaptureThread * capture_thread;
     circbuf * shared_buffer;
+    */
 
     boost::mutex* filterLock;
 
