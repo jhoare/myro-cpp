@@ -67,7 +67,7 @@ DisplayThread::DisplayThread(Scribbler* robot, int colormode, std::vector<Filter
 void DisplayThread::run() {
     Picture* img_cur=NULL;
     Picture* img_new=NULL;
-    cil::CImgDisplay displaywin(image_width,image_height, "Video Stream");
+    cil::CImgDisplay displaywin(image_width,image_height, "Video Stream",3,false,true);
 
     while(!this->stopRequested){
         //std::cerr << "DisplayThread::run()" << std::endl;
