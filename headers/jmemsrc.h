@@ -1,5 +1,5 @@
 #pragma once 
-#include <jpeglib.h>
+#include "jpeglib.h"
 GLOBAL(void)
 myro_jpeg_mem_src (j_decompress_ptr cinfo,
               JOCTET * pData,

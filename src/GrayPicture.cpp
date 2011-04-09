@@ -1,5 +1,5 @@
+#define cimg_use_jpeg
 #include "GrayPicture.h"
-#include <jpeglib.h>
 #include <cstdio>
 #include "MyroInternals.h"
 
@@ -62,10 +62,12 @@ myro_img& GrayPicture::getRawImage(){
 }
 
 bool GrayPicture::loadPicture(const char* filename){
+  image_data.load_jpeg(filename);
   /* And we're done! */
   return true;
 }
 
 void GrayPicture::savePicture(const char* filename){
+  image_data.save_jpeg(filename);
   /* And we're done! */
 }

@@ -2,9 +2,11 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/headers)
 
 LINK_LIBRARIES(${Boost_THREAD_LIBRARY})
 
+GET_DIRECTORY_PROPERTY(myrocpp_jpeg_SRCS DIRECTORY ${PROJECT_SOURCE_DIR}/jpeg DEFINITION myrocpp_jpeg_SRCS)
+
 ADD_LIBRARY(myro-cpp SHARED Myro.cpp MyroInternals.cpp Scribbler.cpp serial.cpp Robot.cpp ColorPicture.cpp GrayPicture.cpp Picture.cpp VideoStream.cpp Filter.cpp jmemsrc.c)
 
-TARGET_LINK_LIBRARIES(myro-cpp ${JPEG_LIBRARIES} ${X11_LIBRARIES})
+TARGET_LINK_LIBRARIES(myro-cpp ${GUI_LIBRARIES} ${PROJECT_BINARY_DIR}/jpeg/libmyrocpp_jpeg.a)
 
 IF(WIN32) 
     MESSAGE(STATUS "Hello Windows User!")

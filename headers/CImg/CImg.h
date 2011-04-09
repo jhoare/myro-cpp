@@ -4538,7 +4538,7 @@ namespace cimg_library {
         res = (*mode=='r')?stdin:stdout;
 #if cimg_OS==2
         if (*mode && mode[1]=='b') { // Force stdin/stdout to be in binary mode.
-          if (_setmode(_fileno(res),0x8000)==-1) res = 0;
+          //if (_setmode(_fileno(res),0x8000)==-1) res = 0;
         }
 #endif
       } else res = std::fopen(path,mode);

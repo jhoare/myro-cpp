@@ -10,7 +10,6 @@
 
 #define image_height 192
 #define image_width 256
-#define RGB 3
 
 class DisplayThread : public Threaded{
     public:

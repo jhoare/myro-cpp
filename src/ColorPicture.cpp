@@ -1,12 +1,6 @@
+#define cimg_use_jpeg
 #include "ColorPicture.h"
-#include <jpeglib.h>
 #include <cstdio>
-/*
-#include <FL/Fl.H>
-#include <FL/Fl_Image.H>
-#include <FL/Fl_Window.H>
-#include <FL/fl_draw.H>
-*/
 #include "MyroInternals.h"
 
 using namespace std;
@@ -64,11 +58,13 @@ Picture* ColorPicture::clone(){
 
 bool ColorPicture::loadPicture(const char* filename){
   /* And we're done! */
+  image_data.load_jpeg(filename);
   return true;
 }
 
 void ColorPicture::savePicture(const char* filename){
   /* And we're done! */
+  image_data.save_jpeg(filename);
 }
 
 myro_img& ColorPicture::getRawImage(){
