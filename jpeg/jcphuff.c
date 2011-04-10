@@ -13,9 +13,9 @@
  */
 
 #define JPEG_INTERNALS
-#include "jinclude.h"
-#include "jpeglib.h"
-#include "jchuff.h"		/* Declarations shared with jchuff.c */
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
+#include "myrojchuff.h"		/* Declarations shared with jchuff.c */
 
 #ifdef C_PROGRESSIVE_SUPPORTED
 

@@ -33,8 +33,8 @@
  */
 
 #define JPEG_INTERNALS
-#include "jinclude.h"
-#include "jpeglib.h"
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
 
 #ifdef UPSAMPLE_MERGING_SUPPORTED
 

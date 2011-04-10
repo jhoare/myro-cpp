@@ -33,9 +33,9 @@
  */
 
 #define JPEG_INTERNALS
-#include "jinclude.h"
-#include "jpeglib.h"
-#include "jdct.h"		/* Private declarations for DCT subsystem */
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
+#include "myrojdct.h"		/* Private declarations for DCT subsystem */
 
 #ifdef DCT_IFAST_SUPPORTED
 

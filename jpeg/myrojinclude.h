@@ -1,5 +1,5 @@
 /*
- * jinclude.h
+ * myrojinclude.h
  *
  * Copyright (C) 1991-1994, Thomas G. Lane.
  * This file is part of the Independent JPEG Group's software.
@@ -11,14 +11,14 @@
  * you may have to edit this file.)
  *
  * NOTE: this file is NOT intended to be included by applications using the
- * JPEG library.  Most applications need only include jpeglib.h.
+ * JPEG library.  Most applications need only include myrojpeglib.h.
  */
 
 
 /* Include auto-config file to find out which system include files we need. */
 
-#include "jconfig.h"		/* auto configuration options */
-#define JCONFIG_INCLUDED	/* so that jpeglib.h doesn't do it again */
+#include "myrojconfig.h"		/* auto configuration options */
+#define JCONFIG_INCLUDED	/* so that myrojpeglib.h doesn't do it again */
 
 /*
  * We need the NULL macro and size_t typedef.
@@ -27,7 +27,7 @@
  * pull in <sys/types.h> as well.
  * Note that the core JPEG library does not require <stdio.h>;
  * only the default error handler and data source/destination modules do.
- * But we must pull it in because of the references to FILE in jpeglib.h.
+ * But we must pull it in because of the references to FILE in myrojpeglib.h.
  * You can remove those references if you want to compile without <stdio.h>.
  */
 

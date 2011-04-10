@@ -1,5 +1,5 @@
 /*
- * jpeglib.h
+ * myrojpeglib.h
  *
  * Copyright (C) 1991-1998, Thomas G. Lane.
  * This file is part of the Independent JPEG Group's software.
@@ -7,7 +7,7 @@
  *
  * This file defines the application interface for the JPEG library.
  * Most applications using the library need only include this file,
- * and perhaps jerror.h if they want to know the exact error codes.
+ * and perhaps myrojerror.h if they want to know the exact error codes.
  */
 
 #ifndef JPEGLIB_H
@@ -15,15 +15,15 @@
 
 /*
  * First we include the configuration files that record how this
- * installation of the JPEG library is set up.  jconfig.h can be
- * generated automatically for many systems.  jmorecfg.h contains
+ * installation of the JPEG library is set up.  myrojconfig.h can be
+ * generated automatically for many systems.  myrojmorecfg.h contains
  * manual configuration options that most people need not worry about.
  */
 
-#ifndef JCONFIG_INCLUDED	/* in case jinclude.h already did */
-#include "jconfig.h"		/* widely used configuration options */
+#ifndef JCONFIG_INCLUDED	/* in case myrojinclude.h already did */
+#include "myrojconfig.h"		/* widely used configuration options */
 #endif
-#include "jmorecfg.h"		/* seldom changed options */
+#include "myrojmorecfg.h"		/* seldom changed options */
 
 
 /* Version ID for the JPEG library.
@@ -48,7 +48,7 @@
 /* Unfortunately, some bozo at Adobe saw no reason to be bound by the standard;
  * the PostScript DCT filter can emit files with many more than 10 blocks/MCU.
  * If you happen to run across such a file, you can up D_MAX_BLOCKS_IN_MCU
- * to handle it.  We even let you do this from the jconfig.h file.  However,
+ * to handle it.  We even let you do this from the myrojconfig.h file.  However,
  * we strongly discourage changing C_MAX_BLOCKS_IN_MCU; just because Adobe
  * sometimes emits noncompliant files doesn't mean you should too.
  */
@@ -220,10 +220,10 @@ typedef enum {
 	JDCT_FLOAT		/* floating-point: accurate, fast on fast HW */
 } J_DCT_METHOD;
 
-#ifndef JDCT_DEFAULT		/* may be overridden in jconfig.h */
+#ifndef JDCT_DEFAULT		/* may be overridden in myrojconfig.h */
 #define JDCT_DEFAULT  JDCT_ISLOW
 #endif
-#ifndef JDCT_FASTEST		/* may be overridden in jconfig.h */
+#ifndef JDCT_FASTEST		/* may be overridden in myrojconfig.h */
 #define JDCT_FASTEST  JDCT_IFAST
 #endif
 
@@ -1054,7 +1054,7 @@ EXTERN(boolean) jpeg_resync_to_restart JPP((j_decompress_ptr cinfo,
  */
 
 #ifdef INCOMPLETE_TYPES_BROKEN
-#ifndef JPEG_INTERNALS		/* will be defined in jpegint.h */
+#ifndef JPEG_INTERNALS		/* will be defined in myrojpegint.h */
 struct jvirt_sarray_control { long dummy; };
 struct jvirt_barray_control { long dummy; };
 struct jpeg_comp_master { long dummy; };
@@ -1084,13 +1084,13 @@ struct jpeg_color_quantizer { long dummy; };
 /*
  * The JPEG library modules define JPEG_INTERNALS before including this file.
  * The internal structure declarations are read only when that is true.
- * Applications using the library should not include jpegint.h, but may wish
- * to include jerror.h.
+ * Applications using the library should not include myrojpegint.h, but may wish
+ * to include myrojerror.h.
  */
 
 #ifdef JPEG_INTERNALS
-#include "jpegint.h"		/* fetch private declarations */
-#include "jerror.h"		/* fetch error codes too */
+#include "myrojpegint.h"		/* fetch private declarations */
+#include "myrojerror.h"		/* fetch error codes too */
 #endif
 
 #endif /* JPEGLIB_H */

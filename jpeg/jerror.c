@@ -19,10 +19,10 @@
  */
 
 /* this is not a core library module, so it doesn't define JPEG_INTERNALS */
-#include "jinclude.h"
-#include "jpeglib.h"
-#include "jversion.h"
-#include "jerror.h"
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
+#include "myrojversion.h"
+#include "myrojerror.h"
 #include <stdlib.h>
 
 #ifdef USE_WINDOWS_MESSAGEBOX
@@ -36,8 +36,8 @@
 
 /*
  * Create the message string table.
- * We do this from the master message list in jerror.h by re-reading
- * jerror.h with a suitable definition for macro JMESSAGE.
+ * We do this from the master message list in myrojerror.h by re-reading
+ * myrojerror.h with a suitable definition for macro JMESSAGE.
  * The message table is made an external symbol just in case any applications
  * want to refer to it directly.
  */
@@ -49,7 +49,7 @@
 #define JMESSAGE(code,string)	string ,
 
 const char * const jpeg_std_message_table[] = {
-#include "jerror.h"
+#include "myrojerror.h"
   NULL
 };
 

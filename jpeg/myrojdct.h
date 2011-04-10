@@ -47,7 +47,7 @@ typedef JMETHOD(void, float_DCT_method_ptr, (FAST_FLOAT * data));
  * DCT_scaled_size * DCT_scaled_size.
  */
 
-/* typedef inverse_DCT_method_ptr is declared in jpegint.h */
+/* typedef inverse_DCT_method_ptr is declared in myrojpegint.h */
 
 /*
  * Each IDCT routine has its own ideas about the best dct_table element type.

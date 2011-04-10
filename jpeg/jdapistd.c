@@ -15,8 +15,8 @@
  */
 
 #define JPEG_INTERNALS
-#include "jinclude.h"
-#include "jpeglib.h"
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
 
 
 /* Forward declarations */

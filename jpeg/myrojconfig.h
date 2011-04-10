@@ -15,7 +15,7 @@
 #  ifndef __RPCNDR_H__		/* don't conflict if rpcndr.h already read */
 typedef unsigned char boolean;
 #  endif
-#  define HAVE_BOOLEAN		/* prevent jmorecfg.h from redefining it */
+#  define HAVE_BOOLEAN		/* prevent myrojmorecfg.h from redefining it */
 #endif /* WIN32 || __EMX__ */
 
 #ifdef JPEG_INTERNALS

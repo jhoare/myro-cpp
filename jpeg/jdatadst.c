@@ -15,9 +15,9 @@
  */
 
 /* this is not a core library module, so it doesn't define JPEG_INTERNALS */
-#include "jinclude.h"
-#include "jpeglib.h"
-#include "jerror.h"
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
+#include "myrojerror.h"
 
 
 /* Expanded data destination object for stdio output */

@@ -19,8 +19,8 @@
 extern "C"
 {
 #endif
-#include "jpeglib.h"
-#include "jerror.h"
+#include "myrojpeglib.h"
+#include "myrojerror.h"
 #ifdef __cplusplus
 }
 #endif

@@ -11,8 +11,8 @@
  */
 
 #define JPEG_INTERNALS
-#include "jinclude.h"
-#include "jpeglib.h"
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
 
 
 /* We use a full-image coefficient buffer when doing Huffman optimization,

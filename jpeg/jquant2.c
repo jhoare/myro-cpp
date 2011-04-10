@@ -18,8 +18,8 @@
  */
 
 #define JPEG_INTERNALS
-#include "jinclude.h"
-#include "jpeglib.h"
+#include "myrojinclude.h"
+#include "myrojpeglib.h"
 
 #ifdef QUANT_2PASS_SUPPORTED
 
@@ -75,8 +75,8 @@
 #define B_SCALE 1		/* and B by this much */
 
 /* Relabel R/G/B as components 0/1/2, respecting the RGB ordering defined
- * in jmorecfg.h.  As the code stands, it will do the right thing for R,G,B
- * and B,G,R orders.  If you define some other weird order in jmorecfg.h,
+ * in myrojmorecfg.h.  As the code stands, it will do the right thing for R,G,B
+ * and B,G,R orders.  If you define some other weird order in myrojmorecfg.h,
  * you'll get compile errors until you extend this logic.  In that case
  * you'll probably want to tweak the histogram sizes too.
  */
