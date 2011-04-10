@@ -143,9 +143,6 @@ int main(int argc, char ** argv) {
     //while(true){
     video.startStream();
 
-    Picture* foo = robot.takePicture();
-    show(foo);
-
     int close = 0;
     std::string quit;
     while(!close) {
