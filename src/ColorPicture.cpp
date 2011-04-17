@@ -8,22 +8,25 @@ using namespace std;
 ColorPicture::ColorPicture(): Picture() {};
 
 ColorPicture::ColorPicture(unsigned char * data, int width, int height)
-    : Picture(width, height), image_data(width,height,1,3){
+    : Picture(width, height){
   
+    image_data.assign(width,height,1,3);
     loadInterlacedImage(data);
     this->width = width;
     this->height = height;
 }
 
 ColorPicture::ColorPicture(int width, int height): 
-    Picture(width, height), image_data(width,height,1,3,0)
+    Picture(width, height)
 {
+    image_data.assign(width,height,1,3,0);
     this->width = width;
     this->height = height;
 }
 
 ColorPicture::ColorPicture(ColorPicture& pic):
-    Picture(pic.width, pic.height), image_data(pic.image_data){
+    Picture(pic.width, pic.height){
+        image_data.assign(pic.image_data);
 }
 
 Pixel ColorPicture::getPixel(int x, int y) {
@@ -69,10 +72,6 @@ bool ColorPicture::loadPicture(const char* filename){
 void ColorPicture::savePicture(const char* filename){
   /* And we're done! */
   image_data.save_jpeg(filename);
-}
-
-myro_img& ColorPicture::getRawImage(){
-    return image_data;
 }
 
 void ColorPicture::loadInterlacedImage(unsigned char* img){

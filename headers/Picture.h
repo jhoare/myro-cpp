@@ -111,7 +111,7 @@ class Picture {
          * Get a pointer to the underlying memory representing the 
          * image.
          */
-        virtual myro_img& getRawImage()=0;
+        myro_img& getRawImage();
 
         /** 
          * Get a "clone" of this picture. A clone is also a copy. 
@@ -162,7 +162,7 @@ class Picture {
 
         //unsigned char * image_data;
         //cimg_library::CImg<unsigned char> image_data;
-        //myro_img image_data;
+        myro_img image_data;
         int width;
         int height;
 };

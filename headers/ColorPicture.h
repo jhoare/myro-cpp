@@ -27,10 +27,9 @@ class ColorPicture: public Picture {
         virtual Picture* clone();
         virtual bool loadPicture(const char* filename);
         virtual void savePicture(const char* filename);
-        virtual myro_img& getRawImage();
     private:
         void loadInterlacedImage(unsigned char* img);
-        myro_img image_data;
+        //myro_img image_data;
 };
 
 

@@ -25,6 +25,10 @@ int Picture::getWidth() {
     return width;
 }
 
+myro_img& Picture::getRawImage(){
+    return image_data;
+}
+
 void Picture::out_of_bounds_error(int width, int height, int given_width, 
                                                     int given_height){
     std::cerr << std::endl << "ERROR: Accessing Image Out of bounds." 

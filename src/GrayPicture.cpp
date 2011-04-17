@@ -8,25 +8,26 @@ using namespace std;
 GrayPicture::GrayPicture() : Picture() {};
 
 GrayPicture::GrayPicture(int width, int height) 
-:Picture(width, height), image_data(width,height,1,1,0) {
-
+:Picture(width, height){
+    image_data.assign(width,height,1,1,0) ;
     this->width = width;
     this->height = height;
 }
 
 GrayPicture::GrayPicture(unsigned char * data, int width, int height)
-:Picture(width, height), image_data(data,width,height,1,1) {
+:Picture(width, height){
+    image_data.assign(data,width,height,1,1) ;
     this->width = width;
     this->height = height;
 }
 
 GrayPicture::GrayPicture(GrayPicture& pic)
-:Picture(pic.width, pic.height),image_data(pic.image_data){
-
+:Picture(pic.width, pic.height){
+    image_data.assign(pic.image_data);
     this->width = pic.width;
     this->height = pic.height;
 
-    image_data = pic.image_data;
+    image_data.assign(pic.image_data);
 }
 
 Pixel GrayPicture::getPixel(int x, int y) {
@@ -59,10 +60,6 @@ void GrayPicture::show(){
     CImg_display* disp = set_picture_window(image_data, "Gray Picture");
     disp->join();
     delete disp;
-}
-
-myro_img& GrayPicture::getRawImage(){
-    return image_data;
 }
 
 bool GrayPicture::loadPicture(const char* filename){
