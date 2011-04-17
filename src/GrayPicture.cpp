@@ -50,9 +50,13 @@ Picture* GrayPicture::clone(){
     return newpic;
 }
 
-void GrayPicture::show() {
-    CImg_display* disp = new CImg_display(image_data, "Gray Picture");
-    disp->start();
+void GrayPicture::show(std::string windowname){
+    CImg_display* disp = set_picture_window(image_data, windowname.c_str());
+    nonblock_display_window(disp); 
+}
+
+void GrayPicture::show(){
+    CImg_display* disp = set_picture_window(image_data, "Gray Picture");
     disp->join();
     delete disp;
 }

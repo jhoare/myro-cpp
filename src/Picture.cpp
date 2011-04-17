@@ -70,9 +70,14 @@ int getHeight(Picture *p)
         return p->getHeight();
 }
 
+void show(Picture *p, std::string windowname)
+{
+    p->show(windowname);
+}
+
 void show(Picture *p)
 {
-        p->show();
+    p->show();
 }
 
 Pixel getPixel(Picture *p, int x, int y)

@@ -44,9 +44,13 @@ void ColorPicture::setPixel(int x, int y, Pixel pix) {
     image_data(x,y,0,2) = pix.B;    
 }
 
-void ColorPicture::show() {
-    CImg_display* disp = new CImg_display(image_data, "Color Picture");
-    disp->start();
+void ColorPicture::show(std::string windowname){
+    CImg_display* disp = set_picture_window(image_data, windowname.c_str());
+    nonblock_display_window(disp); 
+}
+
+void ColorPicture::show(){
+    CImg_display* disp = set_picture_window(image_data, "Color Picture");
     disp->join();
     delete disp;
 }

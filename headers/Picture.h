@@ -89,8 +89,24 @@ class Picture {
         virtual void  setPixel(int x, int y, Pixel pix)=0;
         /**
          * Display the picture on the screen.
+         * 
+         * This function will immediately return, and will not wait for the 
+         * user to close the window.
+         *
+         * @param windowname The name of the window to show the image in. If
+         *      the named window does not already exist, then it will create 
+         *      a new window, if it already exists, it will draw the image
+         *      into that window. 
          */
-        virtual void  show()=0;
+        virtual void  show(std::string windowname)=0;
+        /**
+         * Display the picture on the screen.
+         *
+         * This function will block (wait) until the user has closed the 
+         * window, before the program continues running.
+         *
+         */
+        virtual void show()=0;
         /**
          * Get a pointer to the underlying memory representing the 
          * image.
@@ -153,6 +169,7 @@ class Picture {
 // functions added for lab 6 by Nick
 int getWidth(Picture *p);
 int getHeight(Picture *p);
+void show(Picture *p, std::string windowname);
 void show(Picture *p);
 Pixel getPixel(Picture *p, int x, int y);
 int getPixelValue_grey(Picture *p, int x, int y);
