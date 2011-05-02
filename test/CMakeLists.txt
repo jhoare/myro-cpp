@@ -15,3 +15,5 @@ INSTALL(TARGETS myro_take_snapshot myro_test_ir myro_test_motor myro_test_camera
 #INSTALL(TARGETS myro_test_motor myro_test_camera myro_video_stream RUNTIME DESTINATION bin)
 
 INSTALL( FILES README Makefile test_motor.cpp test_camera.cpp test_camera_fourwindow.cpp test_camera_nonblocking.cpp test_blob.cpp video_stream.cpp DESTINATION "share/doc/myro-cpp-${PKG_VERSION}/examples" )
+
+ADD_SUBDIRECTORY(graphics)

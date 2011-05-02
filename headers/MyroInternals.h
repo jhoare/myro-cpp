@@ -6,6 +6,7 @@
 //#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <MyroCImg.h>
+#include <Graphics.h>
 
 // Inherit from this to get threading.  The usage is:
 //     threaded.start()
@@ -40,7 +41,8 @@ class CImg_display : public Threaded {
         void change_image(myro_img& img);
         std::string getName();
     private:
-        myro_img* img;
+        std::list<GraphicsObject*> draw_commands;
+        myro_img img;
         std::string window_name;
         boost::mutex img_mutex;
         bool img_changed;
@@ -51,6 +53,6 @@ class CImg_display : public Threaded {
 // then block on it if they so choose.
 CImg_display * set_picture_window(myro_img& img, const char* window_name);
 
-/// This is a funciton that has its own thread behind it to join() any display window threads that 
-/// exit, to avoid a memory leak. 
+// This is a funciton that has its own thread behind it to join() any display window threads that 
+// exit, to avoid a memory leak. 
 void nonblock_display_window(CImg_display* thread);

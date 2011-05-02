@@ -53,34 +53,41 @@ void Threaded::startRun(){
     }
 }
 
-CImg_display::CImg_display(myro_img& img, const char* window_name) : img(&img), window_name(window_name), img_changed(false){
-}
-CImg_display::CImg_display(myro_img* img, const char* window_name) : img(img), window_name(window_name), img_changed(false){
-}
+CImg_display::CImg_display(myro_img& img, const char* window_name) 
+: img(img),
+  window_name(window_name), 
+  img_changed(false)
+{}
+
+CImg_display::CImg_display(myro_img* img, const char* window_name) 
+: img(*img),
+  window_name(window_name), 
+  img_changed(false)
+{}
 
 void CImg_display::run(){
-    cil::CImgDisplay displaywin(*img,window_name.c_str());
+    cil::CImgDisplay displaywin(img,window_name.c_str());
 
     while ( !stopRequested && !displaywin.is_closed()){
-        displaywin.wait(1000);
+        displaywin.wait(50);
         {
             boost::mutex::scoped_lock l(img_mutex);
             if ( img_changed ){
                 img_changed = false;
-                displaywin.display(*img);
+                displaywin.display(img);
             }
         }
     }
 }
 
 void CImg_display::change_image(myro_img& img){
-    this->change_image(&img);
+    boost::mutex::scoped_lock l(img_mutex);
+    this->img.assign(img);
+    this->img_changed = true;
 }
 
 void CImg_display::change_image(myro_img* img){
-    boost::mutex::scoped_lock l(img_mutex);
-    this->img = img;
-    this->img_changed = true;
+    this->change_image(*img);
 }
 
 std::string CImg_display::getName(){
