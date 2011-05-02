@@ -256,7 +256,7 @@ extern "C" {
 // to get a builtin support of JPEG files. Using LibJPEG is not mandatory.
 #ifdef cimg_use_jpeg
 extern "C" {
-#include "jpeglib.h"
+#include "myrojpeg/myrojpeglib.h"
 #include "setjmp.h"
 }
 #endif

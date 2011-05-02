@@ -18,13 +18,14 @@ extern "C"{
 #include <jerror.h>
 }
 
-// So the CImg Library wants you to #define certian things to "enable" or "diable" 
-// functionality.
-#define cimg_use_jpeg
 
 // Use the jpeg_buffer to decompress a jpeg image from memory (instead of from file)
 #define cimg_plugin "CImg/jpeg_buffer.h"
 */
+
+// So the CImg Library wants you to #define certian things to "enable" or "diable" 
+// functionality.
+#define cimg_use_jpeg
 #include <CImg/CImg.h>
 
 
