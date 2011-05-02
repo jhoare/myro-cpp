@@ -411,9 +411,9 @@ void Line::draw_command(myro_img& canvas){
         // points so i can draw a "thick" line
         for (int x = x0; x <= x1; x++){
             if ( steep )
-                canvas.draw_circle(y,x,this->width,color);
+                canvas.draw_circle(y,x,ceil(this->width/2.0),color);
             else
-                canvas.draw_circle(x,y,this->width,color);
+                canvas.draw_circle(x,y,ceil(this->width/2.0),color);
             error += deltaerr;
             if ( error >= 0.5 ){
                 y += ystep;
