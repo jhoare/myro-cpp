@@ -56,17 +56,20 @@ void Threaded::startRun(){
 CImg_display::CImg_display(myro_img& img, const char* window_name) 
 : img(img),
   window_name(window_name), 
-  img_changed(false)
+  img_changed(false),
+  mx(-1),my(-1),clickedx(-1),clickedy(-1)
 {}
 
 CImg_display::CImg_display(myro_img* img, const char* window_name) 
 : img(*img),
   window_name(window_name), 
-  img_changed(false)
+  img_changed(false),
+  mx(-1),my(-1),clickedx(-1),clickedy(-1)
 {}
 
 void CImg_display::run(){
     cil::CImgDisplay displaywin(img,window_name.c_str());
+    mx = my = -1;
 
     while ( !stopRequested && !displaywin.is_closed()){
         displaywin.wait(50);
@@ -75,6 +78,15 @@ void CImg_display::run(){
             if ( img_changed ){
                 img_changed = false;
                 displaywin.display(img);
+            }
+            mx = displaywin.mouse_x();
+            my = displaywin.mouse_y();
+            button = displaywin.button();
+            // If its valid, send a wakeup to the mouse condition variable, if we're 
+            if ( mx >= 0 && my >= 0 && button ){
+                clickedx = mx;
+                clickedy = my;
+                mouse.notify_one();
             }
         }
     }
@@ -92,6 +104,23 @@ void CImg_display::change_image(myro_img* img){
 
 std::string CImg_display::getName(){
     return window_name;
+}
+
+Point CImg_display::getMouseClick(){
+    boost::mutex::scoped_lock l(img_mutex);
+    mouse.wait(img_mutex);
+    return Point(clickedx,clickedy);
+}
+
+Point CImg_display::getLastClick(){
+    boost::mutex::scoped_lock l(img_mutex);
+    return Point(clickedx,clickedy);
+}
+
+Point CImg_display::getMouseCoords(int& button){
+    boost::mutex::scoped_lock l(img_mutex);
+    button = this->button;
+    return Point(mx,my);
 }
 
 

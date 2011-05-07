@@ -39,13 +39,22 @@ class CImg_display : public Threaded {
         virtual void run();
         void change_image(myro_img* img);
         void change_image(myro_img& img);
+        Point getMouseClick();
+        Point getLastClick();
+        Point getMouseCoords(int& buttons);
         std::string getName();
     private:
         std::list<GraphicsObject*> draw_commands;
         myro_img img;
         std::string window_name;
         boost::mutex img_mutex;
+        boost::condition mouse;
         bool img_changed;
+        int mx;
+        int my;
+        int clickedx;
+        int clickedy;
+        int button;
 };
 
 

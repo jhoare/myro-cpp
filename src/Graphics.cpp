@@ -115,6 +115,10 @@ void GraphWin::close(){
     }
 }
 
+bool GraphWin::isClosed(){
+    return !this->thread->running(); 
+}
+
 void GraphWin::waitWinClosed(){
     if ( this->thread ){
         thread->join();
@@ -123,13 +127,17 @@ void GraphWin::waitWinClosed(){
     }
 }
 
-/*
 Point GraphWin::getMouse(){
+    return this->thread->getMouseClick();
 }
 
 Point GraphWin::checkMouse(){
+    return this->thread->getLastClick();
 }
-*/
+
+Point GraphWin::getCurrentMouse(int& button){
+    return this->thread->getMouseCoords(button);
+}
 
 void GraphWin::setCoords(int xll, int yll, int xur, int yur){
 }
@@ -143,6 +151,7 @@ GOL_reg GraphWin::draw(GraphicsObject* obj){
 
 void GraphWin::undraw(GOL_reg reg){
     drawlist.erase(reg);
+    this->redraw();
 }
 
 void GraphWin::redraw(){
@@ -260,6 +269,16 @@ Point& Point::operator+=(const Point& rhs){
 Point Point::operator+(const Point& other){
     Point result = *this;
     result += other;
+    return result;
+}
+Point& Point::operator-=(const Point& rhs){
+    x -= rhs.x;
+    y -= rhs.y;
+    return *this;
+}
+Point Point::operator-(const Point& other){
+    Point result = *this;
+    result -= other;
     return result;
 }
 void Point::draw_command(myro_img& canvas){

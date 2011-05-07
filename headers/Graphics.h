@@ -84,11 +84,27 @@ class GraphWin{
         void setBackground(Picture* img);
         /// Close the window programatically.
         void close();
+        bool isClosed();
         /// Function that will not return until the user has closed the GraphWin 
         /// window
         void waitWinClosed();
-        //Point getMouse();
-        //Point checkMouse();
+        /**
+         * Blocks until the user clicks somewhere on the image, and returns that
+         * point.
+         */
+        Point getMouse();
+        /**
+         * Does the same as getMouse() but does not wait until the user has 
+         * clicked, just gets the current mouse position. If the mouse is not 
+         * on the window, then it will return a point of -1,-1. 
+         */
+        Point checkMouse();
+        /**
+         * Get the current mouse status, the return value is the x,y position
+         * of the pointer, and the int (passed by reference) is the status of 
+         * the mouse button
+         */
+        Point getCurrentMouse(int& button);
         /**
          * Sets the coordinate system of the window. The lower-left corner is 
          * xll,yll and the upper-right corner is xur,yur. All subsequent 
@@ -176,6 +192,8 @@ class Point : public GraphicsObject{
         int getY();
         Point& operator+=(const Point &rhs);
         Point operator+(const Point &rhs);
+        Point& operator-=(const Point &rhs);
+        Point operator-(const Point &rhs);
         virtual void move(int dx, int dy);
     protected:
         virtual void draw_command(myro_img& canvas);
