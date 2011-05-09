@@ -33,7 +33,6 @@ VideoStream::VideoStream(Scribbler * scrib, int color_mode)
     this->color_mode = color_mode;
     this->filters = new std::vector<Filter*>();
     this->running = false;
-    this->id = -1;
 }
 
 VideoStream::VideoStream(Scribbler& scrib, int color_mode) 
@@ -42,7 +41,6 @@ VideoStream::VideoStream(Scribbler& scrib, int color_mode)
     this->color_mode = color_mode;
     this->filters = new std::vector<Filter*>();
     this->running = false;
-    this->id = -1;
 }
 
 VideoStream::~VideoStream() {
@@ -66,7 +64,6 @@ DisplayThread::DisplayThread(Scribbler* robot, int colormode, std::vector<Filter
 void DisplayThread::run() {
     Picture* img_cur=NULL;
     Picture* img_new=NULL;
-    cil::CImgDisplay displaywin(image_width,image_height, "Video Stream",3,false,true);
 
     while(!this->stopRequested){
         //std::cerr << "DisplayThread::run()" << std::endl;
@@ -101,15 +98,13 @@ void DisplayThread::run() {
             }
         }
 
-        if ( displaywin.is_closed() ) displaywin.show();
-        displaywin.display(img_new->getRawImage());
+        show(img_new, "Video Stream");
 
         if ( img_cur != NULL ){
             delete img_cur;
         }
         img_cur = img_new;
 
-        displaywin.wait(100);
         //boost::thread::yield();
         //usleep(1000); //hack to slow down the capture thread
                       //so that the other threads are scheduled
@@ -156,7 +151,6 @@ void VideoStream::endStream() {
 
         delete display_thread;
         running = false;
-        id = -1;
     }
 }
 

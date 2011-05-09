@@ -48,14 +48,13 @@ void ColorPicture::setPixel(int x, int y, Pixel pix) {
 }
 
 void ColorPicture::show(std::string windowname){
-    CImg_display* disp = set_picture_window(image_data, windowname.c_str());
-    nonblock_display_window(disp); 
+    displayMan.set_picture_window(image_data, windowname.c_str());
 }
 
 void ColorPicture::show(){
-    CImg_display* disp = set_picture_window(image_data, "Color Picture");
-    disp->join();
-    delete disp;
+    const std::string windowname = "Color Picture";
+    displayMan.set_picture_window(image_data, windowname.c_str());
+    displayMan.block_on(windowname.c_str());
 }
 
 Picture* ColorPicture::clone(){

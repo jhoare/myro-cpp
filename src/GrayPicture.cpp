@@ -52,14 +52,13 @@ Picture* GrayPicture::clone(){
 }
 
 void GrayPicture::show(std::string windowname){
-    CImg_display* disp = set_picture_window(image_data, windowname.c_str());
-    nonblock_display_window(disp); 
+    displayMan.set_picture_window(image_data, windowname.c_str());
 }
 
 void GrayPicture::show(){
-    CImg_display* disp = set_picture_window(image_data, "Gray Picture");
-    disp->join();
-    delete disp;
+    const std::string windowname("Gray Picture");
+    displayMan.set_picture_window(image_data, windowname.c_str());
+    displayMan.block_on(windowname.c_str());
 }
 
 bool GrayPicture::loadPicture(const char* filename){

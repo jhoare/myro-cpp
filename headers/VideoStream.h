@@ -78,24 +78,13 @@ class VideoStream {
     void endStream();
 
     private:
-    int id;
-
     std::vector<Filter*> * filters;
+    boost::mutex* filterLock;
+
     Scribbler * myScrib;
     int color_mode;
 
-    //Fl_Window * window;
-    /*
-    ImageWindow * window;
-    Fl_Thread * fl_thread;
-    */
     DisplayThread * display_thread;
-    /*
-    CaptureThread * capture_thread;
-    circbuf * shared_buffer;
-    */
-
-    boost::mutex* filterLock;
 
     bool running;
 };

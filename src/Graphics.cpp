@@ -74,14 +74,16 @@ GraphWin::GraphWin(std::string title, myro_img& img)
 
 GraphWin::~GraphWin(){
     if (thread){
-        thread->stop();
-        delete thread;
+        thread->close();
+        thread = NULL;
+        //delete thread;
     }
 }
 
 void GraphWin::init(){
-    thread = new CImg_display(result, title.c_str());
-    thread->start();
+    // This will create the window
+    displayMan.set_picture_window(background, title.c_str());
+    thread = displayMan.get_winobj(title.c_str());
 }
 
 void GraphWin::plot(int x, int y, Color color){
@@ -109,20 +111,18 @@ void GraphWin::setBackground(Picture* img){
 
 void GraphWin::close(){
     if ( thread ) {
-        thread->stop();
-        delete thread;
+        thread->close();
         thread = NULL;
     }
 }
 
 bool GraphWin::isClosed(){
-    return !this->thread->running(); 
+    return this->thread->isClosed(); 
 }
 
 void GraphWin::waitWinClosed(){
     if ( this->thread ){
-        thread->join();
-        delete thread;
+        displayMan.block_on(title.c_str());
         thread = NULL;
     }
 }
