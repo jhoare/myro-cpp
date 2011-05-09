@@ -37,39 +37,42 @@ Color string_to_color(std::string color){
 // ====================
 // GraphWin
 // ====================
-GraphWin::GraphWin(std::string title, int width, int height)
+GraphWin::GraphWin(std::string title, int width, int height, bool autoFlush)
 : title(title),
   background(width,height,1,3),
   result(width,height,1,3),
   width(width),
-  height(height)
+  height(height),
+  autoFlush(autoFlush)
 {
     background.fill(255);
     result.fill(255);
     init();
-    redraw();
+    update();
 }
 
-GraphWin::GraphWin(std::string title, myro_img* img)
+GraphWin::GraphWin(std::string title, myro_img* img, bool autoFlush)
 : title(title),
   background(*img),
   result(*img),
   width(width),
-  height(height)
+  height(height),
+  autoFlush(autoFlush)
 {
     init();
-    redraw();
+    update();
 } 
 
-GraphWin::GraphWin(std::string title, myro_img& img)
+GraphWin::GraphWin(std::string title, myro_img& img, bool autoFlush)
 : title(title),
   background(img),
   result(img),
   width(width),
-  height(height)
+  height(height),
+  autoFlush(autoFlush)
 {
     init();
-    redraw();
+    update();
 } 
 
 GraphWin::~GraphWin(){
@@ -84,6 +87,10 @@ void GraphWin::init(){
     // This will create the window
     displayMan.set_picture_window(background, title.c_str());
     thread = displayMan.get_winobj(title.c_str());
+}
+
+void GraphWin::setAutoflush(bool autoFlush){
+    this->autoFlush = autoFlush;
 }
 
 void GraphWin::plot(int x, int y, Color color){
@@ -145,16 +152,16 @@ void GraphWin::setCoords(int xll, int yll, int xur, int yur){
 GOL_reg GraphWin::draw(GraphicsObject* obj){
     drawlist.push_back(obj);
     GOL_reg registration = --drawlist.end();
-    this->redraw();
+    this->check_and_update();
     return registration;
 }
 
 void GraphWin::undraw(GOL_reg reg){
     drawlist.erase(reg);
-    this->redraw();
+    this->check_and_update();
 }
 
-void GraphWin::redraw(){
+void GraphWin::update(){
     // Copy Background to result
     if ( background.spectrum() == 1 ){
         cimg_forXY(background,x,y){
@@ -169,6 +176,11 @@ void GraphWin::redraw(){
         (*it)->draw_command(result);
 
     thread->change_image(result);
+}
+
+void GraphWin::check_and_update(){
+    if ( autoFlush )
+        update();
 }
 
 // ====================
@@ -191,7 +203,7 @@ GraphicsObject::GraphicsObject(Color fill, Color outline, int width)
 void GraphicsObject::setFill(Color color){
     fill=color;
     if ( this->canvas )
-        this->canvas->redraw();
+        this->canvas->check_and_update();
 }
 
 void GraphicsObject::setFill(std::string color){
@@ -202,7 +214,7 @@ void GraphicsObject::setFill(std::string color){
 void GraphicsObject::setOutline(Color color){
     outline=color;
     if ( this->canvas )
-        this->canvas->redraw();
+        this->canvas->check_and_update();
 }
 
 void GraphicsObject::setOutline(std::string color){
@@ -212,6 +224,8 @@ void GraphicsObject::setOutline(std::string color){
 
 void GraphicsObject::setWidth(int width){
     this->width = width;
+    if ( this->canvas )
+        this->canvas->check_and_update();
 }
 
 void GraphicsObject::draw(GraphWin* canvas){
@@ -259,7 +273,7 @@ void Point::move(int dx, int dy){
     x += dx;
     y += dy;
     if ( this->canvas )
-        this->canvas->redraw();
+        this->canvas->check_and_update();
 }
 Point& Point::operator+=(const Point& rhs){
     x += rhs.x;
@@ -299,7 +313,7 @@ void _BBox::move(int dx, int dy){
     this->p1 += d;
     this->p2 += d;
     if ( this->canvas ) 
-        this->canvas->redraw();
+        this->canvas->check_and_update();
 }
 
 Point _BBox::getP1(){ return p1; };
@@ -458,10 +472,7 @@ std::vector<Point> Polygon::getPoints(){
 }
 
 std::vector<Point> Polygon::update_points(){
-    Point l,r,p;
-    double theta,a,b,c;
-    double alpha, beta, el;
-    int i_x, i_y;
+    Point p;
     std::vector<Point> ret;
     outline_lines.clear();
     outline_lines.push_back(Line(points[points.size()-1],points[0]));
@@ -470,53 +481,7 @@ std::vector<Point> Polygon::update_points(){
         if (i+1 < (int)points.size())
             outline_lines.push_back(Line(points[i],points[i+1]));
         ret.push_back(points[i]);
-        //l = this->points[(i+1)%points.size()];
         p = this->points[i];
-        //r = this->points[(i-1)%points.size()];
-    /*
-        // Law of cosines from wikipedia.
-        // Distance of sides of the triangle
-        // c - opposite of l
-        c = hypot(r.getX()-p.getX(),r.getY()-p.getY());
-        std::cout << "c: " << c << std::endl;
-        // b - opposite of r
-        b = hypot(l.getX()-p.getX(),l.getY()-p.getY());
-        std::cout << "b: " << b << std::endl;
-        // a - opposite of p
-        a = hypot(l.getX()-r.getX(),l.getY()-r.getY());
-        std::cout << "a: " << a << std::endl;
-        // Angle from line segments from l->r and l->p
-        theta = acos((a*a+b*b-(c*c))/(2*a*b));
-        std::cout << "theta: " << theta << std::endl;
-
-        // Angle from x-axis to line segment from l->r
-        alpha = atan2(l.getY()-r.getY(),l.getX()-r.getX());
-        //alpha = atan2(r.getY()-l.getY(),r.getX()-l.getX());
-
-        // TODO: This is probably more calculations that needs to be done!
-
-        // Magnitude of distance fom triangle made of l & p
-        el = b * cos(theta);
-        std::cerr << "el: " << el << std::endl;
-        // i_x, i_y is the point for the third point of the right triangle
-        // with l & p
-        i_x = l.getX() + el*cos(alpha);
-        i_y = l.getY() + el*sin(alpha);
-        ret.push_back(Point(i_x,i_y));
-        std::cerr << i_x << " " << i_y << std::endl;
-
-        // The direction to the "inside" of the polygon, from p.
-        beta = atan2(i_y-p.getY(),i_x-p.getX());
-
-        // x
-        pts(i,0,0,0) = (this->width*cos(beta))+p.getX();
-        // y
-        pts(i,0,0,1) = (this->width*sin(beta))+p.getY();
-        */
-        /*
-        pts_bdr(i,0) = p.getX();
-        pts_bdr(i,1) = p.getY();
-        */
         pts(i,0) = p.getX();
         pts(i,1) = p.getY();
     }
@@ -558,7 +523,7 @@ void Polygon::move(int dx, int dy){
         points[i] += d;
     }
     if ( this->canvas ) 
-        this->canvas->redraw();
+        this->canvas->check_and_update();
 }
 
 // ====================
@@ -612,6 +577,6 @@ void Text::draw_command(myro_img& canvas){
 
 void Text::move(int dx, int dy){
     anchor += Point(dx,dy);
-    if ( this->canvas ) 
-        this->canvas->redraw();
+    if ( this->canvas )
+        this->canvas->check_and_update();
 }

@@ -49,23 +49,35 @@ class GraphWin{
          * @param title The Window Title
          * @param width The Window Width
          * @param height The Window Height
+         * @param autoFlush Automatically redraw on a change (default true)
          */
-        GraphWin(std::string title, int width, int height);
+        GraphWin(std::string title, int width, int height, bool autoFlush=true);
         /**
          * Create a GraphWin with a white background.
          * 
          * @param title The Window Title
          * @param img The image you wish to set as the background.
+         * @param autoFlush Automatically redraw on a change (default true)
          */
-        GraphWin(std::string title, myro_img& img);
+        GraphWin(std::string title, myro_img& img, bool autoFlush=true);
         /**
          * Create a GraphWin with a white background.
          * 
          * @param title The Window Title
          * @param img The image you wish to set as the background.
+         * @param autoFlush Automatically redraw on a change (default true)
          */
-        GraphWin(std::string title, myro_img* img);
+        GraphWin(std::string title, myro_img* img, bool autoFlush=true);
         ~GraphWin();
+        /**
+         * Set whether auto flush is on (image automatically updated 
+         * at any change of drawing.) 
+         * 
+         * Turning this off will give better performance, but you must
+         * make sure that you call update() yourself to update the 
+         * image. By default this is on.
+         */
+        void setAutoflush(bool autoFlush);
         /**
          * Set the background pixel x,y to the given color
          */
@@ -115,7 +127,10 @@ class GraphWin{
         /**
          * Redraw the image.
          */
-        void redraw();
+        void update();
+        // Check to see if we are supposed to auto-redraw, and if so do it
+        // TODO: This should be private, but i'm getting errors here...
+        void check_and_update();
     private: 
         GOL_reg draw(GraphicsObject* obj);
         void undraw(GOL_reg reg);
@@ -125,6 +140,7 @@ class GraphWin{
         myro_img result;
         int width;
         int height;
+        bool autoFlush;
         GraphicsObjectList drawlist;
         CImg_display * thread;
         friend class GraphicsObject;

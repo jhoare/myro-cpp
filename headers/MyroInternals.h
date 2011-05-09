@@ -70,7 +70,7 @@ class DisplayMan : public Threaded{
 class CImg_display{
     public:
         bool isClosed();
-        virtual void run();
+        void run();
         void change_image(myro_img* img);
         void change_image(myro_img& img);
         Point getMouseClick();
