@@ -154,6 +154,7 @@ class GraphicsObject{
     public:
         GraphicsObject();
         GraphicsObject(Color fill, Color outline, int width);
+        ~GraphicsObject();
         /// Set the Fill of the shape
         void setFill(Color color);
         /// Set the Fill of the shape

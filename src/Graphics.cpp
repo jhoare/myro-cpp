@@ -175,7 +175,8 @@ void GraphWin::update(){
     for(GOL_reg it = drawlist.begin(); it != drawlist.end(); it++)
         (*it)->draw_command(result);
 
-    thread->change_image(result);
+    if ( thread )
+        thread->change_image(result);
 }
 
 void GraphWin::check_and_update(){
@@ -199,6 +200,11 @@ GraphicsObject::GraphicsObject(Color fill, Color outline, int width)
   outline(outline),
   width(width)
 {}
+
+GraphicsObject::~GraphicsObject(){
+    if (this->canvas)
+        this->undraw();
+}
 
 void GraphicsObject::setFill(Color color){
     fill=color;
