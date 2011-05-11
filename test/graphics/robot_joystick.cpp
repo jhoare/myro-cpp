@@ -26,16 +26,12 @@ int main(){
     Point m;
     Point center(250,250);
     Line l(center,center);
-    float leftWheel;
-    float rightWheel;
-    float forward;
-    float angle;
     int button=0;
     while(!win.isClosed()){
         m = win.getCurrentMouse(button);
         if (m.getX() >= 0 && m.getY() >= 0 && button){
             dir = center - m;
-            std::cerr << dir.getX() << " " << dir.getY() << std::endl;
+            //std::cerr << dir.getX() << " " << dir.getY() << std::endl;
             robot.move(dir.getY()/250.0,dir.getX()/250.0);
             //std::cerr << "m.getX(): " << m.getX() << std::endl
             //          << "m.getY(): " << m.getY() << std::endl;
