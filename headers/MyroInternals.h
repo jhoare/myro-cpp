@@ -1,4 +1,5 @@
 #pragma once
+#include <Myro.h>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -39,11 +40,9 @@ class Threaded {
 typedef std::map<std::string, CImg_display*> myro_cimg_display_map;
 
 struct window_request{
-    boost::mutex m;
     boost::condition c;
     std::string window_name;
     myro_img* img;
-    //CImg_display* disp;
 };
 
 class DisplayMan : public Threaded{

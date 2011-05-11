@@ -116,9 +116,6 @@ void CImg_display::change_image(myro_img& img){
     boost::mutex::scoped_lock l(img_mutex);
     this->img.assign(img);
     this->img_changed = true;
-    // TODO: This might not work in windows!
-    displaywin.paint();
-    displaywin.set_button(0);
 }
 
 void CImg_display::change_image(myro_img* img){
@@ -166,11 +163,9 @@ DisplayMan::~DisplayMan(){
 void DisplayMan::run(){
     myro_cimg_display_map::iterator it;
     while(!stopRequested){
-        //std::cerr << "DisplayMan::run(): start loop" << std::endl;
-        // TODO: will this wait forever, and prevent a window from being created?
-        //if ( display_map.size() > 0 )
-        //    cil::CImgDisplay::wait_all();
-
+        // Wait so we don't just sit spinnning on the cpu. 
+        // 20ms gives us an acceptable polling/update speed
+        cil::cimg::wait(20);
         {
             boost::mutex::scoped_lock l(mutex);
             // Service all the new window requests
@@ -181,7 +176,6 @@ void DisplayMan::run(){
                 //std::cerr << "DisplayMan::run(): making a window?" << std::endl;
                 //req->disp = myset_picture_window(*(req->img), req->window_name.c_str());
                 this->myset_picture_window(*(req->img), req->window_name.c_str());
-                boost::mutex::scoped_lock winl(req->m);
                 req->c.notify_one();
                 //std::cerr << "DisplayMan::run(): making a window?: done!" << std::endl;
             }
@@ -192,7 +186,6 @@ void DisplayMan::run(){
                     // Notify that window was closed if there is someone who 
                     // wants to know
                     if ( t->close_notify ){
-                        boost::mutex::scoped_lock notify_lock(t->close_notify->m);
                         t->close_notify->c.notify_one();
                     }
                     //t->join();
@@ -211,18 +204,14 @@ void DisplayMan::set_picture_window(myro_img& img, const char* window_name){
     window_request req;
     req.window_name = window_name;
     req.img = &img;
-    boost::mutex::scoped_lock l(req.m);
-    {
-        boost::mutex::scoped_lock l(mutex);
-        requests.push(&req);
-    }
-    //std::cerr << "DisplayMan::set_picture_window(): waiting on condition" << std::endl;
+    boost::mutex::scoped_lock l(mutex);
+    requests.push(&req);
     req.c.wait(l);
-    //std::cerr << "DisplayMan::set_picture_window(): got condition" << std::endl;
 }
 
 void DisplayMan::block_on(const char* window_name){
     window_request blk;
+    boost::mutex::scoped_lock l(mutex);
     myro_cimg_display_map::iterator it = display_map.find(window_name);
     if ( it == display_map.end() ){
         // TODO: Do something if asked to block on a non-existant window
@@ -230,14 +219,14 @@ void DisplayMan::block_on(const char* window_name){
     }
     else{
         CImg_display* disp = it->second;
-        boost::mutex::scoped_lock myl(blk.m);
         disp->NotifyWhenClosed(&blk);
-        blk.c.wait(blk.m);
+        blk.c.wait(mutex);
         // When we get here, the window has been closed!
     }
 }
 
 CImg_display* DisplayMan::get_winobj(const char* window_name){
+    boost::mutex::scoped_lock l(mutex);
     myro_cimg_display_map::iterator it = display_map.find(window_name);
     if ( it == display_map.end() ){
         return NULL;
