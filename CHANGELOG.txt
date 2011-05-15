@@ -1,8 +1,9 @@
 2.3.0 (bzr-trunk)
  - Added Graphics Drawing Library
- - Switched from using FLTK to CImg library (included with myro-c++).
  - Changed it so the connect() functions on the robot can take a string to hard-code into your code the commport of your robot. 
+ - show(Picture) is no longer blocking if a string title is given. 
  - Fixed Bug where robot.setName() dropped the 9th character. 
+ - Switched from using FLTK to CImg library (included with myro-c++).
 
 2.2.2 (2011-01-28)
  - Added askQuestion() and askQuestionVector() variant.
