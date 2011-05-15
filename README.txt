@@ -32,8 +32,6 @@ Dependencies
 Myro-Cpp depends on the following software Libraries:
   
   * Boost Threads (www.boost.org)
-  * FLTK 1.1 (www.fltk.org)
-  * libjpeg (www.ijg.org)
 
 Questions
 =========

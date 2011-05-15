@@ -8,6 +8,8 @@
  */
 
 #include <Scribbler.h>
+#include <Graphics.h>
+#include <VideoStream.h>
 
 extern Scribbler robot;
 

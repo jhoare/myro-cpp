@@ -22,10 +22,14 @@ class ColorPicture: public Picture {
 
         virtual Pixel getPixel(int x, int y);
         virtual void setPixel(int x, int y, Pixel pix);
+        virtual void show(std::string windowname);
         virtual void show();
         virtual Picture* clone();
         virtual bool loadPicture(const char* filename);
         virtual void savePicture(const char* filename);
+    private:
+        void loadInterlacedImage(unsigned char* img);
+        //myro_img image_data;
 };
 
 

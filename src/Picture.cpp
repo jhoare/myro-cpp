@@ -7,7 +7,6 @@
 
 Picture::Picture(){
     this->width = this->height = 0;
-    this->image_data = NULL;
 }
 
 Picture::Picture(int width, int height) {
@@ -16,7 +15,6 @@ Picture::Picture(int width, int height) {
 }
 
 Picture::~Picture() {
-    delete[] image_data;
 }
 
 int Picture::getHeight() {
@@ -27,7 +25,7 @@ int Picture::getWidth() {
     return width;
 }
 
-unsigned char* Picture::getRawImage(){
+myro_img& Picture::getRawImage(){
     return image_data;
 }
 
@@ -76,9 +74,14 @@ int getHeight(Picture *p)
         return p->getHeight();
 }
 
+void show(Picture *p, std::string windowname)
+{
+    p->show(windowname);
+}
+
 void show(Picture *p)
 {
-        p->show();
+    p->show();
 }
 
 Pixel getPixel(Picture *p, int x, int y)

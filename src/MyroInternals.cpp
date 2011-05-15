@@ -1,6 +1,8 @@
 #include "MyroInternals.h"
 #include <iostream>
 
+DisplayMan displayMan;
+
 //------------------------------
 // Threaded
 //------------------------------
@@ -53,123 +55,203 @@ void Threaded::startRun(){
     }
 }
 
-//------------------------------
-// FLTKThread
-//------------------------------
+CImg_display::CImg_display(myro_img& img, const char* window_name) 
+: img(img),
+  window_name(window_name), 
+  img_changed(false),
+  displaywin(this->img,window_name),
+  mx(-1),my(-1),clickedx(-1),clickedy(-1),
+  requestClose(false),
+  close_notify(NULL)
+{}
 
-FLTKThread::FLTKThread(){};
-FLTKThread::~FLTKThread(){
-    if ( this->running() )
-        this->stop();
+CImg_display::CImg_display(myro_img* img, const char* window_name) 
+: img(*img),
+  window_name(window_name), 
+  img_changed(false),
+  displaywin(this->img,window_name),
+  mx(-1),my(-1),clickedx(-1),clickedy(-1),
+  requestClose(false),
+  close_notify(NULL)
+{}
+
+bool CImg_display::isClosed(){
+    return displaywin.is_closed();
 }
 
-void FLTKThread::run(){
-    while (!stopRequested){
-        //std::cerr << "FLTKThread::run()" << std::endl;
-        /*
+void CImg_display::run(){
+    //std::cerr << "CImg_display::run()" << std::endl;
+    //cil::CImgDisplay displaywin(img,window_name.c_str());
+    //mx = my = -1;
+
+    //while ( !stopRequested && !displaywin.is_closed()){
+    //    displaywin.wait(50);
         {
-            boost::mutex::scoped_lock l(vector_lock);
-            for (unsigned int i=0; i<to_notify.size(); i++){
-                if ( to_notify[i]->win->shown() ){
-                    boost::mutex::scoped_lock j(to_notify[i]->m);
-                    to_notify[i]->cond.notify_one();
+            boost::mutex::scoped_lock l(img_mutex);
+            if (!displaywin.is_closed()) {
+                if ( requestClose ){
+                    displaywin.close();
+                    return;
+                }
+                if ( img_changed ){
+                    img_changed = false;
+                    displaywin.display(img);
+                }
+                mx = displaywin.mouse_x();
+                my = displaywin.mouse_y();
+                button = displaywin.button();
+                // If its valid, send a wakeup to the mouse condition variable, if we're 
+                if ( mx >= 0 && my >= 0 && button ){
+                    clickedx = mx;
+                    clickedy = my;
+                    mouse.notify_one();
                 }
             }
         }
-        */
+    //}
+}
+
+void CImg_display::change_image(myro_img& img){
+    //std::cerr << "changing image" << std::endl;
+    boost::mutex::scoped_lock l(img_mutex);
+    this->img.assign(img);
+    this->img_changed = true;
+}
+
+void CImg_display::change_image(myro_img* img){
+    this->change_image(*img);
+}
+
+std::string CImg_display::getName(){
+    return window_name;
+}
+
+void CImg_display::close(){
+    boost::mutex::scoped_lock l(img_mutex);
+    requestClose = true;
+}
+
+void CImg_display::NotifyWhenClosed(window_request* req){
+    this->close_notify = req;
+}
+
+Point CImg_display::getMouseClick(){
+    boost::mutex::scoped_lock l(img_mutex);
+    mouse.wait(img_mutex);
+    return Point(clickedx,clickedy);
+}
+
+Point CImg_display::getLastClick(){
+    boost::mutex::scoped_lock l(img_mutex);
+    return Point(clickedx,clickedy);
+}
+
+Point CImg_display::getMouseCoords(int& button){
+    boost::mutex::scoped_lock l(img_mutex);
+    button = this->button;
+    return Point(mx,my);
+}
+
+DisplayMan::DisplayMan(){
+    this->start();
+}
+
+DisplayMan::~DisplayMan(){
+    this->stop();
+}
+
+void DisplayMan::run(){
+    myro_cimg_display_map::iterator it;
+    while(!stopRequested){
+        // Wait so we don't just sit spinnning on the cpu. 
+        // 20ms gives us an acceptable polling/update speed
+        cil::cimg::wait(20);
         {
-            boost::mutex::scoped_lock l(window_lock);
-            for(unsigned int i=0; i<windows.size(); i++){
-                if(windows[i]->visible()){
-                    if (!Fl::check()) {
-                        // Do something...
+            boost::mutex::scoped_lock l(mutex);
+            // Service all the new window requests
+            while ( !requests.empty() ){
+                //std::cerr << "DisplayMan::run(): making a window?" << std::endl;
+                window_request* req = requests.front();
+                requests.pop();
+                //std::cerr << "DisplayMan::run(): making a window?" << std::endl;
+                //req->disp = myset_picture_window(*(req->img), req->window_name.c_str());
+                this->myset_picture_window(*(req->img), req->window_name.c_str());
+                req->c.notify_one();
+                //std::cerr << "DisplayMan::run(): making a window?: done!" << std::endl;
+            }
+
+            for (it = display_map.begin(); it != display_map.end();){
+                CImg_display *t = it->second;
+                if ( t->isClosed() ){
+                    // Notify that window was closed if there is someone who 
+                    // wants to know
+                    if ( t->close_notify ){
+                        t->close_notify->c.notify_one();
                     }
-                }else if ( !Fl::wait() ){
-                    // Do something...
+                    //t->join();
+                    display_map.erase(it++);
                 }
-                windows[i]->refresh();
+                else{
+                    it->second->run();
+                    it++;
+                }
             }
         }
-        Fl::wait(0.05);
-        usleep(50000);
-    }
-    {
-        boost::mutex::scoped_lock l(window_lock);
-        Fl::wait(0.05);
     }
 }
 
-//------------------------------
-// FLTKManager
-//------------------------------
-FLTKThread FLTKManager::thread;
-
-void FLTKManager::block_until_closed(Fl_Window* win){
-    if (!thread.running()) thread.start();
-    //std::cerr << "FLTKManager::block_until_closed(): Blocking" << std::endl;
-    //fltknotify *notify = new fltknotify;
-    //notify->win = win;
-    boost::mutex m;
-    boost::condition cond;
-    ((ImageWindow*)win)->NotifyWhenClosed(&m,(void*)&cond);
-    /*
-    {
-        boost::mutex::scoped_lock l(thread.vector_lock);
-        thread.to_notify.push_back(notify);
-    }
-    */
-    {
-        boost::mutex::scoped_lock l(m);
-        cond.wait(m);
-    }
-    
-    //std::cerr << "FLTKManager::block_until_closed(): Closed!" << std::endl;
+void DisplayMan::set_picture_window(myro_img& img, const char* window_name){
+    window_request req;
+    req.window_name = window_name;
+    req.img = &img;
+    boost::mutex::scoped_lock l(mutex);
+    requests.push(&req);
+    req.c.wait(l);
 }
 
-ImageWindow* FLTKManager::get_image_window(int width, int height, char * title){
-    if (!thread.running()) thread.start();
-    ImageWindow* ret = new ImageWindow(width,height,title);
-    {
-        boost::mutex::scoped_lock l(thread.window_lock);
-        ret->show();
-        ret->end();
-        thread.windows.push_back(ret);
+void DisplayMan::block_on(const char* window_name){
+    window_request blk;
+    boost::mutex::scoped_lock l(mutex);
+    myro_cimg_display_map::iterator it = display_map.find(window_name);
+    if ( it == display_map.end() ){
+        // TODO: Do something if asked to block on a non-existant window
+        std::cerr << "ERROR: block_on did not get a window to block with" << std::endl;
     }
-    return ret;
+    else{
+        CImg_display* disp = it->second;
+        disp->NotifyWhenClosed(&blk);
+        blk.c.wait(mutex);
+        // When we get here, the window has been closed!
+    }
 }
 
-ImageWindow* FLTKManager::get_image_window(int x, int y, int width, int height, char* title){
-    if (!thread.running()) thread.start();
-    ImageWindow* ret = new ImageWindow(x,y,width,height,title);
-    {
-        boost::mutex::scoped_lock l(thread.window_lock);
-        ret->show();
-        thread.windows.push_back(ret);
+CImg_display* DisplayMan::get_winobj(const char* window_name){
+    boost::mutex::scoped_lock l(mutex);
+    myro_cimg_display_map::iterator it = display_map.find(window_name);
+    if ( it == display_map.end() ){
+        return NULL;
     }
-    return ret;
+    else{
+        CImg_display* disp = it->second;
+        return disp;
+    }
 }
 
-bool FLTKManager::remove_image_window(ImageWindow* win){
-    bool isEmpty = false;
-    bool removed = false;
-    {
-        boost::mutex::scoped_lock l(thread.window_lock);
-        std::vector<ImageWindow*>::iterator it;
-        for (it = thread.windows.begin(); it != thread.windows.end(); it++){
-            if (*it == win){
-                thread.windows.erase(it);
-                removed = true;
-                break;
-            }
-        }
-        isEmpty = thread.windows.empty();
-    }
 
-    delete win;
-    
-    // If there's no windows left, stop the thread.
-    if ( isEmpty ){
-        thread.stop();
+// Must already have mutex to call me!
+CImg_display* DisplayMan::myset_picture_window(myro_img& img, const char* window_name){
+    CImg_display* disp;
+    myro_cimg_display_map::iterator it = display_map.find(window_name);
+    if ( it == display_map.end() ){
+        disp = new CImg_display(img, window_name);
+        //disp->start();
+        display_map[window_name] = disp;
     }
-    return removed;
+    else{
+        disp = it->second;
+        //display_map.erase(it);
+        disp->change_image(img);
+    }
+    return disp;
 }
+
