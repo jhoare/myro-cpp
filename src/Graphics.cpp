@@ -146,9 +146,6 @@ Point GraphWin::getCurrentMouse(int& button){
     return this->thread->getMouseCoords(button);
 }
 
-void GraphWin::setCoords(int xll, int yll, int xur, int yur){
-}
-
 GOL_reg GraphWin::draw(GraphicsObject* obj){
     drawlist.push_back(obj);
     GOL_reg registration = --drawlist.end();

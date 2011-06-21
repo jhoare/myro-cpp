@@ -39,7 +39,8 @@ Color string_to_color(std::string color);
 
 /**
  * A GraphWin object represents a window on the screen where graphical images 
- * may be drawn. A program may define any number of GraphWins. 
+ * may be drawn. A program may define any number of GraphWins. Each GraphWin 
+ * object represents a different open window.
  */
 class GraphWin{
     public:
@@ -53,7 +54,7 @@ class GraphWin{
          */
         GraphWin(std::string title, int width, int height, bool autoFlush=true);
         /**
-         * Create a GraphWin with a white background.
+         * Create a GraphWin with a given image as the background.
          * 
          * @param title The Window Title
          * @param img The image you wish to set as the background.
@@ -61,7 +62,7 @@ class GraphWin{
          */
         GraphWin(std::string title, myro_img& img, bool autoFlush=true);
         /**
-         * Create a GraphWin with a white background.
+         * Create a GraphWin with a given image as the background.
          * 
          * @param title The Window Title
          * @param img The image you wish to set as the background.
@@ -75,7 +76,8 @@ class GraphWin{
          * 
          * Turning this off will give better performance, but you must
          * make sure that you call update() yourself to update the 
-         * image. By default this is on.
+         * image. By default this is on, so unless you turn off autoFlush,
+         * you never need to call update() yourself.
          */
         void setAutoflush(bool autoFlush);
         /**
@@ -118,18 +120,11 @@ class GraphWin{
          */
         Point getCurrentMouse(int& button);
         /**
-         * Sets the coordinate system of the window. The lower-left corner is 
-         * xll,yll and the upper-right corner is xur,yur. All subsequent 
-         * drawing will be done with respect to the altered coordinate system 
-         * (except for plotPixel).
-         */
-        void setCoords(int x11,int y11,int xur,int yur);
-        /**
          * Redraw the image.
          */
         void update();
         // Check to see if we are supposed to auto-redraw, and if so do it
-        // TODO: This should be private, but i'm getting errors here...
+        // TODO: This should be private, but I'm getting errors here...
         void check_and_update();
     private: 
         GOL_reg draw(GraphicsObject* obj);
@@ -220,6 +215,7 @@ class Point : public GraphicsObject{
 };
 
 /**
+ * @internal 
  * A private class which other shapes which use a bounding box inherits from.
  */
 class _BBox : public GraphicsObject{
@@ -272,7 +268,7 @@ class Rectangle : public _BBox{
 /// Represents a Line, or Arrow
 class Line : public _BBox{
     public:
-        /// Creates a Line from p1 to p2
+        /// Creates a Line (or Arrow) from p1 to p2
         Line(Point p1, Point p2);
         /// str can be "first", "last", "both", or none. Default is "none"
         void setArrow(std::string type);
