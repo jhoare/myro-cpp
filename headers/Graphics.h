@@ -52,7 +52,7 @@ class GraphWin{
          * @param height The Window Height
          * @param autoFlush Automatically redraw on a change (default true)
          */
-        GraphWin(std::string title, int width, int height, bool autoFlush=true);
+        GraphWin(std::string title="Graphics Window", int width=200, int height=200, bool autoFlush=true);
         /**
          * Create a GraphWin with a given image as the background.
          * 
