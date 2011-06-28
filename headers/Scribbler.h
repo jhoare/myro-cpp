@@ -389,7 +389,7 @@ class Scribbler: public Robot {
 	/**
 	 * Read the current voltage value for the batteries.
 	 *
-	 * @return The percentage of battery power remaining.
+	 * @return The voltage remaining of the battery, from 0.0 to 9.0
 	 */
 	double getBattery();
 	
