@@ -1,6 +1,5 @@
 #include "Picture.h"
-#include "ColorPicture.h"
-#include "GrayPicture.h"
+#include "MyroInternals.h"
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
@@ -12,9 +11,94 @@ Picture::Picture(){
 Picture::Picture(int width, int height) {
     this->width =  width;
     this->height = height;
+    this->channels = 3;
+}
+
+Picture::Picture(unsigned char * data, int channels, int width, int height){
+    this->width = width;
+    this->height = height;
+    this->channels = channels;
+  
+    if ( channels == 3 ){
+        image_data.assign(width,height,1,channels);
+        loadInterlacedImage(data);
+    } else {
+        image_data.assign(data,width,height,1,channels);
+    }
+}
+
+Picture::Picture(Picture& pic)
+{
+    image_data.assign(pic.image_data);
+    this->width = pic.width;
+    this->height = pic.height;
+    this->channels = pic.channels;
 }
 
 Picture::~Picture() {
+}
+
+Pixel Picture::getPixel(int x, int y) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
+    Pixel result;
+    if ( channels == 3 ){
+        result.R = image_data(x,y,0,0);
+        result.G = image_data(x,y,0,1);
+        result.B = image_data(x,y,0,2);
+    }
+    else{
+        result.R = result.G = result.B = image_data(x,y,0,0);
+    }
+    return result;
+}
+
+void Picture::setPixel(int x, int y, Pixel pix) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
+    if ( channels == 3 ){
+        image_data(x,y,0,0) = pix.R;  
+        image_data(x,y,0,1) = pix.G;    
+        image_data(x,y,0,2) = pix.B;    
+    } else {
+        image_data(x,y,0,0) = pix.R;  
+    }
+}
+
+void Picture::show(std::string windowname){
+    displayMan.set_picture_window(image_data, windowname.c_str());
+}
+
+void Picture::show(){
+    const std::string windowname = "Picture";
+    displayMan.set_picture_window(image_data, windowname.c_str());
+    displayMan.block_on(windowname.c_str());
+}
+
+// TODO: Implement this!
+Picture* Picture::clone(){
+    //Picture* newpic = new ColorPicture(*this);
+    //return newpic;
+    return NULL;
+}
+
+bool Picture::loadPicture(const char* filename){
+  /* And we're done! */
+  image_data.load_jpeg(filename);
+  return true;
+}
+
+void Picture::savePicture(const char* filename){
+  /* And we're done! */
+  image_data.save_jpeg(filename);
+}
+
+void Picture::loadInterlacedImage(unsigned char* img){
+    cimg_forXY(image_data,x,y){
+        image_data(x,y,0,0) = img[y*width*3+x*3];
+        image_data(x,y,0,1) = img[y*width*3+x*3+1];
+        image_data(x,y,0,2) = img[y*width*3+x*3+2];
+    }
 }
 
 int Picture::getHeight() {
@@ -110,14 +194,9 @@ void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
 }
 
 Picture* loadPicture(const char* filename){
-    Picture* ret = new ColorPicture();
+    Picture* ret = new Picture();
     if ( ret->loadPicture(filename) )
         return ret;
-    delete ret;
-    ret = new GrayPicture();
-    if ( ret->loadPicture(filename) )
-        return ret;
-    
     return NULL;
 }
 

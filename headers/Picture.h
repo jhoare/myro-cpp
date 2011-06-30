@@ -77,16 +77,18 @@ class Picture {
 
         Picture();
         Picture(int width, int height);
+        Picture(unsigned char * data, int channels, int width, int height);
+        Picture(Picture& pic);
         ~Picture();
 
         /**
          * @return A pixel struct representing the pixel at x,y
          */
-        virtual Pixel getPixel(int x, int y)=0;
+        virtual Pixel getPixel(int x, int y);
         /**
          * Set the value of a pixel at x,y to be the given pixel pix.
          */
-        virtual void  setPixel(int x, int y, Pixel pix)=0;
+        virtual void  setPixel(int x, int y, Pixel pix);
         /**
          * Display the picture on the screen.
          * 
@@ -98,7 +100,7 @@ class Picture {
          *      a new window, if it already exists, it will draw the image
          *      into that window. 
          */
-        virtual void  show(std::string windowname)=0;
+        virtual void show(std::string windowname);
         /**
          * Display the picture on the screen.
          *
@@ -106,7 +108,7 @@ class Picture {
          * window, before the program continues running.
          *
          */
-        virtual void show()=0;
+        virtual void show();
         /**
          * Get a pointer to the underlying memory representing the 
          * image.
@@ -127,7 +129,7 @@ class Picture {
          *
          * @return A clone of this picture
          */
-        virtual Picture* clone() = 0;
+        virtual Picture* clone();
 
         int getHeight();
         int getWidth();
@@ -140,7 +142,7 @@ class Picture {
          * @return True if load sucessful, false if fails (for wrong
          * colorspace, etc.)
          */
-        virtual bool loadPicture(const char* filename)=0;
+        virtual bool loadPicture(const char* filename);
 
         /**
          * Save an image to a file, only jpeg files are supported. 
@@ -149,7 +151,7 @@ class Picture {
          * @param filename The name of the file you save (without the .jpg 
          *  file extention)
          */
-        virtual void savePicture(const char* filename)=0;
+        virtual void savePicture(const char* filename);
 
         /**
          * Static method to print out an error message when a user has 
@@ -158,6 +160,8 @@ class Picture {
         static void out_of_bounds_error(int width, int height, 
                             int given_width, int given_height);
 
+    private:
+        void loadInterlacedImage(unsigned char* img);
     protected:
 
         //unsigned char * image_data;
@@ -165,6 +169,7 @@ class Picture {
         myro_img image_data;
         int width;
         int height;
+        int channels;
 };
 // functions added for lab 6 by Nick
 int getWidth(Picture *p);

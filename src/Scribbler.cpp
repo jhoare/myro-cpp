@@ -8,8 +8,6 @@
 #include <iostream>
 #include <cstring>
 #include <cstdio>
-#include "ColorPicture.h"
-#include "GrayPicture.h"
 #include "VideoStream.h"
 #include <boost/thread/mutex.hpp>
 
@@ -1798,33 +1796,33 @@ Picture * Scribbler::takePicture(std::string type) {
     boost::mutex::scoped_lock l(*(this->image_lock));
     if(type == "color") {
         imageBuffer = grab_array_rgb();
-        image = new ColorPicture(imageBuffer, 256, 192);
+        image = new Picture(imageBuffer, 3, 256, 192);
     }
     else if( type == "gray" || type == "grey") {
         conf_window(0, 1, 0, 255, 191, 2, 2);
         imageBuffer = grab_gray_array();
         conf_gray_window(0, 2, 0, 128, 191, 1, 1);
-        image = new GrayPicture(imageBuffer, 256, 192);
+        image = new Picture(imageBuffer, 1, 256, 192);
     }
     else if( type == "blob" ) {
         imageBuffer = grab_blob_array();
-        image = new ColorPicture(imageBuffer, 256, 192);
+        image = new Picture(imageBuffer, 3, 256, 192);
     }
     else if( type == "jpeg" ) {
         imageBuffer = grab_jpeg_color(1,size);
-        image = new ColorPicture(imageBuffer, 256, 192);
+        image = new Picture(imageBuffer, 3, 256, 192);
     }
     else if( type == "jpeg-fast") {
         imageBuffer = grab_jpeg_color(0,size);
-        image = new ColorPicture(imageBuffer, 256, 192);
+        image = new Picture(imageBuffer, 3, 256, 192);
     }
     else if( type == "grayjpeg") {
         imageBuffer = grab_jpeg_gray(1,size);
-        image = new GrayPicture(imageBuffer, 256, 192);
+        image = new Picture(imageBuffer, 1, 256, 192);
     }
     else if( type == "grayjpeg-fast" ) {
         imageBuffer = grab_jpeg_gray(0,size);
-        image = new GrayPicture(imageBuffer, 256, 192);
+        image = new Picture(imageBuffer, 1, 256, 192);
     }
     else { 
         std::cerr << "Scribbler::takePicture(): Warning: Unknown picture type: " << type << std::endl;
