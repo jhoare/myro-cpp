@@ -433,7 +433,7 @@ class Scribbler: public Robot {
 	 * @return An integer represent the light intensity for the specified
 	 * window.
 	 */
-	int getBright(std::string value = ""); 
+	int getBright(std::string value); 
 
 	/**
 	 * Used to query a specified light sensor located on the rear of the
