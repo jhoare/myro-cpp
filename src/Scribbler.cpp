@@ -1222,7 +1222,9 @@ void * Scribbler::get(std::string sensor, std::vector<std::string> position) {
                 retval = (void*)ptr_bright;
             }
             else if( sensor == "picture" ) {
-                retval = (void*)this->takePicture(position.at(0));
+                retval = NULL;
+                std::cerr << "Use takePicture() instead, don't use get(\"picture\")" << std::endl;
+                //retval = (void*)this->takePicture(position.at(0));
             }
             else 
                 std::cout << "invalid sensor name: " << sensor << std::endl;
@@ -1782,47 +1784,47 @@ std::vector<int> Scribbler::getData(std::vector<int> position) {
     return dataV;
 }
 
-Picture * Scribbler::takePicture(std::string type) {
+PicturePtr Scribbler::takePicture(std::string type) {
     unsigned char * imageBuffer = NULL;
     int size;
 
-    Picture * image = NULL;
+    PicturePtr image;
 
     // Don't take a picture if we're not connected.
     if ( con == NULL )
-        return NULL;
+        return image;
 
     //pthread_mutex_lock(this->image_lock);
     boost::mutex::scoped_lock l(*(this->image_lock));
     if(type == "color") {
         imageBuffer = grab_array_rgb();
-        image = new Picture(imageBuffer, 3, 256, 192);
+        image = PicturePtr(new Picture(imageBuffer, 3, 256, 192));
     }
     else if( type == "gray" || type == "grey") {
         conf_window(0, 1, 0, 255, 191, 2, 2);
         imageBuffer = grab_gray_array();
         conf_gray_window(0, 2, 0, 128, 191, 1, 1);
-        image = new Picture(imageBuffer, 1, 256, 192);
+        image = PicturePtr(new Picture(imageBuffer, 1, 256, 192));
     }
     else if( type == "blob" ) {
         imageBuffer = grab_blob_array();
-        image = new Picture(imageBuffer, 3, 256, 192);
+        image = PicturePtr(new Picture(imageBuffer, 3, 256, 192));
     }
     else if( type == "jpeg" ) {
         imageBuffer = grab_jpeg_color(1,size);
-        image = new Picture(imageBuffer, 3, 256, 192);
+        image = PicturePtr(new Picture(imageBuffer, 3, 256, 192));
     }
     else if( type == "jpeg-fast") {
         imageBuffer = grab_jpeg_color(0,size);
-        image = new Picture(imageBuffer, 3, 256, 192);
+        image = PicturePtr(new Picture(imageBuffer, 3, 256, 192));
     }
     else if( type == "grayjpeg") {
         imageBuffer = grab_jpeg_gray(1,size);
-        image = new Picture(imageBuffer, 1, 256, 192);
+        image = PicturePtr(new Picture(imageBuffer, 1, 256, 192));
     }
     else if( type == "grayjpeg-fast" ) {
         imageBuffer = grab_jpeg_gray(0,size);
-        image = new Picture(imageBuffer, 1, 256, 192);
+        image = PicturePtr(new Picture(imageBuffer, 1, 256, 192));
     }
     else { 
         std::cerr << "Scribbler::takePicture(): Warning: Unknown picture type: " << type << std::endl;

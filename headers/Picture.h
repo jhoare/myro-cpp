@@ -4,10 +4,13 @@
 #include<exception>
 #include<string>
 #include<MyroCImg.h>
+#include<boost/shared_ptr.hpp>
 /** @defgroup picture Picture Operations
  * The collection of all Picture Related commands and operations
  * @{
  */
+class Picture;
+typedef boost::shared_ptr<Picture> PicturePtr;
 
 /**
  * A pixel structure that respesents a single pixel of an Image. 
@@ -129,7 +132,7 @@ class Picture {
          *
          * @return A clone of this picture
          */
-        virtual Picture* clone();
+        virtual PicturePtr clone();
 
         int getHeight();
         int getWidth();
@@ -172,22 +175,22 @@ class Picture {
         int channels;
 };
 // functions added for lab 6 by Nick
-int getWidth(Picture *p);
-int getHeight(Picture *p);
-void show(Picture *p, std::string windowname);
-void show(Picture *p);
-Pixel getPixel(Picture *p, int x, int y);
-int getPixelValue_grey(Picture *p, int x, int y);
-void setPixel(Picture* p, int x, int y, Pixel pix);
-void setPixelColor(Picture *p, int x, int y, int R, int G, int B);
-Picture* clone(Picture* p);
+int getWidth(PicturePtr p);
+int getHeight(PicturePtr p);
+void show(PicturePtr p, std::string windowname);
+void show(PicturePtr p);
+Pixel getPixel(PicturePtr p, int x, int y);
+int getPixelValue_grey(PicturePtr p, int x, int y);
+void setPixel(PicturePtr p, int x, int y, Pixel pix);
+void setPixelColor(PicturePtr p, int x, int y, int R, int G, int B);
+PicturePtr clone(PicturePtr p);
 
 /// Create a picture object from a saved image
-Picture* loadPicture(const char* filename);
+PicturePtr loadPicture(const char* filename);
 /// Load an image into the given Picture object
-void loadPicture(Picture * p, const char* filename);
+void loadPicture(PicturePtr p, const char* filename);
 /// Save the Image to a file
-void savePicture(Picture * p, const char* filename);
+void savePicture(PicturePtr p, const char* filename);
 
 ///@}
 

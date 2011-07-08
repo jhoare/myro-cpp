@@ -76,10 +76,11 @@ void Picture::show(){
 }
 
 // TODO: Implement this!
-Picture* Picture::clone(){
+PicturePtr Picture::clone(){
+    PicturePtr p(new Picture(*this));
     //Picture* newpic = new ColorPicture(*this);
     //return newpic;
-    return NULL;
+    return p;
 }
 
 bool Picture::loadPicture(const char* filename){
@@ -148,43 +149,43 @@ const char* Picture::IndexOutOfBoundsException::what() throw(){
 */
 
 // Below are the C-style Wrappers for the objects...
-int getWidth(Picture *p)
+int getWidth(PicturePtr p)
 {
         return p->getWidth();
 }
 
-int getHeight(Picture *p)
+int getHeight(PicturePtr p)
 {
         return p->getHeight();
 }
 
-void show(Picture *p, std::string windowname)
+void show(PicturePtr p, std::string windowname)
 {
     p->show(windowname);
 }
 
-void show(Picture *p)
+void show(PicturePtr p)
 {
     p->show();
 }
 
-Pixel getPixel(Picture *p, int x, int y)
+Pixel getPixel(PicturePtr p, int x, int y)
 {
         return p->getPixel(x, y);
 }
 
-int getPixelValue_grey(Picture *p, int x, int y)
+int getPixelValue_grey(PicturePtr p, int x, int y)
 {
         Pixel P=p->getPixel(x,y);
         return P.R;
 }
 
-void setPixel(Picture* p, int x, int y, Pixel pix)
+void setPixel(PicturePtr p, int x, int y, Pixel pix)
 {
         p->setPixel(x, y, pix);
 }
 
-void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
+void setPixelColor(PicturePtr p, int x, int y, int R, int G, int B)
 {
         Pixel P=p->getPixel(x,y);
         P.R=R;
@@ -193,21 +194,22 @@ void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
         p->setPixel(x, y, P);
 }
 
-Picture* loadPicture(const char* filename){
-    Picture* ret = new Picture();
+PicturePtr loadPicture(const char* filename){
+    PicturePtr ret(new Picture());
     if ( ret->loadPicture(filename) )
         return ret;
-    return NULL;
+    // TODO: return NULL;
+    return ret;
 }
 
-void loadPicture(Picture * p, const char* filename){
+void loadPicture(PicturePtr p, const char* filename){
     p->loadPicture(filename);
 }
-void savePicture(Picture * p, const char* filename){
+void savePicture(PicturePtr p, const char* filename){
     p->savePicture(filename);
 }
 
-Picture* clone(Picture* p){
+PicturePtr clone(PicturePtr p){
     return p->clone();
 }
 // END C-style Wrappers for the objects...

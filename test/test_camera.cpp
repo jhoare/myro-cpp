@@ -15,24 +15,20 @@ int main(int argc, char ** argv) {
 	cout << "Testing Color, if image looks correct close display" << endl;
 	cout << "If not, try restarting robot, and rerunning test" << endl;
 
-    Picture* img = robot.takePicture("color");
+    PicturePtr img = robot.takePicture("color");
     img->show();
-    delete img;
 
 	cout << "Testing Grayscale" << endl;
     img = robot.takePicture("gray");
     img->show();
-    delete img;
 
 	cout << "Testing Jpeg Color" << endl;
     img = robot.takePicture("jpeg");
     img->show();
-    delete img;
 
 	cout << "Testing Jpeg Gray" << endl;
     img = robot.takePicture("grayjpeg");
     img->show();
-    delete img;
 
 	cout << "All Camera Test Completed\n";
 
