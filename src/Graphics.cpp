@@ -3,6 +3,7 @@
 #include <iostream>
 #include <assert.h>
 #include <cmath>
+#include <cstdlib>
 
 static unsigned char red[] = {255,0,0};
 
@@ -81,6 +82,8 @@ GraphWin::~GraphWin(){
         thread = NULL;
         //delete thread;
     }
+    //while (!drawlist.empty())
+    //    undraw(drawlist.front()+1);
 }
 
 void GraphWin::init(){
@@ -147,14 +150,25 @@ Point GraphWin::getCurrentMouse(int& button){
 }
 
 GOL_reg GraphWin::draw(GraphicsObject* obj){
-    drawlist.push_back(obj);
+    drawlist.push_back(obj->drawData);
+    obj->drawData->common->refCount++;
     GOL_reg registration = --drawlist.end();
     this->check_and_update();
     return registration;
 }
 
 void GraphWin::undraw(GOL_reg reg){
+    DrawMessage* msg = *reg;
+    msg->common->refCount--;
     drawlist.erase(reg);
+    if ( msg->common->refCount <= 0 ){
+        std::cerr << "Cleaning up Object" << std::endl;
+        // Then we have to clean it up, because the object has gone away
+        if ( msg->extra  ) free( msg->extra );
+        if ( msg->data   ) free( msg->data );
+        if ( msg->common ) free( msg->common );
+        if ( msg         ) free( msg );
+    }
     this->check_and_update();
 }
 
@@ -170,7 +184,7 @@ void GraphWin::update(){
         result = background;
     }
     for(GOL_reg it = drawlist.begin(); it != drawlist.end(); it++)
-        (*it)->draw_command(result);
+        assert(GraphWin::draw_message((*it), result));
 
     if ( thread )
         thread->change_image(result);
@@ -181,252 +195,19 @@ void GraphWin::check_and_update(){
         update();
 }
 
-// ====================
-// GraphicsObject
-// ====================
-GraphicsObject::GraphicsObject()
-: canvas(NULL),
-  fill(color_rgb(255,255,255)),
-  outline(color_rgb(0,0,0)),
-  width(1)
-{}
-
-GraphicsObject::GraphicsObject(Color fill, Color outline, int width)
-: canvas(NULL),
-  fill(fill),
-  outline(outline),
-  width(width)
-{}
-
-GraphicsObject::~GraphicsObject(){
-    if (this->canvas)
-        this->undraw();
-}
-
-void GraphicsObject::setFill(Color color){
-    fill=color;
-    if ( this->canvas )
-        this->canvas->check_and_update();
-}
-
-void GraphicsObject::setFill(std::string color){
-    Color c = string_to_color(color);
-    this->setFill(c);
-}
-
-void GraphicsObject::setOutline(Color color){
-    outline=color;
-    if ( this->canvas )
-        this->canvas->check_and_update();
-}
-
-void GraphicsObject::setOutline(std::string color){
-    Color c = string_to_color(color);
-    this->setOutline(c);
-}
-
-void GraphicsObject::setWidth(int width){
-    this->width = width;
-    if ( this->canvas )
-        this->canvas->check_and_update();
-}
-
-void GraphicsObject::draw(GraphWin* canvas){
-    if ( !this->canvas ){
-        this->canvas = canvas;
-        this->registration = this->canvas->draw(this);
-        assert( *registration == this );
-    }
-    else {
-        // Throw an exception or something
-    }
-}
-
-void GraphicsObject::draw(GraphWin& canvas){
-    this->draw(&canvas);
-}
-
-void GraphicsObject::undraw(){
-    if ( this->canvas ){
-        this->canvas->undraw(this->registration);
-        canvas = NULL;
-    }
-    else{
-        // Throw an exception
-    }
-}
-
-// ====================
-// Point
-// ====================
-Point::Point(): x(0),y(0){}
-Point::Point(int x, int y)
-: x(x), y(y)
-{}
-/*
-Point::Point(const Point& p){
-    this->x = p.x;
-    this->y = p.y;
-}
-*/
-Point* Point::clone(){ return new Point(x,y); }
-int Point::getX(){ return x; }
-int Point::getY(){ return y; }
-void Point::move(int dx, int dy){
-    x += dx;
-    y += dy;
-    if ( this->canvas )
-        this->canvas->check_and_update();
-}
-Point& Point::operator+=(const Point& rhs){
-    x += rhs.x;
-    y += rhs.y;
-    return *this;
-}
-Point Point::operator+(const Point& other){
-    Point result = *this;
-    result += other;
-    return result;
-}
-Point& Point::operator-=(const Point& rhs){
-    x -= rhs.x;
-    y -= rhs.y;
-    return *this;
-}
-Point Point::operator-(const Point& other){
-    Point result = *this;
-    result -= other;
-    return result;
-}
-void Point::draw_command(myro_img& canvas){
-    canvas(x,y,0,0) = outline.R;
-    canvas(x,y,0,1) = outline.G;
-    canvas(x,y,0,2) = outline.B;
-}
-
-// ====================
-// _BBox
-// ====================
-_BBox::_BBox(Point p1, Point p2)
-: p1(p1), p2(p2)
-{}
-
-void _BBox::move(int dx, int dy){
-    Point d(dx,dy);
-    this->p1 += d;
-    this->p2 += d;
-    if ( this->canvas ) 
-        this->canvas->check_and_update();
-}
-
-Point _BBox::getP1(){ return p1; };
-Point _BBox::getP2(){ return p2; };
-Point _BBox::getCenter(){ 
-    return Point((p1.getX()+p2.getX())/2, 
-                 (p1.getY()+p2.getY())/2);
-}
-
-// ====================
-// Oval
-// ====================
-Oval::Oval(Point p1, Point p2)
-: _BBox(p1,p2)
-{
-}
-
-Oval* Oval::clone(){
-    return new Oval(this->p1, this->p2);
-}
-
-void Oval::draw_command(myro_img& canvas){
-    Point center = this->getCenter();
-    unsigned char color[] = {fill.R, fill.G, fill.B};
-    unsigned char outlinecolor[] = {outline.R, outline.G, outline.B};
-    int r0 = abs(center.getX() - this->getP2().getX());
-    int r1 = abs(center.getY() - this->getP2().getY());
-    if ( this->width ){
-        canvas.draw_ellipse(center.getX(),center.getY(), r0, r1, 0, outlinecolor);
-        canvas.draw_ellipse(center.getX(), center.getY(), r0-width, r1-width, 0, color);
-    }
-    else
-        canvas.draw_ellipse(center.getX(),center.getY(), r0, r1, 0, color);
-}
-
-// ====================
-// Circle
-// ====================
-Circle::Circle(Point center, int radius)
-: Oval(Point(center.getX()-radius,center.getY()-radius),Point(center.getX()+radius,center.getY()+radius)), 
-  centerPoint(center),
-  radius(radius)
-{}
-
-int Circle::getRadius(){
-    return radius;
-}
-/*
-void Circle::draw_command(myro_img& canvas){
-
-}
-*/
-
-// ====================
-// Rectangle
-// ====================
-Rectangle::Rectangle(Point p1, Point p2)
-: _BBox(p1,p2)
-{}
-
-void Rectangle::draw_command(myro_img& canvas){
-    unsigned char color[] = {fill.R, fill.G, fill.B};
-    if ( this->width ){
-        unsigned char outlinecolor[] = {outline.R, outline.G, outline.B};
-        int leftx = std::min(p1.getX(),p2.getX())+width;;
-        int rightx = std::max(p1.getX(), p2.getX())-width;
-        int topy = std::min(p1.getY(), p2.getY())+width;
-        int bottomy = std::max(p1.getY(), p2.getY())-width;
-        canvas.draw_rectangle(p1.getX(), p1.getY(), p2.getX(), p2.getY(), outlinecolor);
-        canvas.draw_rectangle(leftx,topy,rightx,bottomy, color);
-    }
-    else{
-        canvas.draw_rectangle(p1.getX(), p1.getY(), p2.getX(), p2.getY(), color);
-    }
-}
-
-// ====================
-// Line
-// ====================
-Line::Line(Point p1, Point p2)
-: _BBox(p1,p2),
-  arrow_type("none")
-{}
-
-void Line::setArrow(std::string type){
-    if ( type == "first" ||
-         type == "last"  ||
-         type == "both"  ||
-         type == "none" )
-        this->arrow_type = type;
-    else{
-        std::cerr << "Line::setArrow(): Bad Type: " << type << std::endl;
-        // TODO: Throw Exception
-    }
-}
-
-void Line::draw_command(myro_img& canvas){
-    unsigned char color[] = {outline.R, outline.G, outline.B};
-    //std::cerr<< "color.R: " << (int)color[0] << "color.G: " << (int)color[1] << "color.B: " << (int)color[2] << std::endl;
+void draw_line(Point p1, Point p2, std::string arrow_type, int width, 
+        unsigned char* outlinecolor, myro_img& canvas){
     if ( arrow_type == "first" ){
-        canvas.draw_arrow(p2.getX(), p2.getY(), p1.getX(), p1.getY(), color);
+        canvas.draw_arrow(p2.getX(), p2.getY(), p1.getX(), p1.getY(), outlinecolor);
     }
     else if ( arrow_type == "last" ){
-        canvas.draw_arrow(p1.getX(), p1.getY(), p2.getX(), p2.getY(), color);
+        canvas.draw_arrow(p1.getX(), p1.getY(), p2.getX(), p2.getY(), outlinecolor);
     }
     else if ( arrow_type == "both" ){
-        canvas.draw_arrow(p2.getX(), p2.getY(), p1.getX(), p1.getY(), color);
-        canvas.draw_arrow(p1.getX(), p1.getY(), p2.getX(), p2.getY(), color);
+        canvas.draw_arrow(p2.getX(), p2.getY(), p1.getX(), p1.getY(), outlinecolor);
+        canvas.draw_arrow(p1.getX(), p1.getY(), p2.getX(), p2.getY(), outlinecolor);
     }
-    if ( this->width > 1 ){
+    if ( width > 1 ){
         int x0=p1.getX(),x1=p2.getX(),y0=p1.getY(),y1=p2.getY();
         bool steep = abs(y0-y1) > abs(x0-x1);
         if ( steep ){
@@ -447,9 +228,9 @@ void Line::draw_command(myro_img& canvas){
         // points so i can draw a "thick" line
         for (int x = x0; x <= x1; x++){
             if ( steep )
-                canvas.draw_circle(y,x,ceil(this->width/2.0),color);
+                canvas.draw_circle(y,x,ceil(width/2.0),outlinecolor);
             else
-                canvas.draw_circle(x,y,ceil(this->width/2.0),color);
+                canvas.draw_circle(x,y,ceil(width/2.0),outlinecolor);
             error += deltaerr;
             if ( error >= 0.5 ){
                 y += ystep;
@@ -457,8 +238,373 @@ void Line::draw_command(myro_img& canvas){
             }
         }
     }
-    else if (this->width == 1){
-        canvas.draw_line(p1.getX(), p1.getY(), p2.getX(), p2.getY(), color);
+    else if (width == 1){
+        canvas.draw_line(p1.getX(), p1.getY(), p2.getX(), p2.getY(), outlinecolor);
+    }
+}
+
+std::vector<Point> update_points(polygon_draw_msg* msg, Color lineColor, int width){
+    Point p;
+    std::vector<Point> ret;
+    msg->outline_lines.clear();
+    msg->outline_lines.push_back(Line(msg->points[msg->points.size()-1],msg->points[0]));
+
+    for (int i = 0; i < (int)msg->points.size(); i++){
+        if (i+1 < (int)msg->points.size())
+            msg->outline_lines.push_back(Line(msg->points[i],msg->points[i+1]));
+        ret.push_back(msg->points[i]);
+        p = msg->points[i];
+        msg->pts(i,0) = p.getX();
+        msg->pts(i,1) = p.getY();
+    }
+    for (int i = 0; i < (int)msg->outline_lines.size(); i++){
+        msg->outline_lines[i].setWidth(width);
+        msg->outline_lines[i].setOutline(lineColor);
+    }
+    return ret;
+}
+
+bool GraphWin::draw_message(DrawMessage* msg, myro_img& canvas){
+    unsigned char color[] = {msg->common->fill.R, msg->common->fill.G, msg->common->fill.B};
+    unsigned char outlinecolor[] = {msg->common->outline.R, msg->common->outline.G, msg->common->outline.B};
+    int width = msg->common->width;
+    switch(msg->common->type){
+    case GRAPHICS_OBJECT_POINT:
+    {
+        point_draw_msg* data = (point_draw_msg*)data;
+        int x = data->x, y = data->y;
+        canvas(x,y,0,0) = msg->common->outline.R;
+        canvas(x,y,0,1) = msg->common->outline.G;
+        canvas(x,y,0,2) = msg->common->outline.B;
+    }
+    break;
+    case GRAPHICS_OBJECT_OVAL:
+    case GRAPHICS_OBJECT_CIRCLE:
+    {
+        bb_draw_msg* data = (bb_draw_msg*)msg->data;
+        Point center = Point((data->pt1.getX()+data->pt2.getX())/2, 
+                             (data->pt1.getY()+data->pt2.getY())/2);
+        int r0 = abs(center.getX() - data->pt2.getX());
+        int r1 = abs(center.getY() - data->pt2.getY());
+        if ( width ){
+            canvas.draw_ellipse(center.getX(),center.getY(), r0, r1, 0, outlinecolor);
+            canvas.draw_ellipse(center.getX(), center.getY(), r0-width, r1-width, 0, color);
+        }
+        else{
+            canvas.draw_ellipse(center.getX(),center.getY(), r0, r1, 0, color);
+        }
+    }
+    break;
+    case GRAPHICS_OBJECT_RECTANGLE:
+    {
+        bb_draw_msg* data = (bb_draw_msg*)msg->data;
+        if ( width ){
+            bb_draw_msg* data = (bb_draw_msg*)msg->data;
+            int leftx = std::min(data->pt1.getX(),data->pt2.getX())+width;;
+            int rightx = std::max(data->pt1.getX(), data->pt2.getX())-width;
+            int topy = std::min(data->pt1.getY(), data->pt2.getY())+width;
+            int bottomy = std::max(data->pt1.getY(), data->pt2.getY())-width;
+            canvas.draw_rectangle(data->pt1.getX(), data->pt1.getY(), 
+                                  data->pt2.getX(), data->pt2.getY(), outlinecolor);
+            canvas.draw_rectangle(leftx,topy,rightx,bottomy, color);
+        }
+        else{
+            canvas.draw_rectangle(data->pt1.getX(), data->pt1.getY(), 
+                                  data->pt2.getX(), data->pt2.getY(), color);
+        }
+    }
+    break;
+    case GRAPHICS_OBJECT_LINE:
+    {
+        std::string arrow_type = ((line_draw_msg*)(msg->extra))->arrow_type;
+        bb_draw_msg* data = (bb_draw_msg*)msg->data;
+        Point p1 = data->pt1;
+        Point p2 = data->pt2;
+        draw_line(p1, p2, arrow_type, width, outlinecolor, canvas);
+    }
+    break;
+    case GRAPHICS_OBJECT_POLYGON:
+    {
+        polygon_draw_msg* data = (polygon_draw_msg*)msg->data; 
+        std::vector<Point> debug = update_points(data,msg->common->outline,width);
+        canvas.draw_polygon(data->pts, color);
+        if ( width == 1 ){
+            canvas.draw_polygon(data->pts, outlinecolor, 1, ~0U);
+        } else if ( width > 1 ){
+            for (int i = 0; i < (int)data->outline_lines.size(); i++)
+                draw_line(data->outline_lines[i].getP1(), data->outline_lines[i].getP2(), 
+                          "none", width, outlinecolor, canvas);
+        }
+    }
+    break;
+    case GRAPHICS_OBJECT_TEXT:
+    {
+        text_draw_msg* data = (text_draw_msg*)msg->data;
+        if ( data->background ){
+            canvas.draw_text(data->anchor.getX(), data->anchor.getY(), data->text.c_str(), 
+                             outlinecolor, color, 1, data->size);
+        }
+        else{
+            canvas.draw_text(data->anchor.getX(), data->anchor.getY(), data->text.c_str(), 
+                             outlinecolor, 0, 1, data->size);
+        }
+    }
+    break;
+    default:
+    return false;
+    break;
+    }
+    return true;
+}
+
+// ====================
+// GraphicsObject
+// ====================
+GraphicsObject::GraphicsObject()
+{
+  drawData = new DrawMessage();
+  drawData->common = new draw_message_common();
+  //drawData = (DrawMessage*)malloc(sizeof(DrawMessage));
+  //drawData->common = (draw_message_common*)malloc(sizeof(draw_message_common));
+  drawData->common->refCount = 1;
+  drawData->common->canvas  = NULL;
+  drawData->common->fill    = color_rgb(255,255,255);
+  drawData->common->outline = color_rgb(0,0,0);
+  drawData->common->width   = 1;
+  drawData->data = drawData->extra = NULL;
+}
+
+GraphicsObject::GraphicsObject(Color fill, Color outline, int width)
+{
+  drawData = new DrawMessage();
+  drawData->common = new draw_message_common();
+  drawData->common->refCount = 1;
+  drawData->common->canvas  = NULL;
+  drawData->common->fill    = fill;
+  drawData->common->outline = outline;
+  drawData->common->width   = width;
+  drawData->data = drawData->extra = NULL;
+}
+
+GraphicsObject::~GraphicsObject(){
+}
+
+void GraphicsObject::setFill(Color color){
+    drawData->common->fill=color;
+    if ( drawData->common->canvas )
+        drawData->common->canvas->check_and_update();
+}
+
+void GraphicsObject::setFill(std::string color){
+    Color c = string_to_color(color);
+    this->setFill(c);
+}
+
+Color GraphicsObject::getFill(){
+    return drawData->common->fill;
+}
+
+void GraphicsObject::setOutline(Color color){
+    drawData->common->outline=color;
+    if ( drawData->common->canvas )
+        drawData->common->canvas->check_and_update();
+}
+
+void GraphicsObject::setOutline(std::string color){
+    Color c = string_to_color(color);
+    this->setOutline(c);
+}
+
+Color GraphicsObject::getOutline(){
+    return drawData->common->outline;
+}
+
+void GraphicsObject::setWidth(int width){
+    drawData->common->width = width;
+    if ( drawData->common->canvas )
+        drawData->common->canvas->check_and_update();
+}
+
+int GraphicsObject::getWidth(){
+    return drawData->common->width;
+}
+
+void GraphicsObject::draw(GraphWin* canvas){
+    if ( !drawData->common->canvas ){
+        drawData->common->canvas = canvas;
+        drawData->common->registration = drawData->common->canvas->draw(this);
+        //assert( *(drawData->common->registration) == this );
+    }
+    else {
+        // Throw an exception or something
+    }
+}
+
+void GraphicsObject::draw(GraphWin& canvas){
+    this->draw(&canvas);
+}
+
+void GraphicsObject::undraw(){
+    if ( drawData->common->canvas ){
+        drawData->common->canvas->undraw(drawData->common->registration);
+        drawData->common->canvas = NULL;
+    }
+    else{
+        // Throw an exception
+    }
+}
+
+// ====================
+// Point
+// ====================
+Point::Point()
+{
+    drawData->common->type = GRAPHICS_OBJECT_POINT;
+    //data = (point_draw_msg*)malloc(sizeof(point_draw_msg));
+    data = new point_draw_msg();
+    drawData->data = data;
+    data->x = 0;
+    data->y = 0;
+}
+Point::Point(int x, int y)
+{
+    drawData->common->type = GRAPHICS_OBJECT_POINT;
+    data = new point_draw_msg();
+    drawData->data = data;
+    data->x = x;
+    data->y = y;
+}
+/*
+Point::Point(const Point& p){
+    this->x = p.x;
+    this->y = p.y;
+}
+*/
+Point* Point::clone(){ return new Point(data->x,data->y); }
+int Point::getX(){ return data->x; }
+int Point::getY(){ return data->y; }
+void Point::move(int dx, int dy){
+    data->x += dx;
+    data->y += dy;
+    if ( drawData->common->canvas )
+        drawData->common->canvas->check_and_update();
+}
+Point& Point::operator+=(const Point& rhs){
+    data->x += rhs.data->x;
+    data->y += rhs.data->y;
+    return *this;
+}
+Point Point::operator+(const Point& other){
+    Point result = *this;
+    result += other;
+    return result;
+}
+Point& Point::operator-=(const Point& rhs){
+    data->x -= rhs.data->x;
+    data->y -= rhs.data->y;
+    return *this;
+}
+Point Point::operator-(const Point& other){
+    Point result = *this;
+    result -= other;
+    return result;
+}
+/*
+void Point::draw_command(myro_img& canvas){
+}
+*/
+
+// ====================
+// _BBox
+// ====================
+_BBox::_BBox(Point p1, Point p2){
+    //data = (bb_draw_msg*)malloc(sizeof(bb_draw_msg));
+    data = new bb_draw_msg();
+    drawData->data = data;
+    data->pt1 = p1;
+    data->pt2 = p2;
+}
+
+void _BBox::move(int dx, int dy){
+    Point d(dx,dy);
+    data->pt1 += d;
+    data->pt2 += d;
+    if ( drawData->common->canvas ) 
+        drawData->common->canvas->check_and_update();
+}
+
+Point _BBox::getP1(){ return data->pt1; };
+Point _BBox::getP2(){ return data->pt2; };
+Point _BBox::getCenter(){ 
+    return Point((data->pt1.getX()+data->pt2.getX())/2, 
+                 (data->pt1.getY()+data->pt2.getY())/2);
+}
+
+// ====================
+// Oval
+// ====================
+Oval::Oval(Point p1, Point p2)
+: _BBox(p1,p2)
+{
+    drawData->common->type = GRAPHICS_OBJECT_OVAL;
+}
+
+Oval* Oval::clone(){
+    return new Oval(data->pt1, data->pt2);
+}
+
+// ====================
+// Circle
+// ====================
+Circle::Circle(Point center, int radius)
+: Oval(Point(center.getX()-radius,center.getY()-radius),Point(center.getX()+radius,center.getY()+radius))
+{
+    drawData->common->type = GRAPHICS_OBJECT_CIRCLE;
+    extra = new circle_draw_msg();
+    drawData->extra = extra;
+    extra->centerPoint = center;
+    extra->radius = radius;
+}
+
+int Circle::getRadius(){
+    return extra->radius;
+}
+/*
+void Circle::draw_command(myro_img& canvas){
+
+}
+*/
+
+// ====================
+// Rectangle
+// ====================
+Rectangle::Rectangle(Point p1, Point p2)
+: _BBox(p1,p2)
+{
+    drawData->common->type = GRAPHICS_OBJECT_RECTANGLE;
+}
+
+// ====================
+// Line
+// ====================
+Line::Line(Point p1, Point p2, std::string arrow_type)
+: _BBox(p1,p2)
+{
+    drawData->common->type = GRAPHICS_OBJECT_LINE;
+    extra = new line_draw_msg();
+    drawData->extra = extra;
+    extra->arrow_type = arrow_type;
+}
+
+void Line::setArrow(std::string type){
+    if ( type == "first" ||
+         type == "last"  ||
+         type == "both"  ||
+         type == "none" )
+        extra->arrow_type = type;
+    else{
+        std::cerr << "Line::setArrow(): Bad Type: " << type << std::endl;
+        // TODO: Throw Exception
     }
 }
 
@@ -466,92 +612,54 @@ void Line::draw_command(myro_img& canvas){
 // Polygon
 // ====================
 Polygon::Polygon(std::vector<Point> points)
-:  pts(points.size(),2), points(points)
 {
+    drawData->common->type = GRAPHICS_OBJECT_POLYGON;
+    data = new polygon_draw_msg();
+    drawData->data = data;
+    data->pts.assign(points.size(),2);
+    data->points = points;
 }
 
 std::vector<Point> Polygon::getPoints(){
-    return points;
-}
-
-std::vector<Point> Polygon::update_points(){
-    Point p;
-    std::vector<Point> ret;
-    outline_lines.clear();
-    outline_lines.push_back(Line(points[points.size()-1],points[0]));
-
-    for (int i = 0; i < (int)points.size(); i++){
-        if (i+1 < (int)points.size())
-            outline_lines.push_back(Line(points[i],points[i+1]));
-        ret.push_back(points[i]);
-        p = this->points[i];
-        pts(i,0) = p.getX();
-        pts(i,1) = p.getY();
-    }
-    for (int i = 0; i < (int)outline_lines.size(); i++)
-        outline_lines[i].setWidth(this->width);
-    return ret;
-}
-
-void Polygon::draw_command(myro_img& canvas){
-    unsigned char color[] = {fill.R, fill.G, fill.B};
-    unsigned char border[] = {outline.R, outline.G, outline.B};
-    
-    // TODO: I feel like this is somewhat of an expensive operation O(N) for
-    // the number of points, this should probably only be done when the points
-    // actually need to be updated when they've changed.
-    std::vector<Point> debug = update_points();
-
-    //canvas.draw_polygon(pts_bdr, border, 1, ~0U);
-    //canvas.draw_polygon(pts_bdr, border, 1, ~0U);
-    //canvas.draw_polygon(pts, color);
-    canvas.draw_polygon(pts, color);
-    if ( this->width == 1 ){
-        canvas.draw_polygon(pts, border, 1, ~0U);
-    } else if ( this->width > 1 ){
-        for (int i = 0; i < (int)outline_lines.size(); i++)
-            outline_lines[i].draw_command(canvas);
-    }
-    /*
-    std::cerr << debug.size() << " debug points" << std::endl;
-    for (int i = 0; i < (int)debug.size(); i++){
-        canvas.draw_rectangle(debug[i].getX()-2,debug[i].getY()-2,debug[i].getX()+2,debug[i].getY()+2, red);
-    }
-    */
+    return data->points;
 }
 
 void Polygon::move(int dx, int dy){
     Point d(dx,dy);
-    for (int i = 0; i < (int)points.size(); i++){
-        points[i] += d;
+    for (int i = 0; i < (int)data->points.size(); i++){
+        data->points[i] += d;
     }
-    if ( this->canvas ) 
-        this->canvas->check_and_update();
+    if ( drawData->common->canvas ) 
+        drawData->common->canvas->check_and_update();
 }
 
 // ====================
 // Text
 // ====================
 Text::Text(Point anchor, std::string text)
-: GraphicsObject(color_rgb(0,0,0), color_rgb(0,0,0), 0),
-  text(text),
-  font("helvetica"),
-  size(13),
-  background(false),
-  style("normal"),
-  anchor(anchor)
-{}
+: GraphicsObject(color_rgb(0,0,0), color_rgb(0,0,0), 0)
+{
+    drawData->common->type = GRAPHICS_OBJECT_TEXT;
+    data = new text_draw_msg();
+    drawData->data = data;
+    data->text = text;
+    data->font = "helvetica";
+    data->size = 13;
+    data->background = false;
+    data->style = "normal";
+    data->anchor = anchor;
+}
 
-std::string Text::getText(){ return text; }
-void Text::setText(std::string text){ this->text = text; }
-Point Text::getAnchor(){ return anchor; }
-void Text::setAnchor(Point anchor){ this->anchor=anchor; }
+std::string Text::getText(){ return data->text; }
+void Text::setText(std::string text){ data->text = text; }
+Point Text::getAnchor(){ return data->anchor; }
+void Text::setAnchor(Point anchor){ data->anchor=anchor; }
 void Text::setFace(std::string font){
     // TODO
     //Joke's On you because I don't support any font other than the default!
 }
 void Text::setSize(int size){
-    this->size = size;
+    data->size = size;
 }
 
 void Text::setStyle(std::string style){
@@ -562,24 +670,11 @@ void Text::setTextColor(Color color){ this->setOutline(color); }
 void Text::setTextColor(std::string color){ this->setOutline(color); }
 
 void Text::drawBackground(bool background){
-    this->background = background;
-}
-
-void Text::draw_command(myro_img& canvas){
-    unsigned char background[] = {fill.R, fill.G, fill.B};
-    unsigned char text_color[] = {outline.R, outline.G, outline.B};
-    if ( this->background ){
-        canvas.draw_text(anchor.getX(), anchor.getY(), text.c_str(), 
-                         text_color, background, 1, size);
-    }
-    else{
-        canvas.draw_text(anchor.getX(), anchor.getY(), text.c_str(), 
-                         text_color, 0, 1, size);
-    }
+    data->background = background;
 }
 
 void Text::move(int dx, int dy){
-    anchor += Point(dx,dy);
-    if ( this->canvas )
-        this->canvas->check_and_update();
+    data->anchor += Point(dx,dy);
+    if ( drawData->common->canvas )
+        drawData->common->canvas->check_and_update();
 }
