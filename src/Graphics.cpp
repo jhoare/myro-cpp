@@ -28,6 +28,9 @@ Color color_rgb(unsigned char r, unsigned char g, unsigned char b){
     c.B = b;
     return c;
 }
+Color inline makeColor(unsigned char r, unsigned char g, unsigned char b){
+    return color_rgb(r,g,b);
+}
 
 Color string_to_color(std::string color){
     Color f;

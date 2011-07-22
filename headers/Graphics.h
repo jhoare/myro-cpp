@@ -48,6 +48,14 @@ typedef std::list<DrawMessage*>::iterator GOL_reg;
  */
 Color color_rgb(unsigned char r, unsigned char g, unsigned char b);
 /**
+ * Create a color "object" with the given r,g,b values
+ *
+ * @param r Red value
+ * @param g Green value
+ * @param b Blue value
+ */
+Color makeColor(unsigned char r, unsigned char g, unsigned char b);
+/**
  * Get a Color object from a given string name
  *
  * @param color The name of the color you want. Colors are indicated by 
