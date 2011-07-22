@@ -86,6 +86,9 @@ PicturePtr Picture::clone(){
 bool Picture::loadPicture(const char* filename){
   /* And we're done! */
   image_data.load_jpeg(filename);
+  this->width = image_data.width();
+  this->height = image_data.height();
+  this->channels = image_data.spectrum();
   return true;
 }
 
