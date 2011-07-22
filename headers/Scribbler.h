@@ -470,7 +470,7 @@ class Scribbler: public Robot {
 	 * @param type - Valid values, "color", "gray", and "blob"
 	 * @return unsigned char array containing the image information.
 	 */
-	Picture * takePicture(std::string type =  "color");
+	PicturePtr takePicture(std::string type =  "color");
 	
 	/*
 	 * Not yet functional. This version is intended to be used for

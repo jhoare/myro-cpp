@@ -4,10 +4,13 @@
 #include<exception>
 #include<string>
 #include<MyroCImg.h>
+#include<MyroSmartPointer.h>
 /** @defgroup picture Picture Operations
  * The collection of all Picture Related commands and operations
  * @{
  */
+class Picture;
+typedef MyroSmartPointer<Picture> PicturePtr;
 
 /**
  * A pixel structure that respesents a single pixel of an Image. 
@@ -77,16 +80,18 @@ class Picture {
 
         Picture();
         Picture(int width, int height);
+        Picture(unsigned char * data, int channels, int width, int height);
+        Picture(Picture& pic);
         ~Picture();
 
         /**
          * @return A pixel struct representing the pixel at x,y
          */
-        virtual Pixel getPixel(int x, int y)=0;
+        virtual Pixel getPixel(int x, int y);
         /**
          * Set the value of a pixel at x,y to be the given pixel pix.
          */
-        virtual void  setPixel(int x, int y, Pixel pix)=0;
+        virtual void  setPixel(int x, int y, Pixel pix);
         /**
          * Display the picture on the screen.
          * 
@@ -98,7 +103,7 @@ class Picture {
          *      a new window, if it already exists, it will draw the image
          *      into that window. 
          */
-        virtual void  show(std::string windowname)=0;
+        virtual void show(std::string windowname);
         /**
          * Display the picture on the screen.
          *
@@ -106,7 +111,7 @@ class Picture {
          * window, before the program continues running.
          *
          */
-        virtual void show()=0;
+        virtual void show();
         /**
          * Get a pointer to the underlying memory representing the 
          * image.
@@ -127,7 +132,7 @@ class Picture {
          *
          * @return A clone of this picture
          */
-        virtual Picture* clone() = 0;
+        virtual PicturePtr clone();
 
         int getHeight();
         int getWidth();
@@ -140,7 +145,7 @@ class Picture {
          * @return True if load sucessful, false if fails (for wrong
          * colorspace, etc.)
          */
-        virtual bool loadPicture(const char* filename)=0;
+        virtual bool loadPicture(const char* filename);
 
         /**
          * Save an image to a file, only jpeg files are supported. 
@@ -149,7 +154,7 @@ class Picture {
          * @param filename The name of the file you save (without the .jpg 
          *  file extention)
          */
-        virtual void savePicture(const char* filename)=0;
+        virtual void savePicture(const char* filename);
 
         /**
          * Static method to print out an error message when a user has 
@@ -158,6 +163,8 @@ class Picture {
         static void out_of_bounds_error(int width, int height, 
                             int given_width, int given_height);
 
+    private:
+        void loadInterlacedImage(unsigned char* img);
     protected:
 
         //unsigned char * image_data;
@@ -165,24 +172,25 @@ class Picture {
         myro_img image_data;
         int width;
         int height;
+        int channels;
 };
 // functions added for lab 6 by Nick
-int getWidth(Picture *p);
-int getHeight(Picture *p);
-void show(Picture *p, std::string windowname);
-void show(Picture *p);
-Pixel getPixel(Picture *p, int x, int y);
-int getPixelValue_grey(Picture *p, int x, int y);
-void setPixel(Picture* p, int x, int y, Pixel pix);
-void setPixelColor(Picture *p, int x, int y, int R, int G, int B);
-Picture* clone(Picture* p);
+int getWidth(PicturePtr p);
+int getHeight(PicturePtr p);
+void show(PicturePtr p, std::string windowname);
+void show(PicturePtr p);
+Pixel getPixel(PicturePtr p, int x, int y);
+int getPixelValue_grey(PicturePtr p, int x, int y);
+void setPixel(PicturePtr p, int x, int y, Pixel pix);
+void setPixelColor(PicturePtr p, int x, int y, int R, int G, int B);
+PicturePtr clone(PicturePtr p);
 
 /// Create a picture object from a saved image
-Picture* loadPicture(const char* filename);
+PicturePtr loadPicture(const char* filename);
 /// Load an image into the given Picture object
-void loadPicture(Picture * p, const char* filename);
+void loadPicture(PicturePtr p, const char* filename);
 /// Save the Image to a file
-void savePicture(Picture * p, const char* filename);
+void savePicture(PicturePtr p, const char* filename);
 
 ///@}
 

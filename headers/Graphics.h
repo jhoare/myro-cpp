@@ -9,15 +9,35 @@
  */
 
 
+/// Pixel from Picture.h and Color are the same.
+typedef Pixel Color;
+
 // Forward declartions
 class CImg_display;
 class GraphicsObject;
 class Point;
+class GraphWin;
+class DrawMessage;
 
-typedef std::list<GraphicsObject*> GraphicsObjectList;
-typedef std::list<GraphicsObject*>::iterator GOL_reg;
-/// Pixel from Picture.h and Color are the same.
-typedef Pixel Color;
+struct draw_message_common;
+struct point_draw_msg;
+struct bb_draw_msg;
+struct circle_draw_msg;
+struct line_draw_msg;
+struct polygon_draw_msg;
+struct text_draw_msg;
+struct base_msg;
+
+struct DrawMessage{
+    draw_message_common* common;
+    base_msg* data;
+    base_msg* extra;
+};
+
+typedef std::list<DrawMessage*> GraphicsObjectList;
+typedef std::list<DrawMessage*>::iterator GOL_reg;
+
+
 
 /**
  * Create a color "object" with the given r,g,b values
@@ -36,6 +56,7 @@ Color color_rgb(unsigned char r, unsigned char g, unsigned char b);
  * 'red1', 'red2','red3', 'red4', which are increasingly darker shades of red.
  */
 Color string_to_color(std::string color);
+
 
 /**
  * A GraphWin object represents a window on the screen where graphical images 
@@ -127,6 +148,7 @@ class GraphWin{
         // TODO: This should be private, but I'm getting errors here...
         void check_and_update();
     private: 
+        static bool draw_message(DrawMessage* msg, myro_img& canvas);
         GOL_reg draw(GraphicsObject* obj);
         void undraw(GOL_reg reg);
         void init();
@@ -146,6 +168,7 @@ class GraphWin{
  * class which can be drawn onto a GraphWin.
  */
 class GraphicsObject{
+
     public:
         GraphicsObject();
         GraphicsObject(Color fill, Color outline, int width);
@@ -154,12 +177,18 @@ class GraphicsObject{
         void setFill(Color color);
         /// Set the Fill of the shape
         void setFill(std::string color);
+        /// Get the Fill of the shape
+        Color getFill();
         /// Set the outline of the shape
         void setOutline(Color color);
         /// Set the outline of the shape
         void setOutline(std::string color);
+        /// Get the Outline of the shape
+        Color getOutline();
         /// Set the width of the outline around the shape
         void setWidth(int width);
+        /// Get the width of the outline around the shape
+        int getWidth();
         /// Draw the object to a given GraphWin
         void draw(GraphWin* canvas);
         /// Draw the object to a given GraphWin
@@ -178,12 +207,9 @@ class GraphicsObject{
         /// This function gets implemented by child classes to implement
         /// how to draw itself, the GraphWin calls this on all of its 
         /// registered GraphicObjects.
-        virtual void draw_command(myro_img& canvas)=0;
-        GraphWin* canvas;
-        GOL_reg registration;
-        Color fill;
-        Color outline;
-        int width;
+        //virtual void draw_command(myro_img& canvas)=0;
+        DrawMessage* drawData;
+//        boost::shared_ptr<GraphicsObject::DrawPair> drawdata;
     friend class GraphWin;
 };
 
@@ -208,10 +234,9 @@ class Point : public GraphicsObject{
         Point operator-(const Point &rhs);
         virtual void move(int dx, int dy);
     protected:
-        virtual void draw_command(myro_img& canvas);
+        //virtual void draw_command(myro_img& canvas);
     private:
-        int x;
-        int y;
+        point_draw_msg* data;
 };
 
 /**
@@ -226,8 +251,7 @@ class _BBox : public GraphicsObject{
         Point getP2();
         Point getCenter();
     protected:
-        Point p1;
-        Point p2;
+        bb_draw_msg* data;
 };
 
 /**
@@ -239,7 +263,7 @@ class Oval : public _BBox{
         Oval(Point p1, Point p2);
         Oval* clone();
     protected:
-        virtual void draw_command(myro_img& canvas);
+        //virtual void draw_command(myro_img& canvas);
 };
 
 /**
@@ -251,9 +275,8 @@ class Circle : public Oval{
         Circle(Point center, int radius);
         int getRadius();
 //        virtual void draw_command(myro_img& canvas);
-    private:
-        Point centerPoint;
-        int radius;
+    protected:
+        circle_draw_msg* extra;
 };
 
 /// Represents a Rectangle
@@ -262,20 +285,19 @@ class Rectangle : public _BBox{
         /// Creates a Rectangle formed with the points p1 and p2.
         Rectangle(Point p1, Point p2);
     protected:
-        virtual void draw_command(myro_img& canvas);
+        //virtual void draw_command(myro_img& canvas);
 };
 
 /// Represents a Line, or Arrow
 class Line : public _BBox{
     public:
         /// Creates a Line (or Arrow) from p1 to p2
-        Line(Point p1, Point p2);
+        Line(Point p1, Point p2, std::string arrow_type="none");
         /// str can be "first", "last", "both", or none. Default is "none"
         void setArrow(std::string type);
     protected:
-        virtual void draw_command(myro_img& canvas);
-    private:
-        std::string arrow_type;
+        //virtual void draw_command(myro_img& canvas);
+        line_draw_msg* extra;
     friend class Polygon;
 };
 
@@ -288,12 +310,10 @@ class Polygon : public GraphicsObject{
         std::vector<Point> getPoints();
         virtual void move(int dx, int dy);
     protected:
-        virtual void draw_command(myro_img& canvas);
+        //virtual void draw_command(myro_img& canvas);
     private:
         std::vector<Point> update_points();
-        cil::CImg<int> pts;
-        std::vector<Point> points;
-        std::vector<Line> outline_lines;
+        polygon_draw_msg * data;
 };
 
 /// Used for displaying text on the GraphWin
@@ -333,15 +353,67 @@ class Text: public GraphicsObject{
         ///(default false)
         void drawBackground(bool background);
     protected:
-        virtual void draw_command(myro_img& canvas);
+        //virtual void draw_command(myro_img& canvas);
         virtual void move(int dx, int dy);
     private:
-        std::string text;
-        std::string font;
-        int size;
-        bool background;
-        std::string style;
-        Point anchor;
+        text_draw_msg* data;
 };
+
+// Declaration of "draw messages"
+enum graphics_object_type{
+    GRAPHICS_OBJECT_POINT,
+    GRAPHICS_OBJECT_OVAL,
+    GRAPHICS_OBJECT_CIRCLE,
+    GRAPHICS_OBJECT_RECTANGLE,
+    GRAPHICS_OBJECT_LINE,
+    GRAPHICS_OBJECT_POLYGON,
+    GRAPHICS_OBJECT_TEXT
+};
+struct draw_message_common{
+    int refCount;
+    graphics_object_type type;
+    GOL_reg registration;
+    Color fill;
+    Color outline;
+    int width;
+    GraphWin* canvas;
+};
+
+struct base_msg{};
+
+struct point_draw_msg : public base_msg{
+    int x;
+    int y;
+};
+
+struct bb_draw_msg : public base_msg{
+    Point pt1;
+    Point pt2;
+};
+
+struct circle_draw_msg : public base_msg{
+    Point centerPoint;
+    int radius;
+};
+
+struct line_draw_msg : public base_msg{
+    std::string arrow_type;
+};
+
+struct polygon_draw_msg : public base_msg{
+    cil::CImg<int> pts;
+    std::vector<Point> points;
+    std::vector<Line> outline_lines;
+};
+
+struct text_draw_msg : public base_msg{
+    std::string text;
+    std::string font;
+    int size;
+    bool background;
+    std::string style;
+    Point anchor;
+};
+
 
 ///@}

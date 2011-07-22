@@ -62,8 +62,8 @@ DisplayThread::DisplayThread(Scribbler* robot, int colormode, std::vector<Filter
 }
 
 void DisplayThread::run() {
-    Picture* img_cur=NULL;
-    Picture* img_new=NULL;
+    PicturePtr img_cur;
+    PicturePtr img_new;
 
     while(!this->stopRequested){
         //std::cerr << "DisplayThread::run()" << std::endl;
@@ -84,7 +84,7 @@ void DisplayThread::run() {
             }
         }
         // If we got a NULL picture, shut down thread
-        if ( img_new == NULL )
+        if ( img_new.get() == NULL )
             this->stopRequested = true;
 
         if ( this->stopRequested ) break;
@@ -100,9 +100,10 @@ void DisplayThread::run() {
 
         show(img_new, "Video Stream");
 
+        /*
         if ( img_cur != NULL ){
             delete img_cur;
-        }
+        }*/
         img_cur = img_new;
 
         //boost::thread::yield();

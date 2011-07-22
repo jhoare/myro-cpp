@@ -43,7 +43,7 @@ int main(int argc, char ** argv) {
         if(quit == "E" || quit == "Exit" || quit == "e" || quit == "exit")
             close = 1;
     }
-    Picture* pic = robot.takePicture( argv[1] );
+    PicturePtr pic = robot.takePicture( argv[1] );
     pic->savePicture("snapshot.jpg");
     video.endStream();
     //sleep(5);

@@ -40,7 +40,7 @@ class Filter {
      * is extended to allow for a filter to yield data from its
      * application. 
      */
-    void applyFilter(Picture*);
+    void applyFilter(PicturePtr);
 
     /**
      * The function used by applyFilter to actually process
@@ -48,7 +48,7 @@ class Filter {
      * if you do not overwrite this function, then the filter's
      * default behavior is to do nothing.
      */
-    virtual void filter(Picture*);
+    virtual void filter(PicturePtr);
 
 };
 

@@ -1,6 +1,5 @@
 #include "Picture.h"
-#include "ColorPicture.h"
-#include "GrayPicture.h"
+#include "MyroInternals.h"
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
@@ -12,9 +11,95 @@ Picture::Picture(){
 Picture::Picture(int width, int height) {
     this->width =  width;
     this->height = height;
+    this->channels = 3;
+}
+
+Picture::Picture(unsigned char * data, int channels, int width, int height){
+    this->width = width;
+    this->height = height;
+    this->channels = channels;
+  
+    if ( channels == 3 ){
+        image_data.assign(width,height,1,channels);
+        loadInterlacedImage(data);
+    } else {
+        image_data.assign(data,width,height,1,channels);
+    }
+}
+
+Picture::Picture(Picture& pic)
+{
+    image_data.assign(pic.image_data);
+    this->width = pic.width;
+    this->height = pic.height;
+    this->channels = pic.channels;
 }
 
 Picture::~Picture() {
+}
+
+Pixel Picture::getPixel(int x, int y) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
+    Pixel result;
+    if ( channels == 3 ){
+        result.R = image_data(x,y,0,0);
+        result.G = image_data(x,y,0,1);
+        result.B = image_data(x,y,0,2);
+    }
+    else{
+        result.R = result.G = result.B = image_data(x,y,0,0);
+    }
+    return result;
+}
+
+void Picture::setPixel(int x, int y, Pixel pix) {
+    if ( x >= width || y >= height )
+        Picture::out_of_bounds_error(width,height,x,y);
+    if ( channels == 3 ){
+        image_data(x,y,0,0) = pix.R;  
+        image_data(x,y,0,1) = pix.G;    
+        image_data(x,y,0,2) = pix.B;    
+    } else {
+        image_data(x,y,0,0) = pix.R;  
+    }
+}
+
+void Picture::show(std::string windowname){
+    displayMan.set_picture_window(image_data, windowname.c_str());
+}
+
+void Picture::show(){
+    const std::string windowname = "Picture";
+    displayMan.set_picture_window(image_data, windowname.c_str());
+    displayMan.block_on(windowname.c_str());
+}
+
+// TODO: Implement this!
+PicturePtr Picture::clone(){
+    PicturePtr p(new Picture(*this));
+    //Picture* newpic = new ColorPicture(*this);
+    //return newpic;
+    return p;
+}
+
+bool Picture::loadPicture(const char* filename){
+  /* And we're done! */
+  image_data.load_jpeg(filename);
+  return true;
+}
+
+void Picture::savePicture(const char* filename){
+  /* And we're done! */
+  image_data.save_jpeg(filename);
+}
+
+void Picture::loadInterlacedImage(unsigned char* img){
+    cimg_forXY(image_data,x,y){
+        image_data(x,y,0,0) = img[y*width*3+x*3];
+        image_data(x,y,0,1) = img[y*width*3+x*3+1];
+        image_data(x,y,0,2) = img[y*width*3+x*3+2];
+    }
 }
 
 int Picture::getHeight() {
@@ -64,43 +149,43 @@ const char* Picture::IndexOutOfBoundsException::what() throw(){
 */
 
 // Below are the C-style Wrappers for the objects...
-int getWidth(Picture *p)
+int getWidth(PicturePtr p)
 {
         return p->getWidth();
 }
 
-int getHeight(Picture *p)
+int getHeight(PicturePtr p)
 {
         return p->getHeight();
 }
 
-void show(Picture *p, std::string windowname)
+void show(PicturePtr p, std::string windowname)
 {
     p->show(windowname);
 }
 
-void show(Picture *p)
+void show(PicturePtr p)
 {
     p->show();
 }
 
-Pixel getPixel(Picture *p, int x, int y)
+Pixel getPixel(PicturePtr p, int x, int y)
 {
         return p->getPixel(x, y);
 }
 
-int getPixelValue_grey(Picture *p, int x, int y)
+int getPixelValue_grey(PicturePtr p, int x, int y)
 {
         Pixel P=p->getPixel(x,y);
         return P.R;
 }
 
-void setPixel(Picture* p, int x, int y, Pixel pix)
+void setPixel(PicturePtr p, int x, int y, Pixel pix)
 {
         p->setPixel(x, y, pix);
 }
 
-void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
+void setPixelColor(PicturePtr p, int x, int y, int R, int G, int B)
 {
         Pixel P=p->getPixel(x,y);
         P.R=R;
@@ -109,26 +194,22 @@ void setPixelColor(Picture *p, int x, int y, int R, int G, int B)
         p->setPixel(x, y, P);
 }
 
-Picture* loadPicture(const char* filename){
-    Picture* ret = new ColorPicture();
+PicturePtr loadPicture(const char* filename){
+    PicturePtr ret(new Picture());
     if ( ret->loadPicture(filename) )
         return ret;
-    delete ret;
-    ret = new GrayPicture();
-    if ( ret->loadPicture(filename) )
-        return ret;
-    
-    return NULL;
+    // TODO: return NULL;
+    return ret;
 }
 
-void loadPicture(Picture * p, const char* filename){
+void loadPicture(PicturePtr p, const char* filename){
     p->loadPicture(filename);
 }
-void savePicture(Picture * p, const char* filename){
+void savePicture(PicturePtr p, const char* filename){
     p->savePicture(filename);
 }
 
-Picture* clone(Picture* p){
+PicturePtr clone(PicturePtr p){
     return p->clone();
 }
 // END C-style Wrappers for the objects...

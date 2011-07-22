@@ -17,7 +17,7 @@ class PictureInPicture: public Filter {
         ~PictureInPicture(){}
 
         virtual void filter(Picture* image) {
-            Picture* colorImage = rob.takePicture("jpeg");
+            PicturePtr colorImage = rob.takePicture("jpeg");
 
             int height = image->getHeight();
             int width = image->getWidth();
@@ -34,7 +34,6 @@ class PictureInPicture: public Filter {
                 }
             }
 
-            delete colorImage;
         }
 
     protected:
@@ -142,8 +141,8 @@ int main(int argc, char ** argv) {
     int train = 0;
     string toTrain;
 
-    Picture* showpic = robot.takePicture();
-    Picture* trainpic = showpic->clone();
+    PicturePtr showpic = robot.takePicture();
+    PicturePtr trainpic = showpic->clone();
     while(!train) {
         for(int h = y1; h < y2; h++) {
             for(int w = x1; w < x2; w++) {
@@ -158,9 +157,6 @@ int main(int argc, char ** argv) {
         cin >> toTrain;
         if(toTrain == "y" || toTrain == "yes")
             train = 1;
-        else {
-            delete showpic;
-        }
     }
     robot.conf_rle_range(trainpic->getRawImage(), x1, y1, x2, y2);
 
