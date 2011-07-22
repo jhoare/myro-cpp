@@ -84,7 +84,7 @@ void DisplayThread::run() {
             }
         }
         // If we got a NULL picture, shut down thread
-        if ( img_new == NULL )
+        if ( img_new.get() == NULL )
             this->stopRequested = true;
 
         if ( this->stopRequested ) break;

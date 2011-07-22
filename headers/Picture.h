@@ -4,13 +4,13 @@
 #include<exception>
 #include<string>
 #include<MyroCImg.h>
-#include<boost/shared_ptr.hpp>
+#include<MyroSmartPointer.h>
 /** @defgroup picture Picture Operations
  * The collection of all Picture Related commands and operations
  * @{
  */
 class Picture;
-typedef boost::shared_ptr<Picture> PicturePtr;
+typedef MyroSmartPointer<Picture> PicturePtr;
 
 /**
  * A pixel structure that respesents a single pixel of an Image. 
