@@ -13,9 +13,9 @@ int main(){
 
     connect();
     robot.setForwardness("fluke-forward");
-    VideoStream vs(robot, VideoStream::COLOR);
+    //VideoStream vs(robot, VideoStream::COLOR);
     GraphWin win("Joystick", 500, 500);
-    vs.startStream();
+    //vs.startStream();
 
     Circle cir(Point(250,250), 250);
     cir.setWidth(3);
@@ -31,6 +31,7 @@ int main(){
         m = win.getCurrentMouse(button);
         if (m.getX() >= 0 && m.getY() >= 0 && button){
             dir = center - m;
+            //std::cerr << m.getX() << " " << m.getY() << std::endl;
             //std::cerr << dir.getX() << " " << dir.getY() << std::endl;
             robot.move(dir.getY()/250.0,dir.getX()/250.0);
             //std::cerr << "m.getX(): " << m.getX() << std::endl
@@ -47,7 +48,7 @@ int main(){
         }
         wait(0.05);
     }
-    vs.endStream();
+    //vs.endStream();
     //win.waitWinClosed();
     disconnect();
     return 0;

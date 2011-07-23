@@ -498,7 +498,9 @@ Point& Point::operator+=(const Point& rhs){
     return *this;
 }
 Point Point::operator+(const Point& other){
-    Point result = *this;
+    Point result;
+    result.data->x = data->x;
+    result.data->y = data->y;
     result += other;
     return result;
 }
@@ -508,7 +510,9 @@ Point& Point::operator-=(const Point& rhs){
     return *this;
 }
 Point Point::operator-(const Point& other){
-    Point result = *this;
+    Point result;
+    result.data->x = data->x;
+    result.data->y = data->y;
     result -= other;
     return result;
 }
