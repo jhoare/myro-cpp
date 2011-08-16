@@ -1145,9 +1145,9 @@ void * Scribbler::get(std::string sensor, std::vector<std::string> position) {
             }
             else if( sensor == "all") {
                 //TODO: figure out a good data structure to hold this data
-                if(dongle) {
-                }
-                retval = (void*)retval;
+                AllData * data_ptr;
+                data_ptr = new AllData(this->getAll());
+                retval = (void*)data_ptr;
             }
             else
                 std::cout << "invalid sensor name: " << sensor << std::endl;
@@ -1643,6 +1643,29 @@ void Scribbler::configureBlob(int y_low, int y_high, int u_low, int u_high,
         int v_low, int v_high, int smooth_thresh) {
     this->conf_rle(90, smooth_thresh, y_low, y_high, 
                     u_low, u_high, v_low, v_high);
+}
+
+Scribbler::AllData Scribbler::getAll(){
+    Scribbler::AllData data;
+    unsigned char * result = (unsigned char*)this->_get(GET_ALL, 11);
+    if(dongle) {
+        data.obstacle[0] = this->getObstacle("left");
+        data.obstacle[1] = this->getObstacle("center");
+        data.obstacle[2] = this->getObstacle("right");
+        data.bright[0]   = this->getBright("left");
+        data.bright[1]   = this->getBright("center");
+        data.bright[2]   = this->getBright("right");
+        data.battery     = this->getBattery();
+    }
+    data.light[0] = result[2] << 8 | result[3];
+    data.light[1] = result[4] << 8 | result[5];
+    data.light[2] = result[6] << 8 | result[6];
+    data.ir[0]    = result[0];
+    data.ir[1]    = result[1];
+    std::vector<int> iv = getLine();
+    data.line[0] = iv[0];
+    data.line[1] = iv[1];
+    return data;
 }
 
 double Scribbler::getBattery() {
