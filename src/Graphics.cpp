@@ -113,13 +113,18 @@ void GraphWin::setBackground(Color color){
         background(x,y,0,1) = color.G;
         background(x,y,0,2) = color.B;
     }
+    check_and_update();
 }
 void GraphWin::setBackground(std::string color){
     Color c = string_to_color(color);
     this->setBackground(c);
+    check_and_update();
 }
 
-void GraphWin::setBackground(Picture* img){
+void GraphWin::setBackground(PicturePtr img){
+    background = img->getRawImage();
+    background.resize(width,height,1,3,6);
+    check_and_update();
 }
 
 void GraphWin::close(){

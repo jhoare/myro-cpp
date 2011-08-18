@@ -124,7 +124,7 @@ class GraphWin{
         void setBackground(std::string color);
         ///Set the entire background to be the given image (will stretch
         /// the image to fit the window.)
-        void setBackground(Picture* img);
+        void setBackground(PicturePtr img);
         /// Close the window programatically.
         void close();
         /// Check if the window has been closed (programatically or by the user.)

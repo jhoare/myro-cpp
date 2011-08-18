@@ -104,7 +104,7 @@ void CImg_display::run(){
                 if ( mx >= 0 && my >= 0 && button ){
                     clickedx = mx;
                     clickedy = my;
-                    mouse.notify_one();
+                    mouse.notify_all();
                 }
             }
         }
