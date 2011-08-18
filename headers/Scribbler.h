@@ -25,6 +25,39 @@
  * @author Richard Edwards, John Hoare
  */
 class Scribbler: public Robot {
+    public: 
+        struct AllData{
+            int line[2];
+            bool stall;
+            int bright[3];
+            int obstacle[3];
+            int ir[2];
+            int light[3];
+            double battery;
+            public:
+            AllData(){
+                for (int i=0; i < 3; i++){
+                    bright[i] = 0;
+                    obstacle[i] = 0;
+                    light[i] = 0;
+                }
+                line[0] = line[1] = 0;
+                ir[0]=ir[1]=battery=0;
+                stall = false;
+            }
+            AllData(const AllData& d){
+                for (int i=0; i < 3; i++){
+                    bright[i] = d.line[i];
+                    obstacle[i] = d.line[i];
+                    light[i] = d.line[i];
+                    if ( i != 2 ){
+                        ir[i]   = d.ir[i];
+                        line[i] = d.line[i];
+                    }
+                }
+                stall = d.stall;
+            }
+        };
 
 	public:
 
@@ -386,6 +419,11 @@ class Scribbler: public Robot {
 					   int v_low = 0, int v_high = 255,
 					   int smooth_thresh=4);
 
+    /**
+     * Get all of the available sensor data in the AllData structure.
+     */
+    Scribbler::AllData getAll();
+
 	/**
 	 * Read the current voltage value for the batteries.
 	 *
@@ -467,7 +505,7 @@ class Scribbler: public Robot {
 	 * image with the areas of interest in white, and the areas of
 	 * non-interest in black.
 	 *
-	 * @param type - Valid values, "color", "gray", and "blob"
+	 * @param type - Valid values, "jpeg", "grayjpeg", "color", "gray", and "blob"
 	 * @return unsigned char array containing the image information.
 	 */
 	PicturePtr takePicture(std::string type =  "color");

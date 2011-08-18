@@ -127,6 +127,7 @@ class GraphWin{
         void setBackground(Picture* img);
         /// Close the window programatically.
         void close();
+        /// Check if the window has been closed (programatically or by the user.)
         bool isClosed();
         /// Function that will not return until the user has closed the GraphWin 
         /// window

@@ -12,6 +12,7 @@ Picture::Picture(int width, int height) {
     this->width =  width;
     this->height = height;
     this->channels = 3;
+    image_data.assign(width,height,1,channels);
 }
 
 Picture::Picture(unsigned char * data, int channels, int width, int height){
@@ -251,4 +252,22 @@ inline int getGreen(Pixel& p){
 
 inline int getBlue(Pixel& p){
     return p.B;
+}
+
+PicturePtr makePicture(const char* filename){
+    return loadPicture(filename);
+}
+
+PicturePtr makePicture(int columns, int rows){
+    PicturePtr ptr(new Picture(columns,rows));
+    return ptr;
+}
+
+PicturePtr makePicture(int columns, int rows, unsigned char* array, bool color){
+    PicturePtr ptr;
+    if ( color )
+        ptr = PicturePtr(new Picture(array, 3, columns, rows));
+    else
+        ptr = PicturePtr(new Picture(array, 1, columns, rows));
+    return ptr;
 }

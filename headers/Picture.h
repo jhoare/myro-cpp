@@ -192,6 +192,22 @@ void loadPicture(PicturePtr p, const char* filename);
 /// Save the Image to a file
 void savePicture(PicturePtr p, const char* filename);
 
+/// Create a picture object from a saved image
+PicturePtr makePicture(const char* filename);
+
+/// Create a blank picture 
+PicturePtr makePicture(int columns, int rows);
+
+/**
+ * Create a new picture from an array ( a column-major sequence of 0-255 values that
+ * represent Red, Green, Blue (in that order))
+ * 
+ * The length of the array MUST be exactly columns*rows*3 if color is true, or un-
+ * specified, otherwise, if color is false, it must be columns*rows.
+ */
+PicturePtr makePicture(int columns, int rows, unsigned char* array, bool color=true);
+
+
 ///@}
 
 #endif
