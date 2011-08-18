@@ -1056,11 +1056,7 @@ void * Scribbler::get(std::string sensor, std::vector<std::string> position) {
         retval = (void*)result;
     }
     else if (sensor == "stall") {
-        int * result = this->_get(GET_ALL, 11);
-        for(int i = 0; i < 11; i++)
-            sensors[i] = (unsigned char)result[i];
-        free(result);
-        retval = (void*)(sensors + 10);
+        retval = (void*)getStall();
     }
     else if (sensor == "forwardness") {
         std::string * result;
@@ -1298,7 +1294,10 @@ void * Scribbler::get(std::string item, std::vector<int> position) {
 }
 
 bool Scribbler::getStall(){
-    return (bool)this->get("stall");
+    int * result = this->_get(GET_ALL, 11);
+    bool isStalled = (bool)result[10];
+    free(result);
+    return isStalled;
 }
 
 std::string Scribbler::getForwardness(){
@@ -1647,14 +1646,14 @@ void Scribbler::configureBlob(int y_low, int y_high, int u_low, int u_high,
 
 Scribbler::AllData Scribbler::getAll(){
     Scribbler::AllData data;
-    unsigned char * result = (unsigned char*)this->_get(GET_ALL, 11);
+    int * result = this->_get(GET_ALL, 11);
     if(dongle) {
         data.obstacle[0] = this->getObstacle("left");
         data.obstacle[1] = this->getObstacle("center");
         data.obstacle[2] = this->getObstacle("right");
-        data.bright[0]   = this->getBright("left");
-        data.bright[1]   = this->getBright("center");
-        data.bright[2]   = this->getBright("right");
+        //data.bright[0]   = this->getBright("left");
+        //data.bright[1]   = this->getBright("center");
+        //data.bright[2]   = this->getBright("right");
         data.battery     = this->getBattery();
     }
     data.light[0] = result[2] << 8 | result[3];
@@ -1665,6 +1664,7 @@ Scribbler::AllData Scribbler::getAll(){
     std::vector<int> iv = getLine();
     data.line[0] = iv[0];
     data.line[1] = iv[1];
+    data.stall = (bool)result[10];
     return data;
 }
 

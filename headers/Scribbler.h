@@ -27,7 +27,7 @@
 class Scribbler: public Robot {
     public: 
         struct AllData{
-            int line[3];
+            int line[2];
             bool stall;
             int bright[3];
             int obstacle[3];
@@ -37,17 +37,16 @@ class Scribbler: public Robot {
             public:
             AllData(){
                 for (int i=0; i < 3; i++){
-                    line[i] = 0;
                     bright[i] = 0;
                     obstacle[i] = 0;
                     light[i] = 0;
                 }
+                line[0] = line[1] = 0;
                 ir[0]=ir[1]=battery=0;
                 stall = false;
             }
             AllData(const AllData& d){
                 for (int i=0; i < 3; i++){
-                    line[i] = d.line[i];
                     bright[i] = d.line[i];
                     obstacle[i] = d.line[i];
                     light[i] = d.line[i];
