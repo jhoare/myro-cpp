@@ -1,18 +1,18 @@
 INSTALLING
 ==========
 
-Pre-compiled binaries are available for Mac OSX Snow Leopard, and 
+Pre-compiled binaries are available for Mac OSX, and 
 Ubuntu Linux 10.04 and newer. If you are running either of these operating
 systems, you would likely prefer to install these. For information please 
 refer to:
 
-http://web.eecs.utk.edu/~jhoare/Myro-cpp/Docs
+http://myro-cpp.sf.net
 
 or
 
 http://launchpad.net/myro-c++
 
-Windows (via cygwin... see README-Cygwin.txt file), Linux, and Mac OS X are 
+Windows (via cygwin...), Linux, and Mac OS X are 
 supported operating systems.
 
 
@@ -38,5 +38,6 @@ Questions
 Any questions or problems please visit: 
 
 http://launchpad.net/myro-c++
+http://myro-cpp.sf.net
 
 or email myro-cpp-dev@launchpad.net
