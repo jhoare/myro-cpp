@@ -5,6 +5,81 @@
 #include <cmath>
 #include <cstdlib>
 
+// ====================
+// Internal Messages
+// ====================
+
+// Declaration of "draw messages"
+enum graphics_object_type{
+    GRAPHICS_OBJECT_POINT,
+    GRAPHICS_OBJECT_OVAL,
+    GRAPHICS_OBJECT_CIRCLE,
+    GRAPHICS_OBJECT_RECTANGLE,
+    GRAPHICS_OBJECT_LINE,
+    GRAPHICS_OBJECT_POLYGON,
+    GRAPHICS_OBJECT_TEXT,
+    GRAPHICS_OBJECT_IMAGE
+};
+struct draw_message_common{
+    int refCount;
+    graphics_object_type type;
+    GOL_reg registration;
+    Color fill;
+    Color outline;
+    int width;
+    GraphWin* canvas;
+};
+
+struct base_msg{};
+
+struct DrawMessage{
+    draw_message_common* common;
+    base_msg* data;
+    base_msg* extra;
+};
+
+struct point_draw_msg : public base_msg{
+    int x;
+    int y;
+};
+
+struct bb_draw_msg : public base_msg{
+    Point pt1;
+    Point pt2;
+};
+
+struct circle_draw_msg : public base_msg{
+    Point centerPoint;
+    int radius;
+};
+
+struct line_draw_msg : public base_msg{
+    std::string arrow_type;
+};
+
+struct polygon_draw_msg : public base_msg{
+    cil::CImg<int> pts;
+    std::vector<Point> points;
+    std::vector<Line> outline_lines;
+};
+
+struct text_draw_msg : public base_msg{
+    std::string text;
+    std::string font;
+    int size;
+    bool background;
+    std::string style;
+    Point anchor;
+};
+
+struct image_draw_msg : public base_msg{
+    PicturePtr img;
+    Point anchor;
+};
+// ====================
+// END Internal Messages
+// ====================
+
 static unsigned char red[] = {255,0,0};
 
 static inline void debug_rectangle(myro_img& img, int x, int y){
@@ -357,6 +432,11 @@ bool GraphWin::draw_message(DrawMessage* msg, myro_img& canvas){
                              outlinecolor, 0, 1, data->size);
         }
     }
+    case GRAPHICS_OBJECT_IMAGE:
+    {
+        image_draw_msg* data = (image_draw_msg*)msg->data;
+        canvas.draw_image(data->anchor.getX(), data->anchor.getY(), data->img->getRawImage());
+    }
     break;
     default:
     return false;
@@ -689,4 +769,45 @@ void Text::move(int dx, int dy){
     data->anchor += Point(dx,dy);
     if ( drawData->common->canvas )
         drawData->common->canvas->check_and_update();
+}
+
+// ====================
+// Image
+// ====================
+Image::Image(Point anchor, std::string filename)
+: GraphicsObject(color_rgb(0,0,0), color_rgb(0,0,0), 0)
+{
+    PicturePtr thePicture = makePicture(filename.c_str());
+    drawData->common->type = GRAPHICS_OBJECT_IMAGE;
+    data = new image_draw_msg();
+    drawData->data = data;
+    data->anchor = anchor;
+    data->img = thePicture;
+}
+
+Image::Image(Point anchor, PicturePtr img){
+    drawData->common->type = GRAPHICS_OBJECT_IMAGE;
+    data = new image_draw_msg();
+    drawData->data = data;
+    data->anchor = anchor;
+    data->img = img;
+}
+
+Point Image::getAnchor(){ return data->anchor; }
+void Image::setAnchor(Point anchor){ data->anchor=anchor; }
+
+Pixel Image::getPixel(int x, int y){
+    return data->img->getPixel(x,y);
+}
+
+void Image::setPixel(int x, int y, Color c){
+    data->img->setPixel(x,y,c);
+}
+
+void Image::save(std::string filename){
+    data->img->savePicture(filename.c_str());
+}
+
+void Image::move(int dx, int dy){
+    data->anchor += Point(dx,dy);
 }

@@ -3,6 +3,19 @@
 #include <list>
 #include <vector>
 
+struct DrawMessage;
+struct draw_message_common;
+struct point_draw_msg;
+struct bb_draw_msg;
+struct circle_draw_msg;
+struct line_draw_msg;
+struct polygon_draw_msg;
+struct text_draw_msg;
+struct image_draw_msg;
+struct base_msg;
+typedef std::list<DrawMessage*> GraphicsObjectList;
+typedef std::list<DrawMessage*>::iterator GOL_reg;
+
 /** @defgroup graphics Graphics Tools
  * The collection of all Drawing Commands
  * @{
@@ -17,27 +30,6 @@ class CImg_display;
 class GraphicsObject;
 class Point;
 class GraphWin;
-class DrawMessage;
-
-struct draw_message_common;
-struct point_draw_msg;
-struct bb_draw_msg;
-struct circle_draw_msg;
-struct line_draw_msg;
-struct polygon_draw_msg;
-struct text_draw_msg;
-struct base_msg;
-
-struct DrawMessage{
-    draw_message_common* common;
-    base_msg* data;
-    base_msg* extra;
-};
-
-typedef std::list<DrawMessage*> GraphicsObjectList;
-typedef std::list<DrawMessage*>::iterator GOL_reg;
-
-
 
 /**
  * Create a color "object" with the given r,g,b values
@@ -368,61 +360,25 @@ class Text: public GraphicsObject{
         text_draw_msg* data;
 };
 
-// Declaration of "draw messages"
-enum graphics_object_type{
-    GRAPHICS_OBJECT_POINT,
-    GRAPHICS_OBJECT_OVAL,
-    GRAPHICS_OBJECT_CIRCLE,
-    GRAPHICS_OBJECT_RECTANGLE,
-    GRAPHICS_OBJECT_LINE,
-    GRAPHICS_OBJECT_POLYGON,
-    GRAPHICS_OBJECT_TEXT
+class Image : public GraphicsObject{
+    public:
+        /// Create an Image object from a filename (must be a jpeg file)
+        Image(Point anchor, std::string filename);
+        /// Create an Image object from a PicturePtr object
+        Image(Point anchor, PicturePtr img);
+        /// Get the position of the image
+        Point getAnchor();
+        /// Set the position of the iamge
+        void setAnchor(Point anchor);
+        /// Get the Pixel value at the x,y position
+        Pixel getPixel(int x, int y);
+        /// Set the Pixel Value at the x,y position
+        void setPixel(int x, int y, Color c);
+        /// Save the given image (must be a jpeg)
+        void save(std::string filename);
+        virtual void move(int dx, int dy);
+    private:
+        image_draw_msg* data;
 };
-struct draw_message_common{
-    int refCount;
-    graphics_object_type type;
-    GOL_reg registration;
-    Color fill;
-    Color outline;
-    int width;
-    GraphWin* canvas;
-};
-
-struct base_msg{};
-
-struct point_draw_msg : public base_msg{
-    int x;
-    int y;
-};
-
-struct bb_draw_msg : public base_msg{
-    Point pt1;
-    Point pt2;
-};
-
-struct circle_draw_msg : public base_msg{
-    Point centerPoint;
-    int radius;
-};
-
-struct line_draw_msg : public base_msg{
-    std::string arrow_type;
-};
-
-struct polygon_draw_msg : public base_msg{
-    cil::CImg<int> pts;
-    std::vector<Point> points;
-    std::vector<Line> outline_lines;
-};
-
-struct text_draw_msg : public base_msg{
-    std::string text;
-    std::string font;
-    int size;
-    bool background;
-    std::string style;
-    Point anchor;
-};
-
 
 ///@}
