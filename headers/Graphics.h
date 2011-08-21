@@ -148,6 +148,10 @@ class GraphWin{
         // Check to see if we are supposed to auto-redraw, and if so do it
         // TODO: This should be private, but I'm getting errors here...
         void check_and_update();
+        /** 
+         * Save the current state of the graphwin into an image. 
+         */
+        void saveImage(std::string filename);
     private: 
         static bool draw_message(DrawMessage* msg, myro_img& canvas);
         GOL_reg draw(GraphicsObject* obj);

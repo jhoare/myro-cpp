@@ -278,6 +278,11 @@ void GraphWin::check_and_update(){
         update();
 }
 
+void GraphWin::saveImage(std::string filename){
+    update();
+    result.save_jpeg(filename.c_str());
+}
+
 void draw_line(Point p1, Point p2, std::string arrow_type, int width, 
         unsigned char* outlinecolor, myro_img& canvas){
     if ( arrow_type == "first" ){
