@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=`myro-cpp-config --cflags`
 LIBS=`myro-cpp-config --libs`
 
-BINARIES=test_blob test_camera test_motor video_stream test_camera_fourwindow test_camera_nonblocking
+BINARIES=circles robot_joystick robot_senses cascading_pictures
 
 all: $(BINARIES) 
 
