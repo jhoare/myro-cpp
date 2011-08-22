@@ -1651,9 +1651,9 @@ Scribbler::AllData Scribbler::getAll(){
         data.obstacle[0] = this->getObstacle("left");
         data.obstacle[1] = this->getObstacle("center");
         data.obstacle[2] = this->getObstacle("right");
-        //data.bright[0]   = this->getBright("left");
-        //data.bright[1]   = this->getBright("center");
-        //data.bright[2]   = this->getBright("right");
+        data.bright[0]   = this->getBright("left");
+        data.bright[1]   = this->getBright("center");
+        data.bright[2]   = this->getBright("right");
         data.battery     = this->getBattery();
     }
     data.light[0] = result[2] << 8 | result[3];

@@ -96,8 +96,8 @@ int main(){
         stall_val.setText(lexical_cast<std::string>(data.stall));
 
         bright_val_left.setText(lexical_cast<std::string>(data.bright[0]));
-        bright_val_center.setText(lexical_cast<std::string>(data.bright[0]));
-        bright_val_right.setText(lexical_cast<std::string>(data.bright[0]));
+        bright_val_center.setText(lexical_cast<std::string>(data.bright[1]));
+        bright_val_right.setText(lexical_cast<std::string>(data.bright[2]));
 
         obstacle_val_left.setText(lexical_cast<std::string>(data.obstacle[0]));
         obstacle_val_center.setText(lexical_cast<std::string>(data.obstacle[1]));
