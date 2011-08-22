@@ -437,6 +437,7 @@ bool GraphWin::draw_message(DrawMessage* msg, myro_img& canvas){
                              outlinecolor, 0, 1, data->size);
         }
     }
+    break;
     case GRAPHICS_OBJECT_IMAGE:
     {
         image_draw_msg* data = (image_draw_msg*)msg->data;
