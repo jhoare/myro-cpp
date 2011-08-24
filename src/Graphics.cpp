@@ -359,7 +359,7 @@ bool GraphWin::draw_message(DrawMessage* msg, myro_img& canvas){
     switch(msg->common->type){
     case GRAPHICS_OBJECT_POINT:
     {
-        point_draw_msg* data = (point_draw_msg*)data;
+        point_draw_msg* data = (point_draw_msg*)msg->data;
         int x = data->x, y = data->y;
         canvas(x,y,0,0) = msg->common->outline.R;
         canvas(x,y,0,1) = msg->common->outline.G;
