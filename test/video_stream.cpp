@@ -1,3 +1,12 @@
+/** @file 
+ * 
+ * @brief An example using the VideoStream and Filters
+ *
+ * This file creates several example filters, and will 
+ * have them turned on based on the provided command-line
+ * arguments. 
+ */
+
 #include <Myro.h>
 #include <VideoStream.h>
 #include <Filter.h>

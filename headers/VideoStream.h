@@ -7,6 +7,9 @@
 
 /** @defgroup videostream VideoStream Related
  * Contains all functions related to the VideoStream
+ * 
+ * For an example of usage of the VideoStream (including Filter) 
+ * see the video_stream.cpp example.
  * @{
  */
 

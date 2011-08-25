@@ -575,7 +575,9 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = @CMAKE_SOURCE_DIR@/headers \
-                         @CMAKE_SOURCE_DIR@/docs/mainpage.txt
+                         @CMAKE_SOURCE_DIR@/docs/mainpage.txt \
+                         @CMAKE_SOURCE_DIR@/test \ 
+                         @CMAKE_SOURCE_DIR@/test/graphics
 #                         @CMAKE_SOURCE_DIR@/src \
 
 # This tag can be used to specify the character encoding of the source files
@@ -692,7 +694,7 @@ FILTER_SOURCE_FILES    = NO
 # Note: To get rid of all source code in the generated output, make sure also
 # VERBATIM_HEADERS is set to NO.
 
-SOURCE_BROWSER         = NO
+SOURCE_BROWSER         = YES
 
 # Setting the INLINE_SOURCES tag to YES will include the body
 # of functions and classes directly in the documentation.
@@ -1451,14 +1453,14 @@ TEMPLATE_RELATIONS     = NO
 # file showing the direct and indirect include dependencies of the file with
 # other documented files.
 
-INCLUDE_GRAPH          = YES
+INCLUDE_GRAPH          = NO
 
 # If the ENABLE_PREPROCESSING, SEARCH_INCLUDES, INCLUDED_BY_GRAPH, and
 # HAVE_DOT tags are set to YES then doxygen will generate a graph for each
 # documented header file showing the documented files that directly or
 # indirectly include this file.
 
-INCLUDED_BY_GRAPH      = YES
+INCLUDED_BY_GRAPH      = NO
 
 # If the CALL_GRAPH and HAVE_DOT options are set to YES then
 # doxygen will generate a call dependency graph for every global function

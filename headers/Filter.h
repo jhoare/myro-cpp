@@ -13,9 +13,6 @@
  * creation of various image filters, which can be applied to a stream
  * and the results will be visible in real time.
  *
- * As of version 2.2.0, the Filters class uses Picture* objects,
- * instead of the origional unsigned char*
- *
  * @brief The class defines a framework for creating data filters
  * which can manipulate images, and apply any changes in the image 
  * data back to the image.
