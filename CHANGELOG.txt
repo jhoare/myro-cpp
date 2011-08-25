@@ -1,4 +1,4 @@
-2.3.0 (bzr-trunk)
+2.3.0 (2011-08-25)
  - Added Graphics Drawing Library
  - Changed it so the connect() functions on the robot can take a string to hard-code into your code the commport of your robot. 
  - show(Picture) is no longer blocking if a string title is given. 
