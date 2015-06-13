@@ -1,0 +1,4 @@
+<map id="G" name="G">
+<area shape="rect" href="$class_color_picture.html" title="Object Representing a Color Picture (also used for Blob Pictures)." alt="" coords="5,83,96,112"/>
+<area shape="rect" href="$class_gray_picture.html" title="Object Representing a Gray Picture." alt="" coords="120,83,211,112"/>
+</map>

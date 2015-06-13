@@ -1,0 +1,12 @@
+<map id="G" name="G">
+<area shape="rect" href="$class_graphics_object.html" title="A Generic GraphicsObject class that is the Parent class for every other class which..." alt="" coords="5,165,117,195"/>
+<area shape="rect" href="$class___b_box.html" title="_BBox" alt="" coords="171,59,229,88"/>
+<area shape="rect" href="$class_image.html" title="Image" alt="" coords="172,112,228,141"/>
+<area shape="rect" href="$class_point.html" title="Represents a single point on an image." alt="" coords="175,165,225,195"/>
+<area shape="rect" href="$class_polygon.html" title="Represents any arbitrary Polygon." alt="" coords="167,219,233,248"/>
+<area shape="rect" href="$class_text.html" title="Used for displaying text on the GraphWin." alt="" coords="177,272,223,301"/>
+<area shape="rect" href="$class_line.html" title="Represents a Line, or Arrow." alt="" coords="300,5,345,35"/>
+<area shape="rect" href="$class_oval.html" title="Represents an Oval." alt="" coords="299,59,347,88"/>
+<area shape="rect" href="$class_rectangle.html" title="Represents a Rectangle." alt="" coords="283,112,363,141"/>
+<area shape="rect" href="$class_circle.html" title="Represents a Circle." alt="" coords="412,59,465,88"/>
+</map>

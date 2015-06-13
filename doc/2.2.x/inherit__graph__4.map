@@ -1,0 +1,5 @@
+<map id="G" name="G">
+<area shape="rect" href="$class_picture.html" title="The abstract Picture object that represents a picture taken from a robot." alt="" coords="7,31,71,57"/>
+<area shape="rect" href="$class_color_picture.html" title="ColorPicture" alt="" coords="120,5,219,32"/>
+<area shape="rect" href="$class_gray_picture.html" title="GrayPicture" alt="" coords="121,56,217,83"/>
+</map>

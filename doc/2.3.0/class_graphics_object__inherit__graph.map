@@ -1,0 +1,11 @@
+<map id="G" name="G">
+<area shape="rect" href="$class___b_box.html" title="_BBox" alt="" coords="69,83,128,112"/>
+<area shape="rect" href="$class_image.html" title="Image" alt="" coords="152,83,208,112"/>
+<area shape="rect" href="$class_point.html" title="Represents a single point on an image." alt="" coords="232,83,283,112"/>
+<area shape="rect" href="$class_polygon.html" title="Represents any arbitrary Polygon." alt="" coords="307,83,373,112"/>
+<area shape="rect" href="$class_text.html" title="Used for displaying text on the GraphWin." alt="" coords="397,83,443,112"/>
+<area shape="rect" href="$class_line.html" title="Represents a Line, or Arrow." alt="" coords="5,160,51,189"/>
+<area shape="rect" href="$class_oval.html" title="Represents an Oval." alt="" coords="75,160,123,189"/>
+<area shape="rect" href="$class_rectangle.html" title="Represents a Rectangle." alt="" coords="147,160,227,189"/>
+<area shape="rect" href="$class_circle.html" title="Represents a Circle." alt="" coords="72,237,125,267"/>
+</map>

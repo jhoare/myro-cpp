@@ -1,0 +1,9 @@
+<map id="G" name="G">
+<area shape="rect" href="$class_video_stream.html" title="A class for streaming video from a scribbler robot." alt="" coords="345,293,441,323"/>
+<area shape="rect" href="$class_robot.html" title="A generic robot class that specifies general required functions for basic robot operation..." alt="" coords="621,5,677,35"/>
+<area shape="rect" href="$classserial.html" title="Used to manipulate a serial connection in Linux for connecting, reading, and writing..." alt="" coords="701,5,752,35"/>
+<area shape="rect" href="$class_filter.html" title="The class is used within the VideoStream package to allow for the creation of various..." alt="" coords="189,5,240,35"/>
+<area shape="rect" href="$class_threaded.html" title="Threaded" alt="" coords="321,101,396,131"/>
+<area shape="rect" href="$class_image_window.html" title="ImageWindow" alt="" coords="5,101,107,131"/>
+<area shape="rect" href="$class_picture.html" title="The abstract Picture object that represents a picture taken from a robot." alt="" coords="451,5,512,35"/>
+</map>

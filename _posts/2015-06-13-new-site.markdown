@@ -1,0 +1,12 @@
+---
+layout: post
+title:  "New Site and New Home!"
+date:   2015-06-13 15:00:03
+#categories: jekyll update
+---
+
+I've re-created the old Myro-C++ site and made some changes. 
+The old site was hosted on the UTK EECS servers, and since I have not been there for several years, my account and hosting have been removed. 
+I have moved the source code hosting over to GitHub, and I am now also hosting this page using Github Pages. 
+
+I have not worked on this project at all in a number of years, but if you are still using it and/or would like new features, [let me know](mailto:john@johnami.com) and we can figure out how to make it happen!

@@ -1,0 +1,7 @@
+<map id="G" name="G">
+<area shape="rect" href="$class_line.html" title="Represents a Line, or Arrow." alt="" coords="5,160,51,189"/>
+<area shape="rect" href="$class_oval.html" title="Represents an Oval." alt="" coords="75,160,123,189"/>
+<area shape="rect" href="$class_rectangle.html" title="Represents a Rectangle." alt="" coords="147,160,227,189"/>
+<area shape="rect" href="$class_graphics_object.html" title="A Generic GraphicsObject class that is the Parent class for every other class which..." alt="" coords="43,5,155,35"/>
+<area shape="rect" href="$class_circle.html" title="Represents a Circle." alt="" coords="72,237,125,267"/>
+</map>

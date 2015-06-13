@@ -1,0 +1,13 @@
+# Site settings
+title: Myro-C++
+email: john@johnami.com
+description: > # this means to ignore newlines until "baseurl:"
+  A C++ version of the Myro software originally written in python.
+baseurl: /myro-cpp 
+#url: "http://jhoare.github.io" # the base hostname & protocol for your site
+twitter_username: johnrhoare
+github_username:  jhoare
+
+# Build settings
+markdown: kramdown
+#markdown: redcarpet

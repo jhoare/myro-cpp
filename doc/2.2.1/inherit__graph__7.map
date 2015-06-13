@@ -1,0 +1,4 @@
+<map id="G" name="G">
+<area shape="rect" href="$class_robot.html" title="A generic robot class that specifies general required functions for basic robot operation..." alt="" coords="5,5,61,35"/>
+<area shape="rect" href="$class_scribbler.html" title="A port of the existing IPRE Scribbler Python code to C++." alt="" coords="109,5,181,35"/>
+</map>
