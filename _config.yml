@@ -11,8 +11,3 @@ github_username:  jhoare
 # Build settings
 markdown: kramdown
 #markdown: redcarpet
-
-analytics:
-  provider: google
-  google:
-    tracking_id: 'UA-64106804-1'
